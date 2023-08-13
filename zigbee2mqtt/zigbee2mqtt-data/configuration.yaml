@@ -1,0 +1,25 @@
+homeassistant: false
+permit_join: false
+mqtt:
+  base_topic: zigbee2mqtt
+  server: mqtt://172.17.0.1
+  user: '!secret.yaml user'
+  password: '!secret.yaml password'
+serial:
+  port: /dev/ttyACM0
+  adapter: ezsp
+frontend: true
+advanced:
+  homeassistant_legacy_entity_attributes: false
+  legacy_api: false
+  legacy_availability_payload: false
+device_options:
+  legacy: false
+devices:
+  '0x90ab96fffe78a691':
+    friendly_name: Office_01_Sensor_Sonoff
+    description: |-
+      Sensor: temperature and humidity
+      Location: Office
+      ID: 01
+      Brand: Sonoff

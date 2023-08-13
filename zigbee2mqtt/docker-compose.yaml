@@ -1,0 +1,46 @@
+version: '3.8'
+services:
+
+    zigbee2mqtt:
+        image: koenkk/zigbee2mqtt
+        container_name: zigbee2mqtt
+        restart: unless-stopped
+        volumes:
+            - ./zigbee2mqtt-data/:/app/data/
+            - /run/udev:/run/udev:ro
+        ports:
+            - 8080:8080 # Frontend port
+        environment:
+            - TZ=America/Toronto
+        devices:
+            # Make sure this matches your adapter location
+            - /dev/serial/by-id/usb-ITEAD_SONOFF_Zigbee_3.0_USB_Dongle_Plus_V2_20230505182833-if00:/dev/ttyACM0
+        networks:
+            - hvacnet
+        depends_on:
+            - mosquitto
+
+    mosquitto:
+        image: eclipse-mosquitto
+        container_name: mqtt_broker
+        restart: unless-stopped
+        user: "0"
+        volumes:
+            - ./mosquitto-config:/mosquitto/config
+            - ./mosquitto-data:/mosquitto/data
+            - ./mosquitto-log:/mosquitto/log
+        ports:
+            - 1883:1883
+            - 9001:9001
+        networks:
+            - hvacnet
+
+volumes:
+    mosquitto-config:
+    mosquitto-data:
+    mosquitto-log:
+    zigbee2mqtt-data:
+
+networks:
+    hvacnet:
+        driver: bridge
