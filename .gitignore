@@ -158,4 +158,9 @@ cython_debug/
 #  and can be added to the global gitignore or merged into this file.  For a more nuclear
 #  option (not recommended) you can uncomment the following to ignore the entire idea folder.
 #.idea/
+
 zigbee2mqtt/zigbee2mqtt-data/secret.yaml
+zigbee2mqtt/mosquitto-data/mosquitto.db
+zigbee2mqtt/zigbee2mqtt-data/state.json
+zigbee2mqtt/zigbee2mqtt-data/log/*
+
