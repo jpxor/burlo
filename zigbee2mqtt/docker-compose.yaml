@@ -9,12 +9,13 @@ services:
             - ./zigbee2mqtt-data/:/app/data/
             - /run/udev:/run/udev:ro
         ports:
-            - 8080:8080 # Frontend port
+            - 8082:8080 # Frontend port
         environment:
             - TZ=America/Toronto
         devices:
             # Make sure this matches your adapter location
-            - /dev/serial/by-id/usb-ITEAD_SONOFF_Zigbee_3.0_USB_Dongle_Plus_V2_20230505182833-if00:/dev/ttyACM0
+            # - /dev/serial/by-id/usb-ITEAD_SONOFF_Zigbee_3.0_USB_Dongle_Plus_V2_20230505182833-if00:/dev/ttyACM0
+            - /dev/serial/by-id/usb-Silicon_Labs_Sonoff_Zigbee_3.0_USB_Dongle_Plus_0001-if00-port0:/dev/ttyUSB0
         networks:
             - hvacnet
         depends_on:

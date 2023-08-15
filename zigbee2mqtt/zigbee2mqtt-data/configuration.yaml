@@ -6,10 +6,10 @@ mqtt:
   user: '!secret.yaml user'
   password: '!secret.yaml password'
 serial:
-  port: /dev/ttyACM0
-  adapter: ezsp
+  port: /dev/ttyUSB0
 frontend: true
 advanced:
+  pan_id: 48879
   homeassistant_legacy_entity_attributes: false
   legacy_api: false
   legacy_availability_payload: false
@@ -22,4 +22,11 @@ devices:
       Sensor: temperature and humidity
       Location: Office
       ID: 01
+      Brand: Sonoff
+  '0x90ab96fffe789ed3':
+    friendly_name: GuestRoom_02_Sensor_Sonoff
+    description: |-
+      Sensor: temperature and humidity
+      Location: Guest Room
+      ID: 02
       Brand: Sonoff
