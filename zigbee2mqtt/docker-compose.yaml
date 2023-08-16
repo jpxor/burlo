@@ -13,7 +13,7 @@ services:
         environment:
             - TZ=America/Toronto
         devices:
-            - ${DEVICE_PORT_MAPPING}
+            - /dev/serial/by-id/${DEVICE_ID}:${ZIGBEE2MQTT_CONFIG_SERIAL_PORT}
         networks:
             - hvacnet
         depends_on:
