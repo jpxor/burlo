@@ -13,9 +13,7 @@ services:
         environment:
             - TZ=America/Toronto
         devices:
-            # Make sure this matches your adapter location
-            # - /dev/serial/by-id/usb-ITEAD_SONOFF_Zigbee_3.0_USB_Dongle_Plus_V2_20230505182833-if00:/dev/ttyACM0
-            - /dev/serial/by-id/usb-Silicon_Labs_Sonoff_Zigbee_3.0_USB_Dongle_Plus_0001-if00-port0:/dev/ttyUSB0
+            - ${DEVICE_PORT_MAPPING}
         networks:
             - hvacnet
         depends_on:
