@@ -1,14 +1,4 @@
 '0x90ab96fffe78a691':
-  friendly_name: Office_01_Sensor_Sonoff
-  description: |-
-    Sensor: temperature and humidity
-    Location: Office
-    ID: 01
-    Brand: Sonoff
+  friendly_name: thermostats/01/office
 '0x90ab96fffe789ed3':
-  friendly_name: GuestRoom_02_Sensor_Sonoff
-  description: |-
-    Sensor: temperature and humidity
-    Location: Guest Room
-    ID: 02
-    Brand: Sonoff
+  friendly_name: thermostats/02/guest

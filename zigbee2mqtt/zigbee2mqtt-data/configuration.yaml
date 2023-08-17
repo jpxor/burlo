@@ -5,5 +5,10 @@ mqtt:
   server: mqtt://172.17.0.1
   user: '!secret.yaml user'
   password: '!secret.yaml password'
+serial:
+  port: /dev/ttyUSB0
+advanced:
+  pan_id: 48879
+  log_level: debug
 frontend: true
 devices: devices.yaml

@@ -1,9 +1,0 @@
-#!/usr/bin/sh
-echo "configuring for Sonoff dongle plus E"
-export ZIGBEE2MQTT_CONFIG_SERIAL_PORT=/dev/ttyUSB0
-export ZIGBEE2MQTT_CONFIG_ADVANCED_PAN_ID=0xBEEF
-
-echo ZIGBEE2MQTT_CONFIG_SERIAL_PORT ${ZIGBEE2MQTT_CONFIG_SERIAL_PORT}
-echo ZIGBEE2MQTT_CONFIG_ADVANCED_PAN_ID ${ZIGBEE2MQTT_CONFIG_ADVANCED_PAN_ID}
-
-docker compose -f ./docker-compose-sonoffE.yaml up -d
