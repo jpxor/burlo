@@ -168,3 +168,4 @@ zigbee2mqtt/zigbee2mqtt-data/database.db
 zigbee2mqtt/zigbee2mqtt-data/coordinator_backup.json
 
 commit.txt
+.vscode/settings.json
