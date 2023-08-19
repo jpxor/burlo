@@ -1,14 +1,14 @@
 from Phidget22.Phidget import *
 from Phidget22.Devices.DigitalOutput import DigitalOutput
+from Phidget22.Net import *
 
 from Phidget22.Devices.Manager import *
 
-def onAttach(self,sec):
+def onAttach(self):
     device = self
     deviceName = device.getDeviceName()
     serialNumber = device.getDeviceSerialNumber()
     chid = device.getChannel()
-    print("second param:", sec)
     print("Hello to Device " + str(deviceName) + ", Serial Number: " + str(serialNumber) + ", channel id: " + str(chid))
 
 def onDetach(self):
@@ -34,3 +34,4 @@ while True:
     except PhidgetException as e:
         print(e)
         break
+    print(dout)
