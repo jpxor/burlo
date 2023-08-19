@@ -35,3 +35,19 @@ while True:
         print(e)
         break
     print(dout)
+
+def onAttachMan(self, channel):
+	print("Channel: " + str(channel))
+
+man = Manager()
+
+# Register for event before calling open
+man.setOnAttachHandler(onAttachMan)
+
+man.open()
+
+import time
+
+while True:
+	# Do work, wait for events, etc.
+	time.sleep(1)
