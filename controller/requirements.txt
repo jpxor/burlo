@@ -1,0 +1,3 @@
+aiohttp==3.8.5
+PyYAML==6.0.1
+aiohttp_jinja2==1.5.1

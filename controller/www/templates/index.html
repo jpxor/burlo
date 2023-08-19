@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Thermostat Dashboard</title>
+    <style>
+        body {
+            text-align: center;
+        }
+        .grid-container {
+            display: inline-grid;
+            grid-template-columns: auto auto auto;
+            grid-gap: 10px;
+            padding: 10px;
+        }
+        .grid-item {
+            text-align: center;
+            padding: 20px;
+            font-size: 30px;
+        }
+        .thermostat {
+            border-radius: 10px;
+            width: 200px;
+            height: 200px;
+            border: 1px solid black;
+            padding: 10px;
+            position: relative;
+        }
+        .thermostat h2 {
+            margin-top: -30px;
+        }
+        .temperature, .humidity, .setpoint, .mode {
+            position: absolute;
+            width: 100%;
+        }
+        .temperature {
+            top: 80px;
+            font-size: 40px;
+        }
+        .humidity {
+            top: 10px;
+        }
+        .setpoint {
+            bottom: 10px;
+        }
+        .mode {
+            right: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Thermostat Dashboard</h1>
+    <div class="grid-container">
+        {% for thermostat in thermostats %}
+        <div class="grid-item">
+            <h2><a href="{{ thermostat.actuator_info_url }}">{{ thermostat.name }}</a></h2>
+            <div class="thermostat">
+                <div class="temperature">{{ thermostat.temperature }}°C</div>
+                <div class="humidity">{{ thermostat.humidity }}%</div>
+                <div class="setpoint">{{ thermostat.setpoint }}°C</div>
+                <button onclick="adjustSetpoint('{{ thermostat.name }}', -1)" style="font-size: 20px;">-</button>
+                <button onclick="adjustSetpoint('{{ thermostat.name }}', 1)" style="font-size: 20px;">+</button>
+                <div class="mode">{{ thermostat.mode }}</div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><button onclick="createThermostat()">Create New Thermostat</button>
+
+    <script>
+        function adjustSetpoint(name, adjustment) {
+            // TODO: Implement function to adjust setpoint of thermostat with given name
+        }
+
+        function createThermostat() {
+            // TODO: Implement function to create a new thermostat
+        }
+    </script>
+</body>
+</html>
