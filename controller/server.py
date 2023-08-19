@@ -5,7 +5,7 @@ import jinja2
 import aiohttp_jinja2
 
 from aiohttp import web
-from views import index,  thermostat_view, create_error_handler_middleware
+from views import *
 from settings import load_config, load_db, save_db
 from threading import Lock
 
@@ -26,6 +26,8 @@ def main():
             web.get('/', index),
             web.get('/thermostat/{id}', thermostat_view),
             web.static('/assets/', "./www/static"),
+
+            web.get('/test/{status}', test_view),
         ]
     )
     app.middlewares.append(create_error_handler_middleware())
