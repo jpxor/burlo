@@ -81,7 +81,7 @@ if __name__ == "__main__":
             name = chan.getDeviceName()
             sn = chan.getDeviceSerialNumber()
             chid = chan.getChannel()
-            port = chan.getPort()
+            port = chan.getHubPort()
             print(chid, name, port, sn)
 
     try:
