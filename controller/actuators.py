@@ -9,7 +9,7 @@ attachedChannels = []
 phigetMutex = Lock()
 
 
-async def get_actuators_for_render():
+def get_actuators_for_render():
     actuators = []
     with phigetMutex:
         for chan in attachedChannels:

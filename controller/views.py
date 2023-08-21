@@ -1,6 +1,8 @@
 import traceback
 import aiohttp_jinja2
+
 from aiohttp import web
+from actuators import get_actuators_for_render
 
 
 @aiohttp_jinja2.template('index.html')
@@ -27,9 +29,11 @@ async def index(request):
     # return request.app['db']
 
 
-@aiohttp_jinja2.template('actuator_list.html')
-async def actuator_list_view(request):
-    raise Exception("view not implemented")
+@aiohttp_jinja2.template('actuators.html')
+async def actuators_view(request):
+    return {
+        "actuators": get_actuators_for_render()
+    }
 
 
 @aiohttp_jinja2.template('thermostat.html')
