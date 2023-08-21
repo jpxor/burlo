@@ -4,6 +4,11 @@ from Phidget22.Phidget import *
 from Phidget22.Devices.DigitalOutput import DigitalOutput
 from Phidget22.Devices.Manager import *
 
+from Phidget22.ChannelClass import PHIDCHCLASS_DIGITALOUTPUT, PHIDCHCLASS_VOLTAGEOUTPUT
+supported_channel_classes = [
+    PHIDCHCLASS_DIGITALOUTPUT,
+    PHIDCHCLASS_VOLTAGEOUTPUT,
+]
 
 attachedChannels = []
 phigetMutex = Lock()
@@ -25,7 +30,8 @@ def get_actuators_for_render():
 def ManagerOnAttach(self, device):
     with phigetMutex:
         if device.getIsChannel():
-            attachedChannels.append(device)
+            if device.getChannelClass() in supported_channel_classes:
+                attachedChannels.append(device)
 
 
 def ManagerOnDetach(self, device):
@@ -79,7 +85,9 @@ if __name__ == "__main__":
             sn = chan.getDeviceSerialNumber()
             chid = chan.getChannel()
             port = chan.getHubPort()
-            print(name, sn, port, chid)
+            did = chan.getDeviceId()
+            chname = chan.getChannelName()
+            print(name, chname, sn, port, chid, did)
 
     try:
         manager.close()
