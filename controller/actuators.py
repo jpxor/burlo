@@ -42,7 +42,8 @@ def get_actuators_for_render():
     with phigetMutex:
         for chan in attachedChannels:
             actuators.append({
-                "name": chan.getDeviceName(),
+                "devname": chan.getDeviceName(),
+                "chaname": chan.getChannelName(),
                 "hubserial": chan.getDeviceSerialNumber(),
                 "hubport": chan.getHubPort(),
                 "chid": chan.getChannel()

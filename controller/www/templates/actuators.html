@@ -19,7 +19,7 @@
     {% if actuators %}
     <ul>
         {% for actuator in actuators %}
-        <li>{{ actuator.name }}, Hub Serial: {{ actuator.hubserial }}, Hub Port: {{ actuator.hubport }}, Channel ID: {{
+        <li>{{ actuator.devname }}, {{ actuator.chaname }}, Hub Serial: {{ actuator.hubserial }}, Hub Port: {{ actuator.hubport }}, Channel ID: {{
             actuator.chid }}</li>
         {% endfor %}
     </ul>
