@@ -4,10 +4,10 @@ from Phidget22.Phidget import *
 from Phidget22.Devices.DigitalOutput import DigitalOutput
 from Phidget22.Devices.Manager import *
 
-from Phidget22.ChannelClass import PHIDCHCLASS_DIGITALOUTPUT, PHIDCHCLASS_VOLTAGEOUTPUT
+import Phidget22.ChannelClass
 supported_channel_classes = [
-    PHIDCHCLASS_DIGITALOUTPUT,
-    PHIDCHCLASS_VOLTAGEOUTPUT,
+    ChannelClass.PHIDCHCLASS_DIGITALOUTPUT,
+    ChannelClass.PHIDCHCLASS_VOLTAGEOUTPUT,
 ]
 
 attachedChannels = []
@@ -102,15 +102,13 @@ if __name__ == "__main__":
     time.sleep(2)
 
     with phigetMutex:
-        print(attachedChannels)
         for chan in attachedChannels:
             name = chan.getDeviceName()
             sn = chan.getDeviceSerialNumber()
             chid = chan.getChannel()
             port = chan.getHubPort()
-            did = chan.getDeviceId()
             chname = chan.getChannelName()
-            print(name, chname, sn, port, chid, did)
+            print(f'name: {name}, chname: {chname}, S/N: {sn}, port: {port}, chid: {chid}')
 
     try:
         manager.close()
