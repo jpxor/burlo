@@ -14,6 +14,29 @@ attachedChannels = []
 phigetMutex = Lock()
 
 
+class ActuatorInterface:
+    def set_state(self, state):
+        raise NotImplementedError
+
+
+class PhidgetsDigitalOutput(ActuatorInterface):
+    def __init__(self, serialnumber, hubport, chid):
+        self.serial_number = serialnumber
+        self.hubport = hubport
+        self.chid = chid
+        self.digital_output = DigitalOutput()
+        self.digital_output.setDeviceSerialNumber(serialnumber)
+        self.digital_output.setHubPort(hubport)
+        self.digital_output.setChannel(chid)
+        self.digital_output.openWaitForAttachment(5000)
+
+    def __del__(self):
+        self.digital_output.close()
+
+    def set_state(self, state):
+        self.digital_output.setState(state)
+
+
 def get_actuators_for_render():
     actuators = []
     with phigetMutex:
