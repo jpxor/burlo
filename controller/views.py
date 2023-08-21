@@ -43,7 +43,7 @@ async def thermostat_view(request):
         raise web.HTTPNotFound(text="thermostat id not found")
     return {
         "thermostat": request.app["db"]["thermostats"][id],
-        "actuators": request.app["db"]["actuators"],
+        "actuators": get_actuators_for_render(),
         "sensors": request.app["db"]["sensors"],
     }
 

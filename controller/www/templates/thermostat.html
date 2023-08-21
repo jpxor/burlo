@@ -116,10 +116,13 @@
         </select>
         <label for="actuator-select">Select an actuator:</label>
         <select id="actuator-select">
-            <option value="actuator-1">Actuator 1</option>
-            <option value="actuator-2">Actuator 2</option>
-            <option value="actuator-3">Actuator 3</option>
-            <option value="actuator-4">Actuator 4</option>
+            {% if actuators %}
+            {% for actuator in actuators %}
+            <option value="{{actuator.chaname}} | {{actuator.devname}} | Channel ID {{actuator.chid}}">{{actuator.chaname}} | {{actuator.devname}} | Channel ID {{actuator.chid}}</option>
+            {% endfor %}
+            {% else %}
+            <option value="none" selected>no attached actuators</option>
+            {% endif %}
         </select>
         <button id="actuator-sensor-save">Save Changes</button>
         <a href="/">Back</a>
