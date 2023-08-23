@@ -4,14 +4,14 @@ from Phidget22.Phidget import *
 from Phidget22.Devices.DigitalOutput import DigitalOutput
 from Phidget22.Devices.Manager import *
 
-import Phidget22.ChannelClass
 supported_channel_classes = [
     ChannelClass.PHIDCHCLASS_DIGITALOUTPUT,
-    ChannelClass.PHIDCHCLASS_VOLTAGEOUTPUT,
+    # ChannelClass.PHIDCHCLASS_VOLTAGEOUTPUT,
 ]
 
 attachedChannels = []
-phigetMutex = Lock()
+in_use_channels = []
+phidgetMutex = Lock()
 
 
 class ActuatorInterface:
@@ -20,18 +20,19 @@ class ActuatorInterface:
 
 
 class PhidgetsDigitalOutput(ActuatorInterface):
-    def __init__(self, serialnumber, hubport, chid):
-        self.serial_number = serialnumber
-        self.hubport = hubport
-        self.chid = chid
+    def __init__(self, phidget_device):
+        self.phidget_device = phidget_device
         self.digital_output = DigitalOutput()
-        self.digital_output.setDeviceSerialNumber(serialnumber)
-        self.digital_output.setHubPort(hubport)
-        self.digital_output.setChannel(chid)
+        self.digital_output.setDeviceSerialNumber(
+            phidget_device.getDeviceSerialNumber())
+        self.digital_output.setHubPort(phidget_device.getHubPort())
+        self.digital_output.setChannel(phidget_device.getChannel())
         self.digital_output.openWaitForAttachment(5000)
 
     def __del__(self):
         self.digital_output.close()
+        with phidgetMutex:
+            in_use_channels.remove(self.phidget_device)
 
     def set_state(self, state):
         self.digital_output.setState(state)
@@ -39,35 +40,57 @@ class PhidgetsDigitalOutput(ActuatorInterface):
 
 def get_actuators_for_render():
     actuators = []
-    with phigetMutex:
+    with phidgetMutex:
         for chan in attachedChannels:
             actuators.append({
                 "devname": chan.getDeviceName(),
                 "chaname": chan.getChannelName(),
                 "hubserial": chan.getDeviceSerialNumber(),
                 "hubport": chan.getHubPort(),
-                "chid": chan.getChannel()
+                "chid": chan.getChannel(),
+                "in-use": chan in in_use_channels,
             })
     return actuators
 
 
+def phidget_channel_match(chan_a, chan_b):
+    if chan_a.getChannel() == chan_b.getChannel():
+        if chan_a.getHubPort() == chan_b.getHubPort():
+            if chan_a.getDeviceSerialNumber() == chan_b.getDeviceSerialNumber():
+                return True
+    return False
+
+
+def create_actuator(selected_chan):
+    with phidgetMutex:
+        for chan in attachedChannels:
+            if phidget_channel_match(chan, selected_chan):
+                if chan.getChannelClass() == ChannelClass.PHIDCHCLASS_DIGITALOUTPUT:
+                    in_use_channels.append(chan)
+                    return PhidgetsDigitalOutput(chan)
+                else:
+                    print("unsupported channel class", chan.getChannelClass())
+                    break
+    return None
+
+
 def ManagerOnAttach(self, device):
-    with phigetMutex:
+    with phidgetMutex:
         if device.getIsChannel():
             if device.getChannelClass() in supported_channel_classes:
                 attachedChannels.append(device)
 
 
 def ManagerOnDetach(self, device):
-    with phigetMutex:
+    with phidgetMutex:
         attachedChannels.remove(device)
 
 
-def print_phiget_exeption(e):
+def print_phidget_exeption(e):
     print("Phidget Exception: " + str(e.code) + " - " + str(e.details))
 
 
-def open_phiget_manager():
+def open_phidget_manager():
     try:
         manager = Manager()
     except RuntimeError as e:
@@ -79,30 +102,30 @@ def open_phiget_manager():
         manager.open()
         return manager
     except PhidgetException as e:
-        print_phiget_exeption(e)
+        print_phidget_exeption(e)
         exit(1)
 
 
-async def aiohttp_phiget_context(app):
-    manager = open_phiget_manager()
+async def aiohttp_phidget_context(app):
+    manager = open_phidget_manager()
     yield
     try:
-        with phigetMutex:
+        with phidgetMutex:
             for chan in attachedChannels:
                 chan.close()
         manager.close()
     except PhidgetException as e:
-        print_phiget_exeption(e)
+        print_phidget_exeption(e)
 
 
 if __name__ == "__main__":
-    print("testing phigets")
-    manager = open_phiget_manager()
+    print("testing phidgets")
+    manager = open_phidget_manager()
 
     import time
     time.sleep(2)
 
-    with phigetMutex:
+    with phidgetMutex:
         for chan in attachedChannels:
             name = chan.getDeviceName()
             sn = chan.getDeviceSerialNumber()
@@ -114,5 +137,5 @@ if __name__ == "__main__":
     try:
         manager.close()
     except PhidgetException as e:
-        print_phiget_exeption(e)
+        print_phidget_exeption(e)
     print("done")

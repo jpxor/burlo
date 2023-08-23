@@ -8,7 +8,7 @@ from aiohttp import web
 from views import *
 from settings import load_config, load_db, save_db
 from threading import Lock
-from actuators import aiohttp_phiget_context
+from actuators import aiohttp_phidget_context
 
 
 async def on_shutdown(app):
@@ -37,7 +37,7 @@ def main():
     print(app['db'])
 
     app.on_shutdown.append(on_shutdown)
-    app.cleanup_ctx.append(aiohttp_phiget_context)
+    app.cleanup_ctx.append(aiohttp_phidget_context)
 
     aiohttp_jinja2.setup(app, loader=jinja2.FileSystemLoader('./www/templates'))
     web.run_app(app, host='0.0.0.0', port=8000, access_log_format=" :: %r %s %t")
