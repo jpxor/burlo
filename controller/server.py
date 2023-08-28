@@ -25,6 +25,7 @@ def main():
             web.get('/', index),
             web.get('/thermostat/{id}', thermostat_view),
             web.get('/actuators', actuators_view),
+            web.get('/sensors', sensors_view),
             web.static('/assets/', "./www/static"),
 
             web.get('/test/{status}', test_view),

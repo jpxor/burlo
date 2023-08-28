@@ -6,6 +6,17 @@ activeSensors = []
 sensorMutex = Lock()
 
 
+def get_sensors_for_render():
+    sensors = []
+    with sensorMutex:
+        for sensor in activeSensors:
+            sensors.append({
+                "id": sensor.id(),
+                "type": sensor.type(),
+            })
+    return sensors
+
+
 class SensorInterface():
 
     def subscribe(self, callback):
@@ -22,11 +33,23 @@ class SensorInterface():
     def stop(self):
         pass
 
+    def id(self):
+        if hasattr(self, "id"):
+            return self.id
+        return "{no id}"
+
+    def type(self):
+        if hasattr(self, "type"):
+            return self.type
+        return "{no type}"
+
 
 class MqttSensor(SensorInterface):
 
     def __init__(self, topic, broker, port=1883):
         self.topic = topic
+        self.broker = broker
+        self.port = port
         self.client = mqtt.Client()
         self.client.on_connect = self.mqtt_on_connect
         self.client.on_message = self.mqtt_on_message
@@ -37,8 +60,19 @@ class MqttSensor(SensorInterface):
             self.client.loop_start()
             activeSensors.append(self)
 
+    def __del__(self):
+        with sensorMutex:
+            activeSensors.remove(self)
+        self.stop()
+
     def stop(self):
         self.client.loop_stop()
+
+    def id(self):
+        return f'mqtt:{self.topic}:{self.broker}:{self.port}'
+
+    def type(self):
+        return "MqttSensor"
 
     def mqtt_on_connect(self, client, opaque, flags, rc):
         print(f'connect rc={rc}, subscribing to "{self.topic}"')

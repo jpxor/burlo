@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Sensors</title>
+</head>
+
+<body>
+    <nav>
+        <ul>
+            <li><a href="/">Home</a></li>
+            <li><a href="/">Thermostats</a></li>
+            <li><a href="/sensors">Sensors</a></li>
+            <li><a href="/actuators">Actuators</a></li>
+        </ul>
+    </nav>
+
+    <h1>Sensors</h1>
+    {% if sensors %}
+    <ul>
+        {% for sensor in sensors %}
+        <li>{{ sensor.type }} ({{ sensor.id }})</li>
+        {% endfor %}
+    </ul>
+    {% else %}
+    <p>The list of sensors is empty.</p>
+    {% endif %}
+</body>
+
+</html>

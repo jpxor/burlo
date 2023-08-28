@@ -3,6 +3,7 @@ import aiohttp_jinja2
 
 from aiohttp import web
 from actuators import get_actuators_for_render
+from sensors import get_sensors_for_render
 
 
 @aiohttp_jinja2.template('index.html')
@@ -36,6 +37,13 @@ async def actuators_view(request):
     }
 
 
+@aiohttp_jinja2.template('sensors.html')
+async def sensors_view(request):
+    return {
+        "sensors": get_sensors_for_render()
+    }
+
+
 @aiohttp_jinja2.template('thermostat.html')
 async def thermostat_view(request):
     id = request.match_info['id']
@@ -44,7 +52,7 @@ async def thermostat_view(request):
     return {
         "thermostat": request.app["db"]["thermostats"][id],
         "actuators": get_actuators_for_render(),
-        "sensors": request.app["db"]["sensors"],
+        "sensors": get_sensors_for_render(),
     }
 
 
