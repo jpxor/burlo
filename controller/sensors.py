@@ -1,5 +1,9 @@
 import json
 import paho.mqtt.client as mqtt
+from threading import Lock
+
+activeSensors = []
+sensorMutex = Lock()
 
 
 class SensorInterface():
@@ -15,6 +19,9 @@ class SensorInterface():
             for cb in self.callbacks:
                 cb(data)
 
+    def stop(self):
+        pass
+
 
 class MqttSensor(SensorInterface):
 
@@ -26,6 +33,12 @@ class MqttSensor(SensorInterface):
         self.client.on_disconnect = self.mqtt_on_disconnect
         self.client.username_pw_set("hvac", "hvac_pass")
         self.client.connect(broker, port, 60)
+        with sensorMutex:
+            self.client.loop_start()
+            activeSensors.append(self)
+
+    def stop(self):
+        self.client.loop_stop()
 
     def mqtt_on_connect(self, client, opaque, flags, rc):
         print(f'connect rc={rc}, subscribing to "{self.topic}"')
@@ -49,13 +62,26 @@ class MqttSensor(SensorInterface):
                   "broker "{self.broker}", topic "{self.topic}", payload {msg.payload}')
 
 
+async def aiohttp_sensor_context(app):
+    yield
+    try:
+        with sensorMutex:
+            for client in activeSensors:
+                client.stop()
+    except Exception as e:
+        print(e)
+
+
 if __name__ == "__main__":
     print("testing mqtt enabled sensors")
-    s = MqttSensor(topic="/zigbee2mqtt/thermostats/01/office",
+    s = MqttSensor(topic="zigbee2mqtt/thermostats/01/office",
                    broker="192.168.50.193")
 
     s.subscribe(callback=lambda data: print(data))
     s.publish(data={"test": "pubsub"})
+
+    import time
+    time.sleep(2)
 
     input("Press Enter to stop...")
     print("done")
