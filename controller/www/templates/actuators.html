@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Actuators</title>
+</head>
+
+<body>
+    <nav>
+        <ul>
+            <li><a href="/">Home</a></li>
+            <li><a href="/">Thermostats</a></li>
+            <li><a href="/sensors">Sensors</a></li>
+            <li><a href="/actuators">Actuators</a></li>
+        </ul>
+    </nav>
+
+    <h1>Actuators</h1>
+    {% if actuators %}
+    <ul>
+        {% for actuator in actuators %}
+        <li>{{ actuator.devname }}, {{ actuator.chaname }}, Hub Serial: {{ actuator.hubserial }}, Hub Port: {{ actuator.hubport }}, Channel ID: {{
+            actuator.chid }}</li>
+        {% endfor %}
+    </ul>
+    {% else %}
+    <p>The list of actuators is empty.</p>
+    {% endif %}
+</body>
+
+</html>

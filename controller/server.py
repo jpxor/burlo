@@ -9,14 +9,14 @@ from views import *
 from settings import load_config, load_db, save_db
 from threading import Lock
 
+from actuators import aiohttp_phidget_context
+from sensors import aiohttp_sensor_context
+from sensors import MqttSensor
+
 
 async def on_shutdown(app):
     save_db(app['db'])
 
-async def phigets_context(app):
-    # find and load configured phiget devices
-    yield
-    # close all phiget devices
 
 def main():
     logging.basicConfig(level=logging.INFO)
@@ -25,6 +25,9 @@ def main():
         [
             web.get('/', index),
             web.get('/thermostat/{id}', thermostat_view),
+            web.get('/actuators', actuators_view),
+            web.get('/sensors', sensors_view),
+            web.post('/sensors', post_sensor),
             web.static('/assets/', "./www/static"),
 
             web.get('/test/{status}', test_view),
@@ -39,7 +42,12 @@ def main():
     print(app['db'])
 
     app.on_shutdown.append(on_shutdown)
-    app.cleanup_ctx.append(phigets_context)
+    app.cleanup_ctx.append(aiohttp_phidget_context)
+    app.cleanup_ctx.append(aiohttp_sensor_context)
+
+    for sensor in app['db']["sensors"]:
+        if sensor['type'] == 'mqtt':
+            MqttSensor(sensor['topic'], sensor['broker'], sensor['port'])
 
     aiohttp_jinja2.setup(app, loader=jinja2.FileSystemLoader('./www/templates'))
     web.run_app(app, host='0.0.0.0', port=8000, access_log_format=" :: %r %s %t")
