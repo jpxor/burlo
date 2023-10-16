@@ -25,6 +25,23 @@
     {% else %}
     <p>The list of sensors is empty.</p>
     {% endif %}
+
+    <hr>
+
+    <h2>Add MQTT Sensor</h2>
+    <form id="addSensorForm" action="/sensors" method="post">
+        <label for="mqttSubject">MQTT Subject:</label>
+        <input type="text" id="mqttSubject" name="mqttSubject" required><br>
+
+        <label for="brokerIpAddress">Broker IP Address:</label>
+        <input type="text" id="brokerIpAddress" name="brokerIpAddress" value="192.168.50.193"><br>
+
+        <label for="brokerPort">Broker Port Number:</label>
+        <input type="number" id="brokerPort" name="brokerPort" value="1883"><br>
+
+        <input type="submit" value="Add Sensor">
+    </form>
+
 </body>
 
 </html>
