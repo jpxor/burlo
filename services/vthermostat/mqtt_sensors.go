@@ -2,18 +2,21 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"log"
 	"net/url"
 	"os"
 	"os/signal"
+	"strings"
 	"syscall"
+	"time"
 
 	"github.com/eclipse/paho.golang/autopaho"
 	"github.com/eclipse/paho.golang/paho"
 )
 
-func run_mqtt_service() {
+func run_mqtt_sensors_client() {
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer stop()
 
@@ -54,8 +57,7 @@ func run_mqtt_service() {
 			ClientID: clientID,
 			OnPublishReceived: []func(paho.PublishReceived) (bool, error){
 				func(pr paho.PublishReceived) (bool, error) {
-					mqtt_message_handler(pr.Packet.Topic, pr.Packet.Payload)
-					return true, nil
+					return mqtt_message_handler(pr.Packet.Topic, pr.Packet.Payload), nil
 				}},
 			OnClientError: func(err error) {
 				log.Printf("[mqtt] client error: %s\n", err)
@@ -88,6 +90,37 @@ func run_mqtt_service() {
 	global.waitgroup.Done()
 }
 
-func mqtt_message_handler(topic string, payload []byte) {
-	log.Printf("[mqtt] %s --> %s\r\n", topic, string(payload))
+func mqtt_message_handler(topic string, payload []byte) bool {
+	prefix := "zigbee2mqtt/thermostats/"
+	if !strings.HasPrefix(topic, prefix) {
+		return false
+	}
+	id := strings.TrimPrefix(topic, prefix)
+
+	var new_state SensorData
+	err := json.Unmarshal(payload, &new_state)
+	if err != nil {
+		log.Printf("[mqtt] failed to parse payload: %s --> %s\r\n", id, string(payload))
+		return true
+	}
+
+	thermostat, found := global.thermostats.Get(id)
+	if !found {
+		// new sensor detected, need to create a new
+		// thermostat setpoint contoller to go with it
+		thermostat = &Thermostat{
+			ID:       id,
+			Name:     id, // default
+			Setpoint: 20, // default
+		}
+		global.thermostats.Set(id, thermostat)
+		log.Printf("[mqtt] new thermostat %s\r\n", id)
+	}
+	thermostat.State = new_state
+	thermostat.State.Time = time.Now()
+	thermostat.SetpointErr = new_state.Temperature - thermostat.Setpoint
+
+	log.Printf("[mqtt] %s --> %s\r\n", id, string(payload))
+	go notify_controller(*thermostat)
+	return true
 }
