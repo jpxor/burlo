@@ -77,7 +77,7 @@ async def set_digital_output(request):
     phiwrap = named_phidgets.get(name)
     if not phiwrap:
         if channel == -1 or hub_port == -1:
-            return web.Response(status=400, text="channel and hub_port must be set")
+            return web.Response(status=400, text="name not found; channel and hub_port must be set")
         try:
             do = DigitalOutput()
             do.setChannel(channel)
