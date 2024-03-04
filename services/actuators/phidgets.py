@@ -50,8 +50,10 @@ def onError(self, code, description):
 
 
 async def set_digital_output(request):
-    data = await request.json()
-    print("set_digital_output", data)
+    try:
+        data = await request.json()
+    except:
+        return web.Response(status=400, text="bad json format")
 
     if "name" not in data or "target_state" not in data:
         return web.Response(status=400, text="requires name (str) and target_state (bool)")
@@ -96,8 +98,10 @@ async def set_digital_output(request):
 
 
 async def detach_phidget_channel(request):
-    data = await request.json()
-    print("detach_phidget_channel", data)
+    try:
+        data = await request.json()
+    except:
+        return web.Response(status=400, text="bad json format")
 
     if "name" not in data:
         return web.Response(status=400, text="requires name (str)")
