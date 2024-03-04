@@ -1,0 +1,10 @@
+mosquito (iot message broker)
+    port: 1883
+    hvac: hvac_pass
+
+zigbee2mqtt (add zigbee devices)
+    webui port: 8082
+
+To run:
+./envconfig.sh [sonoffE|sonoffP]
+docker compose ./docker-compose.yml [up|restart]
