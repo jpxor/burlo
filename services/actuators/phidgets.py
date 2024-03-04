@@ -94,16 +94,16 @@ async def set_digital_output(request):
             return web.Response(status=500, text=str(ex))
 
     phiwrap.phidget.setState(target_state)
-    return web.Response(status=200)
+    return web.Response(status=200, text="ACK")
 
 
-async def detach_phidget_channel(request):
+async def close_phidget_channel(request):
     try:
         data = await request.json()
 
         if "name" not in data:
             return web.Response(status=400, text="requires name (str)")
-        
+
         name = data["name"]
         if not isinstance(name, str):
             return web.Response(status=400, text="name must be a string")
@@ -115,8 +115,10 @@ async def detach_phidget_channel(request):
         return web.Response(status=400, text="no phidget by that name")
 
     try:
-        phidget = named_phidgets[name].phidget
-        phidget.close()
+        named_phidgets[name].phidget.close()
+        del named_phidgets[name]
+        return web.Response(status=200, text="ACK")
+
     except Exception as ex:
         traceback.print_exc()
         raise web.HTTPBadRequest(reason=str(ex))
@@ -130,7 +132,7 @@ async def get_phidgets_state(request):
 app = web.Application()
 app.add_routes([
     web.post('/phidgets/digital_out', set_digital_output),
-    web.post('/phidgets/detach', detach_phidget_channel),
+    web.post('/phidgets/close', close_phidget_channel),
     web.get('/phidgets/state', get_phidgets_state),
 ])
 
