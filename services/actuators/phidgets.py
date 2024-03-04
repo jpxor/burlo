@@ -19,7 +19,7 @@ class NamedPhidget:
         self.phidget = phidget
         self.name = name
     
-    def toJSON(self):
+    def toSerializable(self):
         return {
             "name": self.name,
             "phidget": str(self.phidget),
@@ -109,7 +109,9 @@ async def detach_phidget_channel(request):
 
 
 async def get_phidgets_state(request):
-    return web.json_response(named_phidgets)
+    serializables = named_phidgets.map(lambda phiwrap: phiwrap.toSerializable())
+    return web.json_response(serializables)
+
 
 
 app = web.Application()
