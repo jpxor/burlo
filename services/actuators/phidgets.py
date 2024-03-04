@@ -5,6 +5,7 @@ from Phidget22.PhidgetException import *
 from Phidget22.Devices.DigitalOutput import *
 
 import sys
+import json
 import aiohttp
 import asyncio
 import traceback
@@ -12,10 +13,14 @@ import traceback
 ## active phidget channels
 named_phidgets = {}
 
+
 class NamedPhidget:
     def __init__(self, name, phidget):
         self.phidget = phidget
         self.name = name
+    
+    def toJSON(self):
+        return json.dumps(self, default=lambda o: o.__dict__, sort_keys=True, indent=4)
 
 
 def name_from_phidget(phidget):
