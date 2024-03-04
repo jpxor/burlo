@@ -128,8 +128,8 @@ async def close_phidget_channel(request):
 async def get_phidgets_state(request):
     serializables = [phiwrap.toSerializable() for phiwrap in named_phidgets.values()]
     out = "<p>/services/actuators/phidgets OK<p>"
-    out += json.dumps(serializables, indent=4)
-    return web.Response(status=200, text=out)
+    out += "<pre>" + json.dumps(serializables, indent=4) + "</pre>"
+    return web.Response(status=200, text=out, content_type="text/html")
 
 
 app = web.Application()
@@ -155,7 +155,7 @@ def test():
             
             # Test getting state
             async with session.get('http://192.168.50.193:4000/phidgets/state') as resp:
-                print(await resp.json())
+                print(await resp.text())
 
             # Test setting digital output
             data = {'name': 'my_device', 'target_state': False}
@@ -165,7 +165,7 @@ def test():
 
             # Test getting state
             async with session.get('http://192.168.50.193:4000/phidgets/state') as resp:
-                print(await resp.json())
+                print(await resp.text())
                 
             # Test closing
             data = {'name': 'my_device'}
