@@ -5,14 +5,12 @@ from Phidget22.PhidgetException import *
 from Phidget22.Devices.DigitalOutput import *
 
 import sys
-import json
 import aiohttp
 import asyncio
 import traceback
 
 ## active phidget channels
 named_phidgets = {}
-
 
 class NamedPhidget:
     def __init__(self, name, phidget):
@@ -25,7 +23,6 @@ class NamedPhidget:
             "phidget": str(self.phidget),
             "state": self.phidget.getState(), # DigitalOutput only
         }
-
 
 
 def name_from_phidget(phidget):
@@ -52,28 +49,29 @@ def onError(self, code, description):
 async def set_digital_output(request):
     try:
         data = await request.json()
+
+        if "name" not in data or "target_state" not in data:
+            return web.Response(status=400, text="requires name (str) and target_state (bool)")
+        
+        name = data["name"]
+        if not isinstance(name, str):
+            return web.Response(status=400, text="name must be a string")
+
+        target_state = data["target_state"]
+        if not isinstance(target_state, bool):
+            return web.Response(status=400, text="target_state must be a boolean")
+
+        channel = data.get("channel", -1)
+        if not isinstance(channel, int):
+            return web.Response(status=400, text="channel must be an integer")
+
+        hub_port = data.get("hub_port", -1)
+        if not isinstance(hub_port, int):
+            return web.Response(status=400, text="hub_port must be an integer")
+    
     except:
-        return web.Response(status=400, text="bad json format")
+        return web.Response(status=400, text="bad request")
 
-    if "name" not in data or "target_state" not in data:
-        return web.Response(status=400, text="requires name (str) and target_state (bool)")
-    
-    name = data["name"]
-    if not isinstance(name, str):
-        return web.Response(status=400, text="name must be a string")
-
-    target_state = data["target_state"]
-    if not isinstance(target_state, bool):
-        return web.Response(status=400, text="target_state must be a boolean")
-
-    channel = data.get("channel", -1)
-    if not isinstance(channel, int):
-        return web.Response(status=400, text="channel must be an integer")
-
-    hub_port = data.get("hub_port", -1)
-    if not isinstance(hub_port, int):
-        return web.Response(status=400, text="hub_port must be an integer")
-    
     phiwrap = named_phidgets.get(name)
     if not phiwrap:
         if channel == -1 or hub_port == -1:
@@ -102,15 +100,16 @@ async def set_digital_output(request):
 async def detach_phidget_channel(request):
     try:
         data = await request.json()
-    except:
-        return web.Response(status=400, text="bad json format")
 
-    if "name" not in data:
-        return web.Response(status=400, text="requires name (str)")
-    
-    name = data["name"]
-    if not isinstance(name, str):
-        return web.Response(status=400, text="name must be a string")
+        if "name" not in data:
+            return web.Response(status=400, text="requires name (str)")
+        
+        name = data["name"]
+        if not isinstance(name, str):
+            return web.Response(status=400, text="name must be a string")
+
+    except:
+        return web.Response(status=400, text="bad request")
 
     if name not in named_phidgets:
         return web.Response(status=400, text="no phidget by that name")
