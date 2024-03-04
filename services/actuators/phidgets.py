@@ -5,6 +5,7 @@ from Phidget22.PhidgetException import *
 from Phidget22.Devices.DigitalOutput import *
 
 import sys
+import json
 import aiohttp
 import asyncio
 import traceback
@@ -126,7 +127,9 @@ async def close_phidget_channel(request):
 
 async def get_phidgets_state(request):
     serializables = [phiwrap.toSerializable() for phiwrap in named_phidgets.values()]
-    return web.json_response(serializables)
+    out = "<p>/services/actuators/phidgets OK<p>"
+    out += json.dumps(serializables, indent=4)
+    return web.Response(status=200, text=out)
 
 
 app = web.Application()
