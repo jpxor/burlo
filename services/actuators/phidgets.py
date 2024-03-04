@@ -61,11 +61,11 @@ async def set_digital_output(request):
         if not isinstance(target_state, bool):
             return web.Response(status=400, text="target_state must be a boolean")
 
-        channel = data.get("channel", -1)
+        channel = data.get("channel", -2)
         if not isinstance(channel, int):
             return web.Response(status=400, text="channel must be an integer")
 
-        hub_port = data.get("hub_port", -1)
+        hub_port = data.get("hub_port", -2)
         if not isinstance(hub_port, int):
             return web.Response(status=400, text="hub_port must be an integer")
     
