@@ -145,19 +145,30 @@ def test():
     async def test_phidgets():
         async with aiohttp.ClientSession() as session:
             # Test setting digital output
-            data = {'name': 'my_device', 'channel': 0, 'hub_port': 0, 'target_state': 2}
-            async with session.post('http://192.168.50.193:4000/phidgets/digital_out/', json=data) as resp:
-                print(resp.status, resp.reason)
+            data = {'name': 'my_device', 'channel': 0, 'hub_port': 0, 'target_state': True}
+            async with session.post('http://192.168.50.193:4000/phidgets/digital_out', json=data) as resp:
+                if resp.status != 200:
+                    print(resp.status, resp.reason)
             
             # Test getting state
             async with session.get('http://192.168.50.193:4000/phidgets/state') as resp:
                 print(await resp.json())
+
+            # Test setting digital output
+            data = {'name': 'my_device', 'target_state': False}
+            async with session.post('http://192.168.50.193:4000/phidgets/digital_out', json=data) as resp:
+                if resp.status != 200:
+                    print(resp.status, resp.reason)
+
+            # Test getting state
+            async with session.get('http://192.168.50.193:4000/phidgets/state') as resp:
+                print(await resp.json())
                 
-            # Test detaching
+            # Test closing
             data = {'name': 'my_device'}
-            async with session.post('http://192.168.50.193:4000/phidgets/detach/', json=data) as resp:
-                print(resp.status)
-                
+            async with session.post('http://192.168.50.193:4000/phidgets/close', json=data) as resp:
+                print("closing:", resp.status, resp.reason)
+
     loop = asyncio.get_event_loop()
     loop.run_until_complete(test_phidgets())
 
