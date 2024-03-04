@@ -116,7 +116,7 @@ async def detach_phidget_channel(request):
 
     try:
         phidget = named_phidgets[name].phidget
-        await phidget.close()
+        phidget.close()
     except Exception as ex:
         traceback.print_exc()
         raise web.HTTPBadRequest(reason=str(ex))
