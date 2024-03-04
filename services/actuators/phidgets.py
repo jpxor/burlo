@@ -144,7 +144,7 @@ def run():
     web.run_app(app, port=4000)
 
 
-def test():
+def sanity_test(): # happy paths only
     async def test_phidgets():
         async with aiohttp.ClientSession() as session:
             # Test setting digital output
@@ -183,9 +183,8 @@ if len(sys.argv) != 2:
     
 cmd = sys.argv[1]
 if cmd == "test":
-    test()
+    sanity_test()
 elif cmd == "run":
     run()
 else:
     print("Invalid argument. Usage: phidgets.py [test|run]")
-
