@@ -20,7 +20,12 @@ class NamedPhidget:
         self.name = name
     
     def toJSON(self):
-        return json.dumps(self, default=lambda o: o.__dict__, sort_keys=True, indent=4)
+        return {
+            "name": self.name,
+            "phidget": str(self.phidget),
+            "state": self.phidget.getState(), # DigitalOutput only
+        }
+
 
 
 def name_from_phidget(phidget):
