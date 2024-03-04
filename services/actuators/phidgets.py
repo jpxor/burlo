@@ -127,7 +127,7 @@ async def close_phidget_channel(request):
 
 async def get_phidgets_state(request):
     serializables = [phiwrap.toSerializable() for phiwrap in named_phidgets.values()]
-    out = "<p>/services/actuators/phidgets OK<p>"
+    out = "<p>[OK] /services/actuators/phidgets<p>"
     out += "<pre>" + json.dumps(serializables, indent=4) + "</pre>"
     return web.Response(status=200, text=out, content_type="text/html")
 
