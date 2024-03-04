@@ -109,9 +109,8 @@ async def detach_phidget_channel(request):
 
 
 async def get_phidgets_state(request):
-    serializables = named_phidgets.map(lambda phiwrap: phiwrap.toSerializable())
+    serializables = [phiwrap.toSerializable() for phiwrap in named_phidgets]
     return web.json_response(serializables)
-
 
 
 app = web.Application()
