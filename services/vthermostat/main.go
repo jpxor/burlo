@@ -14,16 +14,14 @@ import (
 //  - web interface for status
 
 type global_vars struct {
-	thermostats *RWMap[string, *Thermostat]
-	waitgroup   sync.WaitGroup
+	thermostats  *RWMap[string, *Thermostat]
+	notify_queue chan Thermostat
+	waitgroup    sync.WaitGroup
 }
 
 var global = global_vars{
-	thermostats: NewRWMap[string, *Thermostat](),
-}
-
-var notify_controller = func(tstat Thermostat) {
-	log.Fatalln("notify_controller is not yet initialized")
+	thermostats:  NewRWMap[string, *Thermostat](),
+	notify_queue: make(chan Thermostat),
 }
 
 func main() {
@@ -31,6 +29,9 @@ func main() {
 
 	global.waitgroup.Add(1)
 	go run_mqtt_sensors_client()
+
+	global.waitgroup.Add(1)
+	go run_controller_notify_client()
 
 	// waits for all service type goroutines to complete
 	global.waitgroup.Wait()
