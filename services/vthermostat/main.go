@@ -15,16 +15,14 @@ import (
 //  - web interface for status
 
 type global_vars struct {
-	thermostats  *lockbox.LockBox[map[string]Thermostat]
-	history      *lockbox.LockBox[[]HistoryData]
-	notify_queue chan Thermostat
-	waitgroup    sync.WaitGroup
+	thermostats *lockbox.LockBox[map[string]Thermostat]
+	history     *lockbox.LockBox[[]HistoryData]
+	waitgroup   sync.WaitGroup
 }
 
 var global = global_vars{
-	thermostats:  lockbox.New(map[string]Thermostat{}),
-	history:      lockbox.New([]HistoryData{}),
-	notify_queue: make(chan Thermostat),
+	thermostats: lockbox.New(map[string]Thermostat{}),
+	history:     lockbox.New([]HistoryData{}),
 }
 
 func main() {

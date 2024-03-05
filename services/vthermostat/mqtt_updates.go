@@ -82,7 +82,7 @@ func process_mqtt_updates() {
 	}
 
 	<-ctx.Done() // waits for interrupt signal
-	log.Println("[mqtt] signal caught, exiting...")
+	log.Println("[mqtt] stopping")
 
 	<-c.Done() // waits for clean shutdown of autopaho mqtt connection
 	log.Println("[mqtt] client cleanup complete")
