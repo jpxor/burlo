@@ -38,14 +38,12 @@ func process_thermostat_updates() {
 	}
 }
 
-// the real work
 func sync_process_thermostat_update(tstat Thermostat) {
 	// the sensors don't provide dewpoint, but it is critical when cooling
 	tstat.State.DewPoint = calculate_dewpoint_simple(tstat.State.Temperature, tstat.State.Humidity)
 
 	notify_controller(tstat)
 	update_tstat_history(tstat)
-
 }
 
 // a simple approximation, should err on the side of being
