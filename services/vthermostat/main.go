@@ -3,10 +3,11 @@ package main
 import (
 	"log"
 	"sync"
+	"vthermostat/lockbox"
 )
 
 // tracks current state of all sensors and outdoor conditions
-//  - listens on mqtt topics
+//  - listens on mqtt topics [done]
 //  - state:
 //     - sensor name, temperature, humidity, dewpoint, last update
 //     - outdoor temperature, humidity, dewpoint, windspeed
@@ -14,13 +15,15 @@ import (
 //  - web interface for status
 
 type global_vars struct {
-	thermostats  *RWMap[string, *Thermostat]
+	thermostats  *lockbox.LockBox[map[string]Thermostat]
+	history      *lockbox.LockBox[[]HistoryData]
 	notify_queue chan Thermostat
 	waitgroup    sync.WaitGroup
 }
 
 var global = global_vars{
-	thermostats:  NewRWMap[string, *Thermostat](),
+	thermostats:  lockbox.New(map[string]Thermostat{}),
+	history:      lockbox.New([]HistoryData{}),
 	notify_queue: make(chan Thermostat),
 }
 
@@ -28,10 +31,10 @@ func main() {
 	log.Println("Running virtual thermostat service")
 
 	global.waitgroup.Add(1)
-	go run_mqtt_sensors_client()
+	go process_thermostat_updates()
 
 	global.waitgroup.Add(1)
-	go run_controller_notify_client()
+	go process_mqtt_updates()
 
 	// waits for all service type goroutines to complete
 	global.waitgroup.Wait()

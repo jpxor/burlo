@@ -16,7 +16,7 @@ import (
 	"github.com/eclipse/paho.golang/paho"
 )
 
-func run_mqtt_sensors_client() {
+func process_mqtt_updates() {
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer stop()
 
@@ -104,23 +104,26 @@ func mqtt_message_handler(topic string, payload []byte) bool {
 		return true
 	}
 
-	thermostat, found := global.thermostats.Get(id)
+	thermostats, lbk := global.thermostats.Take()
+	tstat, found := thermostats[id]
 	if !found {
 		// new sensor detected, need to create a new
 		// thermostat setpoint contoller to go with it
-		thermostat = &Thermostat{
+		tstat = Thermostat{
 			ID:       id,
 			Name:     id, // default
 			Setpoint: 20, // default
 		}
-		global.thermostats.Set(id, thermostat)
+		thermostats[id] = tstat
 		log.Printf("[mqtt] new thermostat %s\r\n", id)
 	}
-	thermostat.State = new_state
-	thermostat.State.Time = time.Now()
-	thermostat.SetpointErr = new_state.Temperature - thermostat.Setpoint
+	tstat.State = new_state
+	tstat.State.Time = time.Now()
+	tstat.SetpointErr = new_state.Temperature - tstat.Setpoint
 
 	log.Printf("[mqtt] %s --> %s\r\n", id, string(payload))
-	go notify_controller(*thermostat)
+	go async_process_thermostat_update(tstat)
+
+	global.thermostats.Put(thermostats, lbk)
 	return true
 }

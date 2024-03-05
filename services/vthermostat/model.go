@@ -18,3 +18,12 @@ type Thermostat struct {
 	Setpoint    float32
 	SetpointErr float32
 }
+
+type HistoryData struct {
+	SensorID    string
+	Temperature float32
+	Humidity    float32
+	DewPoint    float32
+	SetpointErr float32
+	Time        time.Time
+}
