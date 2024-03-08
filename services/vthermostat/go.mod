@@ -1,6 +1,6 @@
 module vthermostat
 
-go 1.21.4
+go 1.22.0
 
 require github.com/eclipse/paho.golang v0.21.0
 

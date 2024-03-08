@@ -34,6 +34,9 @@ func main() {
 	global.waitgroup.Add(1)
 	go process_mqtt_updates()
 
+	global.waitgroup.Add(1)
+	go go_gadget_web_app()
+
 	// waits for all service type goroutines to complete
 	global.waitgroup.Wait()
 }
