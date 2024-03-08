@@ -114,7 +114,6 @@ func mqtt_message_handler(topic string, payload []byte) bool {
 			Name:     id, // default
 			Setpoint: 20, // default
 		}
-		thermostats[id] = tstat
 		log.Printf("[mqtt] new thermostat %s\r\n", id)
 	}
 	tstat.State = new_state
@@ -124,6 +123,7 @@ func mqtt_message_handler(topic string, payload []byte) bool {
 	log.Printf("[mqtt] %s --> %s\r\n", id, string(payload))
 	go async_process_thermostat_update(tstat)
 
+	thermostats[id] = tstat
 	global.thermostats.Put(thermostats, lbk)
 	return true
 }
