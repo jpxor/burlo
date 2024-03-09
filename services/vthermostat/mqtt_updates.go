@@ -95,7 +95,13 @@ func mqtt_message_handler(topic string, payload []byte) bool {
 	if !strings.HasPrefix(topic, prefix) {
 		return false
 	}
-	id := strings.TrimPrefix(topic, prefix)
+	name := strings.TrimPrefix(topic, prefix)
+	id, _, _ := strings.Cut(name, "/")
+
+	// id needs to be safe to use in URL paths as well
+	// as in css class names
+	id = url.PathEscape(id)
+	id = strings.ReplaceAll(id, "%", "_")
 
 	var new_state SensorData
 	err := json.Unmarshal(payload, &new_state)
@@ -111,7 +117,7 @@ func mqtt_message_handler(topic string, payload []byte) bool {
 		// thermostat setpoint contoller to go with it
 		tstat = Thermostat{
 			ID:       id,
-			Name:     id, // default
+			Name:     name,
 			Setpoint: 20, // default
 		}
 		log.Printf("[mqtt] new thermostat %s\r\n", id)
