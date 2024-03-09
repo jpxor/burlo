@@ -1,0 +1,6 @@
+<form id="id-{{ .ID }}-title" style="display: flex; padding-bottom: 1rem;" hx-swap="outerHTML"
+    hx-put="/thermostat/{{ .ID }}/name" hx-target="#id-{{ .ID }}-title">
+    <label for="name" style="width: 0; height: 0;">Thermostat name</label>
+    <input name="name" id="id-{{ .ID }}-name" type="text" style="margin-block: auto;" value="{{ .Name }}">
+    <button type="submit">🗸</button>
+</form>

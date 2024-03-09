@@ -1,0 +1,7 @@
+<div id="id-{{ .ID }}-title" style="display: flex; padding-bottom: 1rem;">
+    <h2 style="margin-block: auto;">{{ .Name }}</h2>
+    <button
+        hx-get="/thermostat/{{ .ID }}/name-change-form"
+        hx-target="#id-{{ .ID }}-title">
+        🖉</button>
+</div>

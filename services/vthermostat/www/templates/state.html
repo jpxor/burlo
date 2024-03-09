@@ -99,17 +99,23 @@
         {{ range $key, $thermostat := . }}
         <section>
 
-            <div style="display: flex; padding-bottom: 1rem;">
+            <div id="id-{{ $key }}-title" style="display: flex; padding-bottom: 1rem;">
                 <h2 style="margin-block: auto;">{{ $thermostat.Name }}</h2>
-                <button>🖉</button>
+                <button
+                    hx-get="/thermostat/{{ $thermostat.ID }}/name-change-form"
+                    hx-target="#id-{{ $key }}-title"
+                    hx-swap="outerHTML">
+                    🖉</button>
             </div>
 
-            <label for="{{ $key }}-setpoint" style="display: flex; flex-direction: column;">
+            <label for="setpoint" style="display: flex; flex-direction: column;">
                 <p style="font-size: large; margin: 0; padding-bottom: 4px; color: rgba(0, 0, 0, 0.75);">Setpoint</p>
-                <input type="number" id="{{ $key }}-setpoint" name="{{ $key }}-setpoint"
-                    style="text-align: center; margin-bottom: 0.5em;" value="{{ $thermostat.Setpoint }}" step="0.5"
-                    class="mt-1 p-2 border rounded-md w-full" hx-put="/thermostats/{{ $thermostat.ID }}/setpoint"
-                    hx-trigger="change" hx-target="#{{ $key }}-setpoint" hx-vals="setpoint:this.value">
+                <input type="number" id="id-{{ $key }}-setpoint" name="setpoint"
+                    style="text-align: center; margin-bottom: 0.5em;"
+                    value="{{ $thermostat.Setpoint }}" step="0.5"
+                    hx-put="/thermostat/{{ $key }}/setpoint"
+                    hx-trigger="change"
+                    min="0" max="86">
             </label>
 
             <div style="display: flex;">
@@ -129,7 +135,7 @@
                     <p>Battery</p>
                 </div>
                 <div class="measurement secondary">
-                    <div>{{ $thermostat.State.LinkQuality }}%</div>
+                    <div>{{ $thermostat.State.LinkQuality }}</div>
                     <p>Signal Strength</p>
                 </div>
             </div>
