@@ -1,7 +1,7 @@
 package main
 
 import (
-	"burlo/vthermostat/lockbox"
+	"burlo/pkg/lockbox"
 	"log"
 	"sync"
 )
