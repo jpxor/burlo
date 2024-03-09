@@ -143,6 +143,8 @@ func PutThermostatName(tmpl *template.Template) http.HandlerFunc {
 		tstat.Name = name
 		thermostats[id] = tstat
 		tmpl.Execute(w, tstat)
+
+		// TODO save name to file (map id-->name)
 	}
 }
 
