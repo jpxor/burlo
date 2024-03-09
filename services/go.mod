@@ -1,4 +1,4 @@
-module vthermostat
+module burlo
 
 go 1.22.0
 

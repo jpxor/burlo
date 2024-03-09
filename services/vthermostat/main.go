@@ -1,9 +1,9 @@
 package main
 
 import (
+	"burlo/vthermostat/lockbox"
 	"log"
 	"sync"
-	"vthermostat/lockbox"
 )
 
 // tracks current state of all sensors and outdoor conditions
