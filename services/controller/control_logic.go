@@ -199,7 +199,7 @@ func NightCoolingBoost() bool {
 	return now.After(startTime) && now.Before(endTime)
 }
 
-func main() {
+func sample() {
 	// Example usage:
 	outdoor_air_temp = -35 // Set the outdoor temperature
 	outdoor_air_temp_trailing = -10
