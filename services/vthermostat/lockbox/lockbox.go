@@ -31,6 +31,7 @@ func (l *LockBox[T]) Put(data T, key Key) {
 		log.Fatalln("incorrect key")
 	}
 	l.data = data
+	l.key = Key{}
 	l.mutex.Unlock()
 }
 
@@ -38,5 +39,6 @@ func (l *LockBox[T]) Release(key Key) {
 	if l.key != key {
 		log.Fatalln("incorrect key")
 	}
+	l.key = Key{}
 	l.mutex.Unlock()
 }
