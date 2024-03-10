@@ -1,10 +1,14 @@
 package main
 
 import (
+	"burlo/model"
 	"burlo/pkg/lockbox"
 	"log"
 	"sync"
 )
+
+type Thermostat model.Thermostat
+type SensorData model.SensorData
 
 // tracks current state of all sensors and outdoor conditions
 //  - listens on mqtt topics [done]

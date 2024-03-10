@@ -1,6 +1,7 @@
 package main
 
 import (
+	"burlo/model"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -103,7 +104,7 @@ func mqtt_message_handler(topic string, payload []byte) bool {
 	id = url.PathEscape(id)
 	id = strings.ReplaceAll(id, "%", "_")
 
-	var new_state SensorData
+	var new_state model.SensorData
 	err := json.Unmarshal(payload, &new_state)
 	if err != nil {
 		log.Printf("[mqtt] failed to parse payload: %s --> %s\r\n", id, string(payload))
