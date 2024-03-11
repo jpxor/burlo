@@ -1,6 +1,7 @@
 package main
 
 import (
+	"burlo/model"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -80,7 +81,7 @@ type ControllerUpdate struct {
 
 func PostControllerUpdate() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		var data ControllerUpdate
+		var data model.Thermostat
 		err := json.NewDecoder(r.Body).Decode(&data)
 		if err != nil {
 			http.Error(w, "invalid request", http.StatusBadRequest)
@@ -91,6 +92,6 @@ func PostControllerUpdate() http.HandlerFunc {
 	}
 }
 
-func controller_update(data ControllerUpdate) {
-	log.Println(data)
+func controller_update(updated model.Thermostat) {
+	log.Println(updated)
 }

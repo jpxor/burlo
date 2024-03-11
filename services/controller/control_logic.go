@@ -68,7 +68,7 @@ func RoomTooCold(setpoint_error float32) bool {
 // RoomTooHot is a helper that returns true if the
 // room temperature rises above the target (with some margin)
 func RoomTooHot(setpoint_error float32) bool {
-	return setpoint_error > 2.5 // example: {target=20, too_hot=22.5}
+	return setpoint_error > 2 // example: {target=20, too_hot=22}
 }
 
 // UpdateSystemMode handles auto-changeover for heat-off-cool modes
