@@ -117,15 +117,15 @@ func mqtt_message_handler(topic string, payload []byte) bool {
 		// new sensor detected, need to create a new
 		// thermostat setpoint contoller to go with it
 		tstat = Thermostat{
-			ID:       id,
-			Name:     name,
-			Setpoint: 20, // default
+			ID:           id,
+			Name:         name,
+			HeatSetpoint: 20, // default
+			CoolSetpoint: 24, // default
 		}
 		log.Printf("[mqtt] new thermostat %s\r\n", id)
 	}
 	tstat.State = new_state
 	tstat.State.Time = time.Now()
-	tstat.SetpointErr = new_state.Temperature - tstat.Setpoint
 
 	log.Printf("[mqtt] %s --> %s\r\n", id, string(payload))
 	go async_process_thermostat_update(tstat)

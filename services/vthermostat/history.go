@@ -8,7 +8,6 @@ func update_tstat_history(tstat Thermostat) {
 		Temperature: tstat.State.Temperature,
 		Humidity:    tstat.State.Humidity,
 		DewPoint:    tstat.State.DewPoint,
-		SetpointErr: tstat.SetpointErr,
 		Time:        tstat.State.Time,
 	}
 	history, lbk := global.history.Take()

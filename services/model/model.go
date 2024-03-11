@@ -12,9 +12,9 @@ type SensorData struct {
 }
 
 type Thermostat struct {
-	ID          string
-	Name        string
-	State       SensorData
-	Setpoint    float32
-	SetpointErr float32
+	ID           string
+	Name         string
+	State        SensorData
+	HeatSetpoint float32
+	CoolSetpoint float32
 }

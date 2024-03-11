@@ -76,6 +76,7 @@
         }
 
         section {
+            text-align: left;
             border-radius: 1rem;
             background-color: white;
             padding: 1rem;
@@ -101,22 +102,34 @@
 
             <div id="id-{{ $key }}-title" style="display: flex; padding-bottom: 1rem;">
                 <h2 style="margin-block: auto;">{{ $thermostat.Name }}</h2>
-                <button
-                    hx-get="/thermostat/{{ $thermostat.ID }}/name-change-form"
-                    hx-target="#id-{{ $key }}-title"
+                <button hx-get="/thermostat/{{ $thermostat.ID }}/name-change-form" hx-target="#id-{{ $key }}-title"
                     hx-swap="outerHTML">
                     🖉</button>
             </div>
 
-            <label for="setpoint" style="display: flex; flex-direction: column;">
-                <p style="font-size: large; margin: 0; padding-bottom: 4px; color: rgba(0, 0, 0, 0.75);">Setpoint</p>
-                <input type="number" id="id-{{ $key }}-setpoint" name="setpoint"
-                    style="text-align: center; margin-bottom: 0.5em;"
-                    value="{{ $thermostat.Setpoint }}" step="0.5"
-                    hx-put="/thermostat/{{ $key }}/setpoint"
-                    hx-trigger="change"
-                    min="0" max="86">
-            </label>
+            <form>
+                <label for="setpoint" style="display: flex; flex-direction: column;">
+                    <p style="font-size: large; margin: 0; padding-bottom: 4px; color: rgba(0, 0, 0, 0.75);">Heating
+                        Setpoint
+                    </p>
+                    <input type="number" id="id-{{ $key }}-setpoint" name="setpoint"
+                        style="text-align: center; margin-bottom: 0.5em;" value="{{ $thermostat.HeatSetpoint }}"
+                        step="0.5" hx-put="/thermostat/{{ $key }}/setpoint" hx-trigger="change" min="0" max="86">
+                    <input type="hidden" name="mode" value="heat">
+                </label>
+            </form>
+
+            <form style="padding-top: 1em;">
+                <label for="setpoint" style="display: flex; flex-direction: column;">
+                    <p style="font-size: large; margin: 0; padding-bottom: 4px; color: rgba(0, 0, 0, 0.75);">Cooling
+                        Setpoint
+                    </p>
+                    <input type="number" id="id-{{ $key }}-setpoint" name="setpoint"
+                        style="text-align: center; margin-bottom: 0.5em;" value="{{ $thermostat.CoolSetpoint }}"
+                        step="0.5" hx-put="/thermostat/{{ $key }}/setpoint" hx-trigger="change" min="0" max="86">
+                    <input type="hidden" name="mode" value="cool">
+                </label>
+            </form>
 
             <div style="display: flex;">
                 <div class="measurement primary">

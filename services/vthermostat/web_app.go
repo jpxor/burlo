@@ -163,6 +163,12 @@ func PutThermostatSetpoint(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	mode_str := r.Form.Get("mode")
+	if len(mode_str) == 0 || !(mode_str == "heat" || mode_str == "cool") {
+		http.Error(w, "missing request param 'mode (heat or cool)'", http.StatusBadRequest)
+		return
+	}
+
 	setpoint, err := strconv.ParseFloat(setpoint_str, 32)
 	if err != nil {
 		http.Error(w, "failed to parse request", http.StatusBadRequest)
@@ -181,7 +187,11 @@ func PutThermostatSetpoint(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "invalid setpoint, must be within range [0-30] degrees Celcius", http.StatusBadRequest)
 		return
 	}
-	tstat.Setpoint = float32(setpoint)
+	if mode_str == "heat" {
+		tstat.HeatSetpoint = float32(setpoint)
+	} else {
+		tstat.CoolSetpoint = float32(setpoint)
+	}
 	thermostats[id] = tstat
 	w.WriteHeader(http.StatusOK)
 }
