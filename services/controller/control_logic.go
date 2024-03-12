@@ -20,6 +20,36 @@ type SystemMode struct {
 	LastUpdate time.Time
 }
 
+type CirculatorState struct {
+	Running    bool
+	LastUpdate time.Time
+}
+
+type ControlState struct {
+	CirculatorState
+	SystemMode
+	TargetSupplyTemperature float32
+}
+
+type IndoorConditions struct {
+	SetpointError    float32
+	DewPoint         float32
+	IndoorAirTempMax float32
+}
+
+type OutdoorConditions struct {
+	OutdoorAirTemp   float32
+	OutdoorAir24hLow float32
+	OutdoorAir24hAvg float32
+}
+
+type ControlConditions struct {
+	IndoorConditions
+	OutdoorConditions
+}
+
+var manual_override Mode = Auto
+
 // configs
 var min_cooling_supply_temperature float32 = 12
 var comfort_cooling_supply_temperature float32 = 18
@@ -30,27 +60,18 @@ var design_indoor_air_temperature float32 = 20
 var zero_load_outdoor_air_temperature float32 = 16
 var cooling_mode_cutoff float32 = 20
 
-var manual_override Mode = Auto
+// UpdateControls makes decisions based on outdoor temperature and humidity.
+func UpdateControls(state ControlState, conditions ControlConditions) ControlState {
 
-type ControlConditions struct {
-	SetpointError    float32
-	DewPoint         float32
-	IndoorAirTempMax float32
-	OutdoorAirTemp   float32
-	OutdoorAir24hLow float32
-	OutdoorAir24hAvg float32
-}
+	state.SystemMode = UpdateSystemMode(state, conditions)
+	state.TargetSupplyTemperature = UpdateSupplyWaterTemperature(state, conditions)
+	state.CirculatorState = UpdateCirculatorState(state, conditions)
 
-// DecisionLogic makes decisions based on outdoor temperature and humidity.
-func DecisionLogic(mode SystemMode, conditions ControlConditions) {
+	fmt.Printf("System Mode: %+v\n", state.SystemMode)
+	fmt.Printf("Supply Water Temperature: %.2f°C\n", state.TargetSupplyTemperature)
+	fmt.Printf("Circulator Status: %v\n", state.CirculatorState)
 
-	mode = UpdateSystemMode(mode, conditions)
-	supplyTemp := UpdateSupplyWaterTemperature(mode, conditions)
-	circulatorState := UpdateCirculatorState(mode, supplyTemp, conditions)
-
-	fmt.Printf("System Mode: %+v\n", mode)
-	fmt.Printf("Supply Water Temperature: %.2f°C\n", supplyTemp)
-	fmt.Printf("Circulator Status: %v\n", circulatorState)
+	return state
 }
 
 // RoomTooCold is a helper that returns true if the
@@ -66,19 +87,19 @@ func RoomTooHot(setpoint_error float32) bool {
 }
 
 // UpdateSystemMode handles auto-changeover for heat-off-cool modes
-func UpdateSystemMode(mode SystemMode, conditions ControlConditions) SystemMode {
+func UpdateSystemMode(state ControlState, conditions ControlConditions) SystemMode {
 
 	// the web interface allows mannually setting 'heat', 'cool', 'off'
-	if mode.Mode == manual_override {
-		return mode
+	if state.Mode == manual_override {
+		return state.SystemMode
 	}
 
 	// debounce, don't let the mode switch too often
-	if time.Since(mode.LastUpdate) < 24*time.Hour {
-		return mode
+	if time.Since(state.SystemMode.LastUpdate) < 24*time.Hour {
+		return state.SystemMode
 	}
 
-	switch mode.Mode {
+	switch state.Mode {
 	case Heat:
 		// decide when to turn off - the end of heating season,
 		// can be conservative since there is nearly no cost to
@@ -119,12 +140,12 @@ func UpdateSystemMode(mode SystemMode, conditions ControlConditions) SystemMode 
 	}
 
 	// no change
-	return mode
+	return state.SystemMode
 }
 
 // UpdateSupplyWaterTemperature calculates the ideal supply water temperature (Celsius)
-func UpdateSupplyWaterTemperature(mode SystemMode, conditions ControlConditions) float32 {
-	switch mode.Mode {
+func UpdateSupplyWaterTemperature(state ControlState, conditions ControlConditions) float32 {
+	switch state.Mode {
 	case Heat:
 		// linear relationship from no-load to design-load
 		// re: Heating Load Line Chart
@@ -155,24 +176,56 @@ func UpdateSupplyWaterTemperature(mode SystemMode, conditions ControlConditions)
 }
 
 // UpdateCirculatorState determines whether the circulator should run.
-func UpdateCirculatorState(mode SystemMode, supply_water_temperature float32, conditions ControlConditions) bool {
-	switch mode.Mode {
+func UpdateCirculatorState(state ControlState, conditions ControlConditions) CirculatorState {
+
+	// debounce, don't let the circulator switch too often
+	if state.CirculatorState.Running {
+		// run for at least 15 mins
+		if time.Since(state.CirculatorState.LastUpdate) < 15*time.Minute {
+			return state.CirculatorState
+		}
+	} else {
+		// stay off for at least 1 min
+		if time.Since(state.CirculatorState.LastUpdate) < 1*time.Minute {
+			return state.CirculatorState
+		}
+	}
+
+	switch state.Mode {
 	case Heat:
 		if RoomTooHot(conditions.SetpointError) ||
-			supply_water_temperature < conditions.IndoorAirTempMax {
-			return false
+			state.TargetSupplyTemperature < conditions.IndoorAirTempMax {
+			return CirculatorState{
+				Running:    false,
+				LastUpdate: time.Now(),
+			}
 		}
 
 	case Cool:
 		if RoomTooCold(conditions.SetpointError) ||
-			supply_water_temperature > conditions.IndoorAirTempMax {
-			return false
+			state.TargetSupplyTemperature > conditions.IndoorAirTempMax {
+			return CirculatorState{
+				Running:    false,
+				LastUpdate: time.Now(),
+			}
 		}
 
 	case Off:
-		return false
+		return CirculatorState{
+			Running:    false,
+			LastUpdate: time.Now(),
+		}
 	}
-	return true
+
+	// no change if already running
+	if state.CirculatorState.Running {
+		return state.CirculatorState
+	}
+
+	return CirculatorState{
+		Running:    true,
+		LastUpdate: time.Now(),
+	}
 }
 
 func NightCoolingBoost() bool {
@@ -199,15 +252,23 @@ func NightCoolingBoost() bool {
 func sample() {
 	// Example usage:
 	conditions := ControlConditions{
-		SetpointError:    0,
-		DewPoint:         12,
-		OutdoorAirTemp:   -15,
-		OutdoorAir24hAvg: -10,
-		OutdoorAir24hLow: -20,
-		IndoorAirTempMax: 21,
+		IndoorConditions{
+			SetpointError:    0,
+			DewPoint:         12,
+			IndoorAirTempMax: 21,
+		},
+		OutdoorConditions{
+			OutdoorAirTemp:   -15,
+			OutdoorAir24hAvg: -10,
+			OutdoorAir24hLow: -20,
+		},
 	}
 	mode := SystemMode{
 		Mode: Heat,
 	}
-	DecisionLogic(mode, conditions)
+
+	constrolState := ControlState{
+		SystemMode: mode,
+	}
+	UpdateControls(constrolState, conditions)
 }

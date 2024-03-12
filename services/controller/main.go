@@ -2,6 +2,7 @@ package main
 
 import (
 	"burlo/model"
+	"burlo/pkg/lockbox"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -14,11 +15,25 @@ import (
 	"time"
 )
 
+type Thermostat model.Thermostat
+type SensorData model.SensorData
+
+type system_state struct {
+	ControlState
+	ControlConditions
+	Thermostats map[string]Thermostat
+}
+
 type global_vars struct {
+	state     *lockbox.LockBox[system_state]
 	waitgroup sync.WaitGroup
 }
 
-var global = global_vars{}
+var global = global_vars{
+	state: lockbox.New(system_state{
+		Thermostats: make(map[string]Thermostat),
+	}),
+}
 
 func main() {
 	log.Println("Running controller service")
@@ -51,7 +66,7 @@ func controller_http_server() {
 	}()
 
 	mux.HandleFunc("GET /controller/state", GetControllerState())
-	mux.HandleFunc("POST /controller/update", PostControllerUpdate())
+	mux.HandleFunc("POST /controller/thermostat/update", PostThermostatUpdate())
 	mux.HandleFunc("/", CatchAll())
 
 	log.Println("[ctrl_server] started", addr)
@@ -72,26 +87,54 @@ func CatchAll() http.HandlerFunc {
 
 func GetControllerState() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte("ACK"))
+		state, lbk := global.state.Take()
+		defer global.state.Release(lbk)
+		w.Write([]byte(fmt.Sprintln("%+v", state.ControlState)))
 	}
 }
 
-type ControllerUpdate struct {
-}
-
-func PostControllerUpdate() http.HandlerFunc {
+func PostThermostatUpdate() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		var data model.Thermostat
-		err := json.NewDecoder(r.Body).Decode(&data)
+		var tstat Thermostat
+		err := json.NewDecoder(r.Body).Decode(&tstat)
 		if err != nil {
 			http.Error(w, "invalid request", http.StatusBadRequest)
 			return
 		}
-		controller_update(data)
-		w.Write([]byte(fmt.Sprintf("%+v\r\n", data)))
+		update_indoor_conditions(tstat)
+		w.Write([]byte("ACK"))
 	}
 }
 
-func controller_update(updated model.Thermostat) {
-	log.Println(updated)
+func update_indoor_conditions(tstat Thermostat) {
+	state, lbk := global.state.Take()
+
+	state.Thermostats[tstat.ID] = tstat
+
+	var idc IndoorConditions
+	for _, tstat := range state.Thermostats {
+		idc.IndoorAirTempMax = max(idc.IndoorAirTempMax, tstat.State.Temperature)
+		idc.DewPoint = max(idc.DewPoint, tstat.State.DewPoint)
+		switch state.Mode {
+		case Heat:
+			idc.SetpointError += tstat.State.Temperature - tstat.HeatSetpoint
+		case Cool:
+			idc.SetpointError += tstat.State.Temperature - tstat.CoolSetpoint
+		}
+	}
+
+	// average setpoint error
+	idc.SetpointError /= float32(len(state.Thermostats))
+	state.IndoorConditions = idc
+
+	state.ControlState = UpdateControls(state.ControlState, ControlConditions{
+		state.IndoorConditions,
+		state.OutdoorConditions,
+	})
+	apply(state.ControlState)
+	global.state.Put(state, lbk)
+}
+
+func apply(output ControlState) {
+	log.Println("apply:", output)
 }
