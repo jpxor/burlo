@@ -26,33 +26,27 @@ var comfort_cooling_supply_temperature float32 = 18
 var max_supply_temperature float32 = 40.55
 var design_supply_temperature float32 = 40.55
 var design_outdoor_air_temperature float32 = -25
-var target_indoor_air_temperature float32 = 20
+var design_indoor_air_temperature float32 = 20
 var zero_load_outdoor_air_temperature float32 = 16
-var manual_override Mode = Auto
-var cooling_setpoint float32 = 24
+var cooling_mode_cutoff float32 = 20
 
-// measurements
-var outdoor_air_temp float32           // updated every 15 mins
-var outdoor_air_temp_trailing float32  // updated every 15 mins, average over the previous 24hrs
-var max_indoor_air_temperature float32 // updated in realtime as temperatues change
-var avg_setpoint_err float32           // updated in realtime as temperatues change
-var dewPoint float32                   // updated in realtime as temperatures and humidity change
-var min_outdoor_air_temp float32       // past 24hr & forcasted next 2 days
+var manual_override Mode = Auto
+
+type ControlConditions struct {
+	SetpointError    float32
+	DewPoint         float32
+	IndoorAirTempMax float32
+	OutdoorAirTemp   float32
+	OutdoorAir24hLow float32
+	OutdoorAir24hAvg float32
+}
 
 // DecisionLogic makes decisions based on outdoor temperature and humidity.
-func DecisionLogic() {
+func DecisionLogic(mode SystemMode, conditions ControlConditions) {
 
-	mode := SystemMode{
-		Mode: Off,
-	}
-
-	mode = UpdateSystemMode(mode,
-		outdoor_air_temp_trailing,
-		outdoor_air_temp,
-		avg_setpoint_err)
-
-	supplyTemp := UpdateSupplyWaterTemperature(mode, outdoor_air_temp, dewPoint)
-	circulatorState := UpdateCirculatorState(mode, supplyTemp, avg_setpoint_err)
+	mode = UpdateSystemMode(mode, conditions)
+	supplyTemp := UpdateSupplyWaterTemperature(mode, conditions)
+	circulatorState := UpdateCirculatorState(mode, supplyTemp, conditions)
 
 	fmt.Printf("System Mode: %+v\n", mode)
 	fmt.Printf("Supply Water Temperature: %.2f°C\n", supplyTemp)
@@ -68,17 +62,18 @@ func RoomTooCold(setpoint_error float32) bool {
 // RoomTooHot is a helper that returns true if the
 // room temperature rises above the target (with some margin)
 func RoomTooHot(setpoint_error float32) bool {
-	return setpoint_error > 2 // example: {target=20, too_hot=22}
+	return setpoint_error >= 1 // example: {target=20, too_hot=21}
 }
 
 // UpdateSystemMode handles auto-changeover for heat-off-cool modes
-func UpdateSystemMode(mode SystemMode, avg_outdoor_air_temp, outdoor_air_temp, avg_setpoint_err float32) SystemMode {
-	if manual_override != Auto {
-		return SystemMode{
-			Mode: manual_override,
-		}
+func UpdateSystemMode(mode SystemMode, conditions ControlConditions) SystemMode {
+
+	// the web interface allows mannually setting 'heat', 'cool', 'off'
+	if mode.Mode == manual_override {
+		return mode
 	}
 
+	// debounce, don't let the mode switch too often
 	if time.Since(mode.LastUpdate) < 24*time.Hour {
 		return mode
 	}
@@ -89,7 +84,7 @@ func UpdateSystemMode(mode SystemMode, avg_outdoor_air_temp, outdoor_air_temp, a
 		// can be conservative since there is nearly no cost to
 		// maintaining heating mode while not heating (keeps buffer
 		// near room temperature when its warm out)
-		if min_outdoor_air_temp >= zero_load_outdoor_air_temperature {
+		if conditions.OutdoorAir24hLow > zero_load_outdoor_air_temperature {
 			return SystemMode{
 				Off, time.Now(),
 			}
@@ -97,7 +92,7 @@ func UpdateSystemMode(mode SystemMode, avg_outdoor_air_temp, outdoor_air_temp, a
 
 	case Cool:
 		// decide when to turn off - the end of cooling season,
-		if avg_outdoor_air_temp <= target_indoor_air_temperature {
+		if conditions.OutdoorAir24hAvg < cooling_mode_cutoff {
 			return SystemMode{
 				Off, time.Now(),
 			}
@@ -107,14 +102,16 @@ func UpdateSystemMode(mode SystemMode, avg_outdoor_air_temp, outdoor_air_temp, a
 		// if the average outdoor temperature is higher than our cooling setpoint, then
 		// the room temperatures will start to rise above that setpoint, which triggers
 		// cooling mode
-		if (avg_outdoor_air_temp > cooling_setpoint) && RoomTooHot(avg_setpoint_err) {
+		if (conditions.OutdoorAir24hAvg > design_indoor_air_temperature) &&
+			RoomTooHot(conditions.SetpointError) {
 			return SystemMode{
 				Cool, time.Now(),
 			}
 		}
 		// if the average outdoor temp is less than the zero-load, then room temperatures will
 		// start to drop until they become too cold, which triggers heating mode
-		if (avg_outdoor_air_temp < zero_load_outdoor_air_temperature) && RoomTooCold(avg_setpoint_err) {
+		if (conditions.OutdoorAir24hAvg < zero_load_outdoor_air_temperature) &&
+			RoomTooCold(conditions.SetpointError) {
 			return SystemMode{
 				Heat, time.Now(),
 			}
@@ -126,16 +123,16 @@ func UpdateSystemMode(mode SystemMode, avg_outdoor_air_temp, outdoor_air_temp, a
 }
 
 // UpdateSupplyWaterTemperature calculates the ideal supply water temperature (Celsius)
-func UpdateSupplyWaterTemperature(mode SystemMode, outdoor_air_temp, dewPoint float32) float32 {
+func UpdateSupplyWaterTemperature(mode SystemMode, conditions ControlConditions) float32 {
 	switch mode.Mode {
 	case Heat:
 		// linear relationship from no-load to design-load
 		// re: Heating Load Line Chart
-		min_heating_supply_temperature := target_indoor_air_temperature
+		min_heating_supply_temperature := design_indoor_air_temperature
 		m := (design_supply_temperature - min_heating_supply_temperature) /
 			(design_outdoor_air_temperature - zero_load_outdoor_air_temperature)
 		b := design_supply_temperature - (m * design_outdoor_air_temperature)
-		t := outdoor_air_temp
+		t := conditions.OutdoorAirTemp
 		target_supply_temperature := m*t + b
 		return min(max_supply_temperature, max(min_heating_supply_temperature,
 			target_supply_temperature))
@@ -148,27 +145,27 @@ func UpdateSupplyWaterTemperature(mode SystemMode, outdoor_air_temp, dewPoint fl
 		if NightCoolingBoost() {
 			target_supply_temperature = min_cooling_supply_temperature
 		}
-		return max(dewPoint+1.5, target_supply_temperature)
+		return max(conditions.DewPoint+1.5, target_supply_temperature)
 
 	default:
 		// No supply water needed in Off mode, but return
 		// a sane default anyway
-		return target_indoor_air_temperature
+		return design_indoor_air_temperature
 	}
 }
 
 // UpdateCirculatorState determines whether the circulator should run.
-func UpdateCirculatorState(mode SystemMode, supply_water_temperature, avg_setpoint_err float32) bool {
+func UpdateCirculatorState(mode SystemMode, supply_water_temperature float32, conditions ControlConditions) bool {
 	switch mode.Mode {
 	case Heat:
-		if RoomTooHot(avg_setpoint_err) ||
-			supply_water_temperature < max_indoor_air_temperature {
+		if RoomTooHot(conditions.SetpointError) ||
+			supply_water_temperature < conditions.IndoorAirTempMax {
 			return false
 		}
 
 	case Cool:
-		if RoomTooCold(avg_setpoint_err) ||
-			supply_water_temperature > max_indoor_air_temperature {
+		if RoomTooCold(conditions.SetpointError) ||
+			supply_water_temperature > conditions.IndoorAirTempMax {
 			return false
 		}
 
@@ -201,10 +198,16 @@ func NightCoolingBoost() bool {
 
 func sample() {
 	// Example usage:
-	outdoor_air_temp = -35 // Set the outdoor temperature
-	outdoor_air_temp_trailing = -10
-	avg_setpoint_err = -1.0
-	dewPoint = 45.0 // Set the dew point
-
-	DecisionLogic()
+	conditions := ControlConditions{
+		SetpointError:    0,
+		DewPoint:         12,
+		OutdoorAirTemp:   -15,
+		OutdoorAir24hAvg: -10,
+		OutdoorAir24hLow: -20,
+		IndoorAirTempMax: 21,
+	}
+	mode := SystemMode{
+		Mode: Heat,
+	}
+	DecisionLogic(mode, conditions)
 }
