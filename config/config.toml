@@ -1,0 +1,67 @@
+units = "celsius"
+
+[services]
+# by default, all services run on the same host
+controller   = "http://localhost:4005"
+vthermostats = "http://localhost:4004"
+mqtt_server  = "http://localhost:4003"
+actuators    = "http://localhost:4002"
+
+[weather]
+# current weather conditions and temperature
+# forcasts are made using location
+latitude = "45.41117"
+longitude = "-75.69812"
+
+# hydronic cooling settings
+[controller.cooling]
+enabled = true
+
+# sends extra chilled water that would be too
+# cold on the toes when using hydronic floors
+overnight_boost_enabled = true
+overnight_boost_temperature = 12
+
+# normal temperature when cooling, keep
+# it between 18-20C for comfort when
+# using hydronic floors
+cooling_supply_temperature = 18
+
+# cooling mode is activated when average outdoor
+# air temperature rises above this point
+cooling_trigger_temperature = 24
+
+# hydronic heating settings
+[controller.heating]
+
+# the maximum temperature allowed in the system,
+# set this to protect floors and maintain comfortable
+# levels of heat when using hydronic floors
+max_supply_temperature = 40.55
+
+# defines the weather compensation curve,
+# heating mode is activated when minimum
+# outdoor air temperature drops below the
+# zero_load point
+design_load_outdoor_air_temperature = -25
+design_load_supply_temperature = 40.55
+zero_load_outdoor_air_temperature = 16
+zero_load_supply_temperature = 20
+
+
+[thermostats]
+# there is only a single zone, so only the setpoint
+# on the primary thermostat is used as feedback for
+# room temperature. The set value is the thermostat
+# ID, which is also the path used for its mqtt
+primary = "01"
+
+
+[actuators]
+circulator = {hubport = 0, channel = 0, type="digital_output"}
+
+
+[mqtt]
+prefix = "/thermostats"
+user = "hvac"
+pass = "hvac_pass"
