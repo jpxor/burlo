@@ -29,8 +29,8 @@ func notify_controller(tstat Thermostat) {
 	payload, err := json.Marshal(tstat)
 	if err != nil {
 		log.Println("[notify_controller] failed to encode thermostat data:", err)
+		return
 	}
-
 	req, err := http.NewRequest("POST", controller_upate_url, bytes.NewBuffer(payload))
 	if err != nil {
 		log.Println("[notify_controller] failed to create request:", err)
