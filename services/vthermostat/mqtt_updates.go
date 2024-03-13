@@ -1,7 +1,7 @@
 package main
 
 import (
-	"burlo/model"
+	"burlo/services/model"
 	"context"
 	"encoding/json"
 	"fmt"

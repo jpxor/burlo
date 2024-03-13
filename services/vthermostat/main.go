@@ -1,8 +1,8 @@
 package main
 
 import (
-	"burlo/model"
 	"burlo/pkg/lockbox"
+	"burlo/services/model"
 	"log"
 	"sync"
 )
