@@ -18,12 +18,6 @@ import (
 type Thermostat model.Thermostat
 type SensorData model.SensorData
 
-type system_state struct {
-	ControlState
-	ControlConditions
-	Thermostats map[string]Thermostat
-}
-
 type global_vars struct {
 	state     *lockbox.LockBox[system_state]
 	waitgroup sync.WaitGroup
@@ -89,7 +83,9 @@ func GetControllerState() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		state, lbk := global.state.Take()
 		defer global.state.Release(lbk)
-		w.Write([]byte(fmt.Sprintln("%+v", state.ControlState)))
+		w.Write([]byte(fmt.Sprintf("%+v\r\n", state.ControlState)))
+		w.Write([]byte(fmt.Sprintf("%+v\r\n", state.ControlConditions)))
+		w.Write([]byte(fmt.Sprintf("%+v\r\n", state.Thermostats)))
 	}
 }
 

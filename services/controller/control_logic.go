@@ -5,49 +5,6 @@ import (
 	"time"
 )
 
-type Mode int
-
-const (
-	Off Mode = iota
-	On
-	Heat
-	Cool
-	Auto
-)
-
-type SystemMode struct {
-	Mode
-	LastUpdate time.Time
-}
-
-type CirculatorState struct {
-	Running    bool
-	LastUpdate time.Time
-}
-
-type ControlState struct {
-	CirculatorState
-	SystemMode
-	TargetSupplyTemperature float32
-}
-
-type IndoorConditions struct {
-	SetpointError    float32
-	DewPoint         float32
-	IndoorAirTempMax float32
-}
-
-type OutdoorConditions struct {
-	OutdoorAirTemp   float32
-	OutdoorAir24hLow float32
-	OutdoorAir24hAvg float32
-}
-
-type ControlConditions struct {
-	IndoorConditions
-	OutdoorConditions
-}
-
 var manual_override Mode = Auto
 
 // configs
@@ -59,20 +16,6 @@ var design_outdoor_air_temperature float32 = -25
 var design_indoor_air_temperature float32 = 20
 var zero_load_outdoor_air_temperature float32 = 16
 var cooling_mode_cutoff float32 = 20
-
-// UpdateControls makes decisions based on outdoor temperature and humidity.
-func UpdateControls(state ControlState, conditions ControlConditions) ControlState {
-
-	state.SystemMode = UpdateSystemMode(state, conditions)
-	state.TargetSupplyTemperature = UpdateSupplyWaterTemperature(state, conditions)
-	state.CirculatorState = UpdateCirculatorState(state, conditions)
-
-	fmt.Printf("System Mode: %+v\n", state.SystemMode)
-	fmt.Printf("Supply Water Temperature: %.2f°C\n", state.TargetSupplyTemperature)
-	fmt.Printf("Circulator Status: %v\n", state.CirculatorState)
-
-	return state
-}
 
 // RoomTooCold is a helper that returns true if the
 // room temperature falls below the target (with some margin)
@@ -86,13 +29,16 @@ func RoomTooHot(setpoint_error float32) bool {
 	return setpoint_error >= 1 // example: {target=20, too_hot=21}
 }
 
-// UpdateSystemMode handles auto-changeover for heat-off-cool modes
-func UpdateSystemMode(state ControlState, conditions ControlConditions) SystemMode {
+// UpdateControls
+func UpdateControls(state ControlState, conditions ControlConditions) ControlState {
+	state.SystemMode = updateSystemMode(state, conditions)
+	state.SupplyTemperature = updateSupplyWaterTemperature(state, conditions)
+	state.CirculatorState = updateCirculatorState(state, conditions)
+	return state
+}
 
-	// the web interface allows mannually setting 'heat', 'cool', 'off'
-	if state.Mode == manual_override {
-		return state.SystemMode
-	}
+// updateSystemMode handles auto-changeover for heat-off-cool modes
+func updateSystemMode(state ControlState, conditions ControlConditions) SystemMode {
 
 	// debounce, don't let the mode switch too often
 	if time.Since(state.SystemMode.LastUpdate) < 24*time.Hour {
@@ -112,8 +58,10 @@ func UpdateSystemMode(state ControlState, conditions ControlConditions) SystemMo
 		}
 
 	case Cool:
-		// decide when to turn off - the end of cooling season,
-		if conditions.OutdoorAir24hAvg < cooling_mode_cutoff {
+		// decide when to turn off - don't want this running too
+		// often, so we are aggresive when turning it off
+		if conditions.OutdoorAir24hAvg < cooling_mode_cutoff &&
+			!RoomTooHot(conditions.SetpointError) {
 			return SystemMode{
 				Off, time.Now(),
 			}
@@ -143,8 +91,8 @@ func UpdateSystemMode(state ControlState, conditions ControlConditions) SystemMo
 	return state.SystemMode
 }
 
-// UpdateSupplyWaterTemperature calculates the ideal supply water temperature (Celsius)
-func UpdateSupplyWaterTemperature(state ControlState, conditions ControlConditions) float32 {
+// updateSupplyWaterTemperature calculates the ideal supply water temperature (Celsius)
+func updateSupplyWaterTemperature(state ControlState, conditions ControlConditions) SupplyTemperature {
 	switch state.Mode {
 	case Heat:
 		// linear relationship from no-load to design-load
@@ -155,8 +103,22 @@ func UpdateSupplyWaterTemperature(state ControlState, conditions ControlConditio
 		b := design_supply_temperature - (m * design_outdoor_air_temperature)
 		t := conditions.OutdoorAirTemp
 		target_supply_temperature := m*t + b
-		return min(max_supply_temperature, max(min_heating_supply_temperature,
-			target_supply_temperature))
+
+		// correction with delay
+		if time.Since(state.SupplyTemperature.LastUpdate) > 15*time.Minute {
+			if RoomTooHot(conditions.SetpointError) {
+				state.SupplyTemperature.Correction -= 1
+				state.SupplyTemperature.LastUpdate = time.Now()
+			}
+			if RoomTooCold(conditions.SetpointError) {
+				state.SupplyTemperature.Correction += 1
+				state.SupplyTemperature.LastUpdate = time.Now()
+			}
+		}
+		target_supply_temperature += state.SupplyTemperature.Correction
+
+		state.SupplyTemperature.Target = min(max_supply_temperature, max(min_heating_supply_temperature, target_supply_temperature))
+		return state.SupplyTemperature
 
 	case Cool:
 		// cooling temperature is set to ensure the floors don't
@@ -166,17 +128,19 @@ func UpdateSupplyWaterTemperature(state ControlState, conditions ControlConditio
 		if NightCoolingBoost() {
 			target_supply_temperature = min_cooling_supply_temperature
 		}
-		return max(conditions.DewPoint+1.5, target_supply_temperature)
+		state.SupplyTemperature.Target = max(conditions.DewPoint+1.5, target_supply_temperature)
+		return state.SupplyTemperature
 
 	default:
 		// No supply water needed in Off mode, but return
 		// a sane default anyway
-		return design_indoor_air_temperature
+		state.SupplyTemperature.Target = design_indoor_air_temperature
+		return state.SupplyTemperature
 	}
 }
 
-// UpdateCirculatorState determines whether the circulator should run.
-func UpdateCirculatorState(state ControlState, conditions ControlConditions) CirculatorState {
+// updateCirculatorState determines whether the circulator should run.
+func updateCirculatorState(state ControlState, conditions ControlConditions) CirculatorState {
 
 	// debounce, don't let the circulator switch too often
 	if state.CirculatorState.Running {
@@ -194,7 +158,7 @@ func UpdateCirculatorState(state ControlState, conditions ControlConditions) Cir
 	switch state.Mode {
 	case Heat:
 		if RoomTooHot(conditions.SetpointError) ||
-			state.TargetSupplyTemperature < conditions.IndoorAirTempMax {
+			state.SupplyTemperature.Target < conditions.IndoorAirTempMax {
 			return CirculatorState{
 				Running:    false,
 				LastUpdate: time.Now(),
@@ -203,7 +167,7 @@ func UpdateCirculatorState(state ControlState, conditions ControlConditions) Cir
 
 	case Cool:
 		if RoomTooCold(conditions.SetpointError) ||
-			state.TargetSupplyTemperature > conditions.IndoorAirTempMax {
+			state.SupplyTemperature.Target > conditions.IndoorAirTempMax {
 			return CirculatorState{
 				Running:    false,
 				LastUpdate: time.Now(),
