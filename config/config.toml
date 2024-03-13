@@ -2,10 +2,10 @@ units = "celsius"
 
 [services]
 # by default, all services run on the same host
-controller   = "http://localhost:4005"
-vthermostats = "http://localhost:4004"
-mqtt_server  = "http://localhost:4003"
-actuators    = "http://localhost:4002"
+controller   = "localhost:4005"
+vthermostats = "localhost:4004"
+mqtt_server  = "localhost:4003"
+actuators    = "localhost:4002"
 
 [weather]
 # current weather conditions and temperature
