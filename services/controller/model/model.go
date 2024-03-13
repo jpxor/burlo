@@ -1,6 +1,9 @@
-package main
+package model
 
-import "time"
+import (
+	services "burlo/services/model"
+	"time"
+)
 
 type Mode int
 
@@ -41,9 +44,10 @@ type IndoorConditions struct {
 }
 
 type OutdoorConditions struct {
-	OutdoorAirTemp   float32
-	OutdoorAir24hLow float32
-	OutdoorAir24hAvg float32
+	OutdoorAirTemp    float32
+	OutdoorAir24hLow  float32
+	OutdoorAir24hAvg  float32
+	OutdoorAir24hHigh float32
 }
 
 type ControlConditions struct {
@@ -54,5 +58,5 @@ type ControlConditions struct {
 type system_state struct {
 	ControlState
 	ControlConditions
-	Thermostats map[string]Thermostat
+	Thermostats map[string]services.Thermostat
 }
