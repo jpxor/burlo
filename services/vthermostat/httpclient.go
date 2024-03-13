@@ -13,7 +13,7 @@ import (
 // TODO: move controller info to config
 var host = "localhost"
 var port = "4005"
-var path = "/controller/update"
+var path = "/controller/thermostat/update"
 var controller_upate_url = fmt.Sprintf("http://%s:%s%s", host, port, path)
 
 var httpclient = &http.Client{
