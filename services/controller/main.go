@@ -2,7 +2,8 @@ package main
 
 import (
 	"burlo/pkg/lockbox"
-	"burlo/services/model"
+	. "burlo/services/controller/model"
+	services "burlo/services/model"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -15,17 +16,14 @@ import (
 	"time"
 )
 
-type Thermostat model.Thermostat
-type SensorData model.SensorData
-
 type global_vars struct {
-	state     *lockbox.LockBox[system_state]
+	state     *lockbox.LockBox[SystemState]
 	waitgroup sync.WaitGroup
 }
 
 var global = global_vars{
-	state: lockbox.New(system_state{
-		Thermostats: make(map[string]Thermostat),
+	state: lockbox.New(SystemState{
+		Thermostats: make(map[string]services.Thermostat),
 	}),
 }
 
@@ -61,6 +59,7 @@ func controller_http_server() {
 
 	mux.HandleFunc("GET /controller/state", GetControllerState())
 	mux.HandleFunc("POST /controller/thermostat/update", PostThermostatUpdate())
+	mux.HandleFunc("POST /controller/weather/update", PostWeatherUpdate())
 	mux.HandleFunc("/", CatchAll())
 
 	log.Println("[ctrl_server] started", addr)
@@ -91,7 +90,7 @@ func GetControllerState() http.HandlerFunc {
 
 func PostThermostatUpdate() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		var tstat Thermostat
+		var tstat services.Thermostat
 		err := json.NewDecoder(r.Body).Decode(&tstat)
 		if err != nil {
 			http.Error(w, "invalid request", http.StatusBadRequest)
@@ -102,7 +101,24 @@ func PostThermostatUpdate() http.HandlerFunc {
 	}
 }
 
-func update_indoor_conditions(tstat Thermostat) {
+func PostWeatherUpdate() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		var conditions OutdoorConditions
+		err := json.NewDecoder(r.Body).Decode(&conditions)
+		if err != nil {
+			http.Error(w, "invalid request", http.StatusBadRequest)
+			return
+		}
+		update_outdoor_conditions(conditions)
+		w.Write([]byte("ACK"))
+	}
+}
+
+func update_outdoor_conditions(conditions OutdoorConditions) {
+	log.Println(conditions)
+}
+
+func update_indoor_conditions(tstat services.Thermostat) {
 	state, lbk := global.state.Take()
 
 	state.Thermostats[tstat.ID] = tstat

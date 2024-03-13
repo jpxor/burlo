@@ -1,6 +1,7 @@
 package main
 
 import (
+	. "burlo/services/controller/model"
 	"fmt"
 	"time"
 )

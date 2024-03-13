@@ -23,7 +23,7 @@ var httpclient = &http.Client{
 var controller_server_url string
 
 func initHttpClient(srvaddr string) {
-	controller_server_url = fmt.Sprintf("http://%s/controller/weather", srvaddr)
+	controller_server_url = fmt.Sprintf("http://%s/controller/weather/update", srvaddr)
 }
 
 func notify_controller(conditions controller.OutdoorConditions) {

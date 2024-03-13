@@ -55,7 +55,7 @@ type ControlConditions struct {
 	OutdoorConditions
 }
 
-type system_state struct {
+type SystemState struct {
 	ControlState
 	ControlConditions
 	Thermostats map[string]services.Thermostat
