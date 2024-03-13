@@ -1,1 +1,0 @@
-{"thermostats": {}, "actuators": [], "sensors": [{"type": "mqtt", "topic": "zigbee/thermostats/01/office", "broker": "192.168.50.193", "port": 1883}, {"type": "mqtt", "topic": "zigbee/thermostats/02/guest", "broker": "192.168.50.193", "port": 1883}]}
