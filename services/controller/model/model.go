@@ -41,6 +41,7 @@ type IndoorConditions struct {
 	SetpointError    float32
 	DewPoint         float32
 	IndoorAirTempMax float32
+	LastUpdate       time.Time
 }
 
 type OutdoorConditions struct {
@@ -48,6 +49,7 @@ type OutdoorConditions struct {
 	OutdoorAir24hLow  float32
 	OutdoorAir24hAvg  float32
 	OutdoorAir24hHigh float32
+	LastUpdate        time.Time
 }
 
 type ControlConditions struct {
