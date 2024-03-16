@@ -34,6 +34,11 @@ func initValue[T any](val T) Value[T] {
 	return Value[T]{val, time.Time{}}
 }
 
+func isInitialized(conditions ControlConditions) bool {
+	return !conditions.IndoorConditions.LastUpdate.IsZero() &&
+		!conditions.OutdoorConditions.LastUpdate.IsZero()
+}
+
 func control_loop(indoorChan chan IndoorConditions, outdoorChan chan OutdoorConditions) {
 
 	system_state := SystemStateV2{
@@ -70,21 +75,15 @@ func control_loop(indoorChan chan IndoorConditions, outdoorChan chan OutdoorCond
 			log.Println("[controller] stopped")
 			return
 		}
+		if !isInitialized(system_conditions) {
+			continue
+		}
 		system_state = update(system_state, system_conditions)
 		applyV2(system_state)
 	}
 }
 
 func update(state SystemStateV2, conditions ControlConditions) SystemStateV2 {
-	// if the indoor or outdoor conditions are not changing, then we don't
-	// need to change the system state. Also guards against changing state
-	// before the conditions have been initialzed
-	if time.Since(conditions.IndoorConditions.LastUpdate) > time.Hour {
-		return state
-	}
-	if time.Since(conditions.OutdoorConditions.LastUpdate) > 6*time.Hour {
-		return state
-	}
 	state = update_mode(state, conditions)
 	state = update_supply_temp(state, conditions)
 	state = update_circulator(state, conditions)
