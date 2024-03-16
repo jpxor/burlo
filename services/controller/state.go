@@ -80,6 +80,8 @@ func control_loop(indoorChan chan IndoorConditions, outdoorChan chan OutdoorCond
 		}
 		system_state = update(system_state, system_conditions)
 		applyV2(system_state)
+
+		update_history(system_state, system_conditions)
 	}
 }
 
