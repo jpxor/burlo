@@ -1,7 +1,6 @@
 package main
 
 import (
-	"burlo/pkg/lockbox"
 	. "burlo/services/controller/model"
 	services "burlo/services/model"
 	"context"
@@ -17,14 +16,29 @@ import (
 )
 
 type global_vars struct {
-	state     *lockbox.LockBox[SystemState]
-	waitgroup sync.WaitGroup
+	waitgroup   sync.WaitGroup
+	mutex       sync.Mutex
+	state       SystemStateV2
+	conditions  ControlConditions
+	thermostats map[string]services.Thermostat
 }
 
 var global = global_vars{
-	state: lockbox.New(SystemState{
-		Thermostats: make(map[string]services.Thermostat),
-	}),
+	state: SystemStateV2{
+		Circulator{
+			initValue(false),
+		},
+		Heatpump{
+			Mode:          initValue("off"),
+			TsTemperature: initValue(float32(20)),
+			TsCorrection:  initValue(float32(0)),
+		},
+	},
+	conditions: ControlConditions{
+		IndoorConditions{},
+		OutdoorConditions{},
+	},
+	thermostats: make(map[string]services.Thermostat),
 }
 
 func main() {
@@ -80,11 +94,11 @@ func CatchAll() http.HandlerFunc {
 
 func GetControllerState() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		state, lbk := global.state.Take()
-		defer global.state.Release(lbk)
-		w.Write([]byte(fmt.Sprintf("%+v\r\n", state.ControlState)))
-		w.Write([]byte(fmt.Sprintf("%+v\r\n", state.ControlConditions)))
-		w.Write([]byte(fmt.Sprintf("%+v\r\n", state.Thermostats)))
+		global.mutex.Lock()
+		defer global.mutex.Unlock()
+		w.Write([]byte(fmt.Sprintf("%+v\r\n", global.state)))
+		w.Write([]byte(fmt.Sprintf("%+v\r\n", global.conditions)))
+		w.Write([]byte(fmt.Sprintf("%+v\r\n", global.thermostats)))
 	}
 }
 
@@ -114,39 +128,35 @@ func PostWeatherUpdate() http.HandlerFunc {
 	}
 }
 
-func update_outdoor_conditions(conditions OutdoorConditions) {
-	log.Println(conditions)
+func update_outdoor_conditions(odc OutdoorConditions) {
+	global.mutex.Lock()
+	defer global.mutex.Unlock()
+
+	global.conditions.OutdoorConditions = odc
+	global.state = system_update(global.state, global.conditions)
 }
 
 func update_indoor_conditions(tstat services.Thermostat) {
-	state, lbk := global.state.Take()
+	global.mutex.Lock()
+	defer global.mutex.Unlock()
 
-	state.Thermostats[tstat.ID] = tstat
+	// update thermostat cache, recalculate
+	// average setpoint error
+	global.thermostats[tstat.ID] = tstat
 
 	var idc IndoorConditions
-	for _, tstat := range state.Thermostats {
+	for _, tstat := range global.thermostats {
 		idc.IndoorAirTempMax = max(idc.IndoorAirTempMax, tstat.State.Temperature)
 		idc.DewPoint = max(idc.DewPoint, tstat.State.DewPoint)
-		switch state.Mode {
-		case Heat:
+		switch global.state.Heatpump.Mode.Value {
+		case "heat":
 			idc.SetpointError += tstat.State.Temperature - tstat.HeatSetpoint
-		case Cool:
+		case "cool":
 			idc.SetpointError += tstat.State.Temperature - tstat.CoolSetpoint
 		}
 	}
+	idc.SetpointError /= float32(len(global.thermostats))
 
-	// average setpoint error
-	idc.SetpointError /= float32(len(state.Thermostats))
-	state.IndoorConditions = idc
-
-	state.ControlState = UpdateControls(state.ControlState, ControlConditions{
-		state.IndoorConditions,
-		state.OutdoorConditions,
-	})
-	apply(state.ControlState)
-	global.state.Put(state, lbk)
-}
-
-func apply(output ControlState) {
-	log.Println("apply:", output)
+	global.conditions.IndoorConditions = idc
+	global.state = system_update(global.state, global.conditions)
 }
