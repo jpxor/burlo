@@ -133,6 +133,7 @@ func update_outdoor_conditions(odc OutdoorConditions) {
 	defer global.mutex.Unlock()
 
 	global.conditions.OutdoorConditions = odc
+	global.conditions.OutdoorConditions.LastUpdate = time.Now()
 	global.state = system_update(global.state, global.conditions)
 }
 
@@ -158,5 +159,6 @@ func update_indoor_conditions(tstat services.Thermostat) {
 	idc.SetpointError /= float32(len(global.thermostats))
 
 	global.conditions.IndoorConditions = idc
+	global.conditions.IndoorConditions.LastUpdate = time.Now()
 	global.state = system_update(global.state, global.conditions)
 }
