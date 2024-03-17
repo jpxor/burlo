@@ -2,6 +2,7 @@ package main
 
 import (
 	. "burlo/services/controller/model"
+	"fmt"
 	"time"
 )
 
@@ -193,4 +194,7 @@ func update_circulator(state SystemStateV2, conditions ControlConditions) System
 
 func applyV2(state SystemStateV2) {
 	//
+	fmt.Printf("%+v\r\n", global.state)
+	fmt.Printf("%+v\r\n", global.conditions)
+	fmt.Printf("%+v\r\n", global.thermostats)
 }
