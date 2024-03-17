@@ -2,7 +2,7 @@ package main
 
 import (
 	. "burlo/services/controller/model"
-	"fmt"
+	"log"
 	"time"
 )
 
@@ -43,6 +43,7 @@ func system_update(state SystemStateV2, conditions ControlConditions) SystemStat
 	if !isInitialized(conditions) {
 		return state
 	}
+	log.Println("[controller] system update")
 	state = update_mode(state, conditions)
 	state = update_supply_temp(state, conditions)
 	state = update_circulator(state, conditions)
@@ -56,6 +57,7 @@ func system_update(state SystemStateV2, conditions ControlConditions) SystemStat
 func update_mode(state SystemStateV2, conditions ControlConditions) SystemStateV2 {
 	// debounce, don't let the mode switch too often
 	if time.Since(state.Heatpump.Mode.LastUpdate) < 24*time.Hour {
+		log.Println("[mode] -- last update was less than 24h ago")
 		return state
 	}
 
@@ -66,6 +68,7 @@ func update_mode(state SystemStateV2, conditions ControlConditions) SystemStateV
 		// maintaining heating mode while not heating (keeps buffer
 		// near room temperature when its warm out)
 		if conditions.OutdoorAir24hLow > zero_load_outdoor_air_temperature {
+			log.Println("[mode] heat-->off: outdoor air above zero load temperature")
 			state.Heatpump.Mode = newValue("off")
 			return state
 		}
@@ -75,29 +78,33 @@ func update_mode(state SystemStateV2, conditions ControlConditions) SystemStateV
 		// often, so we are aggresive when turning it off
 		if conditions.OutdoorAir24hAvg < cooling_mode_cutoff &&
 			!RoomTooHot(conditions.SetpointError) {
+			log.Println("[mode] cool->off: mean outdoor air below cooling trigger temperature")
 			state.Heatpump.Mode = newValue("off")
 			return state
 		}
 
 	case "off":
+		// Note: there is no setpoint when system is off! Don't know if we need
+		// the heating or cooling setpoint at the time setpoint error is calculated
+
 		// if the average outdoor temperature is higher than our cooling setpoint, then
-		// the room temperatures will start to rise above that setpoint, which triggers
-		// cooling mode
-		if (conditions.OutdoorAir24hAvg > design_indoor_air_temperature) && // TODO: use config.CoolingTriggerTemperature
-			RoomTooHot(conditions.SetpointError) {
+		// the room temperatures will start to rise, which triggers cooling mode
+		if conditions.OutdoorAir24hAvg > design_indoor_air_temperature { // TODO: use config.CoolingTriggerTemperature
+			log.Println("[mode] off->cool: mean outdoor air above cooling trigger temperature and room too hot")
 			state.Heatpump.Mode = newValue("cool")
 			return state
 		}
 		// if the average outdoor temp is less than the zero-load, then room temperatures will
-		// start to drop until they become too cold, which triggers heating mode
-		if (conditions.OutdoorAir24hAvg < zero_load_outdoor_air_temperature) &&
-			RoomTooCold(conditions.SetpointError) {
+		// start to drop, which triggers heating mode
+		if conditions.OutdoorAir24hAvg < zero_load_outdoor_air_temperature {
+			log.Println("[mode] off->heat: mean outdoor air below zero load temperature and room too cold")
 			state.Heatpump.Mode = newValue("heat")
 			return state
 		}
 	}
 
 	// no change
+	log.Println("[mode] -- no change, state =", state.Heatpump.Mode.Value)
 	return state
 }
 
@@ -114,19 +121,25 @@ func update_supply_temp(state SystemStateV2, conditions ControlConditions) Syste
 		target_supply_temperature := m*t + b
 
 		// correction with delay
+		if state.Heatpump.TsCorrection.LastUpdate.IsZero() {
+			state.Heatpump.TsCorrection.LastUpdate = time.Now()
+		}
 		if time.Since(state.Heatpump.TsCorrection.LastUpdate) > 15*time.Minute {
 			if RoomTooHot(conditions.SetpointError) {
+				log.Println("[Tsupply-correction] -1: room too hot")
 				state.TsCorrection.Value -= 1
 				state.TsCorrection.LastUpdate = time.Now()
 			}
 			if RoomTooCold(conditions.SetpointError) &&
 				target_supply_temperature < max_supply_temperature {
+				log.Println("[Tsupply-correction] +1: room too cold")
 				state.TsCorrection.Value += 1
 				state.TsCorrection.LastUpdate = time.Now()
 			}
 		}
 		target_supply_temperature += state.TsCorrection.Value
 		state.TsTemperature = newValue(min(max_supply_temperature, max(min_heating_supply_temperature, target_supply_temperature)))
+		log.Println("[Tsupply] heating", state.TsTemperature.Value, "C supply temperature")
 		return state
 
 	case "cool":
@@ -138,12 +151,14 @@ func update_supply_temp(state SystemStateV2, conditions ControlConditions) Syste
 			target_supply_temperature = min_cooling_supply_temperature
 		}
 		state.TsTemperature = newValue(max(conditions.DewPoint+1.5, target_supply_temperature))
+		log.Println("[Tsupply] cooling", state.TsTemperature.Value, "C supply temperature")
 		return state
 
 	default:
 		// No supply water needed in Off mode, but return
 		// a sane default anyway
 		state.TsTemperature = newValue(design_indoor_air_temperature)
+		state.TsCorrection = newValue(float32(0))
 		return state
 	}
 }
@@ -166,6 +181,7 @@ func update_circulator(state SystemStateV2, conditions ControlConditions) System
 	case "heat":
 		if RoomTooHot(conditions.SetpointError) ||
 			state.TsTemperature.Value < conditions.IndoorAirTempMax {
+			log.Println("[cirlculator] off: room too hot or Ts too low")
 			state.Circulator.Active = newValue(false)
 			return state
 		}
@@ -173,6 +189,7 @@ func update_circulator(state SystemStateV2, conditions ControlConditions) System
 	case "cool":
 		if RoomTooCold(conditions.SetpointError) ||
 			state.TsTemperature.Value > conditions.IndoorAirTempMax {
+			log.Println("[cirlculator] off: room too cold or Ts too high")
 			state.Circulator.Active = newValue(false)
 			return state
 		}
@@ -189,12 +206,10 @@ func update_circulator(state SystemStateV2, conditions ControlConditions) System
 
 	// start running if its not
 	state.Circulator.Active = newValue(true)
+	log.Println("[cirlculator] on")
 	return state
 }
 
 func applyV2(state SystemStateV2) {
-	//
-	fmt.Printf("%+v\r\n", global.state)
-	fmt.Printf("%+v\r\n", global.conditions)
-	fmt.Printf("%+v\r\n", global.thermostats)
+	log.Println("[controller] applying state")
 }
