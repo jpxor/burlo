@@ -150,9 +150,9 @@ func update_indoor_conditions(tstat services.Thermostat) {
 		idc.IndoorAirTempMax = max(idc.IndoorAirTempMax, tstat.State.Temperature)
 		idc.DewPoint = max(idc.DewPoint, tstat.State.DewPoint)
 		switch global.state.Heatpump.Mode.Value {
-		case "heat":
+		case HEAT:
 			idc.SetpointError += tstat.State.Temperature - tstat.HeatSetpoint
-		case "cool":
+		case COOL:
 			idc.SetpointError += tstat.State.Temperature - tstat.CoolSetpoint
 		}
 	}
