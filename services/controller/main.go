@@ -29,7 +29,7 @@ var global = global_vars{
 			initValue(false),
 		},
 		Heatpump{
-			Mode:          initValue("off"),
+			Mode:          initValue(HEAT),
 			TsTemperature: initValue(float32(20)),
 			TsCorrection:  initValue(float32(0)),
 		},

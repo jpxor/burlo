@@ -16,7 +16,7 @@ var design_supply_temperature float32 = 40.55
 var design_outdoor_air_temperature float32 = -25
 var design_indoor_air_temperature float32 = 20
 var zero_load_outdoor_air_temperature float32 = 16
-var cooling_mode_cutoff float32 = 20
+var cooling_mode_high_temp_trigger float32 = 28
 
 // RoomTooCold is a helper that returns true if the
 // room temperature falls below the target (with some margin)
