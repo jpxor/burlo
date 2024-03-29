@@ -3,6 +3,7 @@ package main
 import (
 	. "burlo/services/controller/model"
 	"fmt"
+	"log"
 	"time"
 )
 
@@ -49,4 +50,54 @@ func NightCoolingBoost() bool {
 		return now.After(startTime) || now.Before(endTime)
 	}
 	return now.After(startTime) && now.Before(endTime)
+}
+
+func clamp(minv, v, maxv float32) float32 {
+	v = min(v, maxv)
+	v = max(v, minv)
+	return v
+}
+
+type Value[T any] struct {
+	Value      T
+	LastUpdate time.Time
+}
+
+type Circulator struct {
+	Active Value[bool]
+}
+
+type HPMode string
+
+const (
+	HEAT HPMode = "Heat"
+	COOL HPMode = "Cool"
+)
+
+type Heatpump struct {
+	Mode          Value[HPMode]
+	TsTemperature Value[float32]
+	TsCorrection  Value[float32]
+}
+
+type SystemStateV2 struct {
+	Circulator
+	Heatpump
+}
+
+func initValue[T any](val T) Value[T] {
+	return Value[T]{val, time.Time{}}
+}
+
+func newValue[T any](val T) Value[T] {
+	return Value[T]{val, time.Now()}
+}
+
+func isInitialized(conditions ControlConditions) bool {
+	return !conditions.IndoorConditions.LastUpdate.IsZero() &&
+		!conditions.OutdoorConditions.LastUpdate.IsZero()
+}
+
+func applyV2(state SystemStateV2) {
+	log.Println("[controller] applying state")
 }

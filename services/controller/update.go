@@ -2,49 +2,45 @@ package main
 
 import (
 	. "burlo/services/controller/model"
+	services "burlo/services/model"
 	"log"
 	"math"
 	"time"
 )
 
-type Value[T any] struct {
-	Value      T
-	LastUpdate time.Time
+func update_outdoor_conditions(odc OutdoorConditions) {
+	global.mutex.Lock()
+	defer global.mutex.Unlock()
+
+	odc.LastUpdate = time.Now()
+	global.conditions.OutdoorConditions = odc
+	global.state = system_update(global.state, global.conditions)
 }
 
-type Circulator struct {
-	Active Value[bool]
-}
+func update_indoor_conditions(tstat services.Thermostat) {
+	global.mutex.Lock()
+	defer global.mutex.Unlock()
 
-type HPMode string
+	// update thermostat cache, recalculate
+	// average setpoint error
+	global.thermostats[tstat.ID] = tstat
 
-const (
-	HEAT HPMode = "Heat"
-	COOL HPMode = "Cool"
-)
+	var idc IndoorConditions
+	for _, tstat := range global.thermostats {
+		idc.IndoorAirTempMax = max(idc.IndoorAirTempMax, tstat.State.Temperature)
+		idc.DewPoint = max(idc.DewPoint, tstat.State.DewPoint)
+		switch global.state.Heatpump.Mode.Value {
+		case HEAT:
+			idc.SetpointError += tstat.State.Temperature - tstat.HeatSetpoint
+		case COOL:
+			idc.SetpointError += tstat.State.Temperature - tstat.CoolSetpoint
+		}
+	}
+	idc.SetpointError /= float32(len(global.thermostats))
 
-type Heatpump struct {
-	Mode          Value[HPMode]
-	TsTemperature Value[float32]
-	TsCorrection  Value[float32]
-}
-
-type SystemStateV2 struct {
-	Circulator
-	Heatpump
-}
-
-func initValue[T any](val T) Value[T] {
-	return Value[T]{val, time.Time{}}
-}
-
-func newValue[T any](val T) Value[T] {
-	return Value[T]{val, time.Now()}
-}
-
-func isInitialized(conditions ControlConditions) bool {
-	return !conditions.IndoorConditions.LastUpdate.IsZero() &&
-		!conditions.OutdoorConditions.LastUpdate.IsZero()
+	idc.LastUpdate = time.Now()
+	global.conditions.IndoorConditions = idc
+	global.state = system_update(global.state, global.conditions)
 }
 
 func system_update(state SystemStateV2, conditions ControlConditions) SystemStateV2 {
@@ -182,14 +178,4 @@ func update_circulator(state SystemStateV2, conditions ControlConditions) System
 	state.Circulator.Active = newValue(true)
 	log.Println("[cirlculator] on")
 	return state
-}
-
-func applyV2(state SystemStateV2) {
-	log.Println("[controller] applying state")
-}
-
-func clamp(minv, v, maxv float32) float32 {
-	v = min(v, maxv)
-	v = max(v, minv)
-	return v
 }
