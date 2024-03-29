@@ -118,6 +118,10 @@ func update_supply_temp(state SystemStateV2, conditions ControlConditions) Syste
 				state.TsCorrection.Value += 1
 				state.TsCorrection.LastUpdate = time.Now()
 			}
+			if math.Abs(float64(state.TsCorrection.Value)) > 5 {
+				log.Println("[WARN] supply temperature correction too large")
+				state.TsCorrection.Value = clamp(-5, state.TsCorrection.Value, 5)
+			}
 		}
 		target_supply_temperature += state.TsCorrection.Value
 		state.TsTemperature = newValue(min(max_supply_temperature, max(min_heating_supply_temperature, target_supply_temperature)))
