@@ -7,16 +7,16 @@ import (
 	"golang.org/x/exp/constraints"
 )
 
-type Mode int
+type Mode string
 
 const ( // circulator modes
-	ON Mode = iota
-	OFF
+	ON  Mode = "ON"
+	OFF      = "OFF"
 )
 
 const ( // heatpump modes
-	HEAT Mode = iota
-	COOL
+	HEAT Mode = "Heat"
+	COOL      = "Cool"
 )
 
 type Controls struct {
