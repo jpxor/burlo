@@ -3,7 +3,7 @@ package main
 import (
 	"burlo/config"
 	"burlo/pkg/lockbox"
-	"burlo/services/protocols/controller"
+	protocol "burlo/services/protocols"
 	weather "burlo/services/weather/model"
 	"burlo/services/weather/openmateo"
 	"context"
@@ -21,7 +21,7 @@ type WeatherService interface {
 	TemperatureForcast24h() (weather.Forcast, error)
 }
 
-var outdoor_conditions = lockbox.New(controller.OutdoorConditions{})
+var outdoor_conditions = lockbox.New(protocol.OutdoorConditions{})
 var lastForcastUpdate time.Time
 
 func main() {

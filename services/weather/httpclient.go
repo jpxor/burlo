@@ -1,7 +1,7 @@
 package main
 
 import (
-	"burlo/services/protocols/controller"
+	protocol "burlo/services/protocols"
 	"bytes"
 	"encoding/json"
 	"fmt"
@@ -26,7 +26,7 @@ func initHttpClient(srvaddr string) {
 	controller_server_url = fmt.Sprintf("http://%s/controller/weather/update", srvaddr)
 }
 
-func notify_controller(conditions controller.OutdoorConditions) {
+func notify_controller(conditions protocol.OutdoorConditions) {
 	payload, err := json.Marshal(conditions)
 	if err != nil {
 		log.Println("[weather] notify_controller: failed to encode thermostat data:", err)
