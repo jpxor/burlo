@@ -2,23 +2,22 @@ package main
 
 import (
 	"burlo/pkg/lockbox"
-	. "burlo/services/controller/model"
 	"time"
 )
 
 type History struct {
-	SystemStateV2
-	ControlConditions
+	Controls
+	Conditions
 	Time time.Time
 }
 
 var history = lockbox.New([]History{})
 
 // keeps all data points within the last 48 hours
-func update_history(state SystemStateV2, conditions ControlConditions) {
+func update_history(controls Controls, conditions Conditions) {
 	hlist, lbk := history.Take()
 	hlist = append(hlist, History{
-		state, conditions, time.Now(),
+		controls, conditions, time.Now(),
 	})
 	for i, h := range hlist {
 		if time.Since(h.Time) <= 48*time.Hour {

@@ -7,6 +7,24 @@ import (
 	"golang.org/x/exp/constraints"
 )
 
+type Mode int
+
+const ( // circulator modes
+	ON Mode = iota
+	OFF
+)
+
+const ( // heatpump modes
+	HEAT Mode = iota
+	COOL
+)
+
+type Controls struct {
+	Circulator ControlMode[Mode]
+	Heatpump   ControlMode[Mode]
+	SupplyTemp ControlValue[float32]
+}
+
 type ControlValue[T constraints.Ordered] struct {
 	Value      T
 	Min        T
@@ -29,10 +47,6 @@ func (cv *ControlValue[T]) Set(val T) {
 	cv.LastUpdate = time.Now()
 }
 
-func (cv *ControlValue[T]) Get() T {
-	return cv.Value
-}
-
 func (cm *ControlMode[T]) Set(mode T) {
 	assert(slices.Contains(cm.ValidModes, mode))
 	if cm.Mode == mode {
@@ -40,10 +54,6 @@ func (cm *ControlMode[T]) Set(mode T) {
 	}
 	cm.Mode = mode
 	cm.LastUpdate = time.Now()
-}
-
-func (cm *ControlMode[T]) Get() T {
-	return cm.Mode
 }
 
 func assert(pass bool) {

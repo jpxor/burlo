@@ -1,7 +1,6 @@
 package main
 
 import (
-	. "burlo/services/controller/model"
 	services "burlo/services/model"
 	"context"
 	"encoding/json"
@@ -40,13 +39,12 @@ func controller_http_server() {
 	mux.HandleFunc("POST /controller/weather/update", PostWeatherUpdate())
 	mux.HandleFunc("/", CatchAll())
 
-	log.Println("[ctrl_server] started", addr)
-	err := server.ListenAndServe()
+	log.Println("[controller_http_server] started", addr)
+	defer log.Println("[controller_http_server] stopped")
 
-	if err != http.ErrServerClosed {
-		log.Println("[ctrl_server]", err)
+	if err := server.ListenAndServe(); err != http.ErrServerClosed {
+		log.Println("[controller_http_server]", err)
 	}
-	log.Println("[ctrl_server] stopped")
 }
 
 func CatchAll() http.HandlerFunc {
@@ -60,8 +58,9 @@ func GetControllerState() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		global.mutex.Lock()
 		defer global.mutex.Unlock()
-		w.Write([]byte(fmt.Sprintf("%+v\r\n", global.state)))
-		w.Write([]byte(fmt.Sprintf("%+v\r\n", global.conditions)))
+		w.Write([]byte(fmt.Sprintf("%+v\r\n", global.Controls)))
+		w.Write([]byte(fmt.Sprintf("%+v\r\n", global.OutdoorConditions)))
+		w.Write([]byte(fmt.Sprintf("%+v\r\n", global.IndoorConditions)))
 		w.Write([]byte(fmt.Sprintf("%+v\r\n", global.thermostats)))
 	}
 }
