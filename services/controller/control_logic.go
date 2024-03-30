@@ -3,12 +3,8 @@ package main
 import (
 	services "burlo/services/model"
 	. "burlo/services/protocols/controller"
-	"context"
 	"fmt"
 	"log"
-	"os"
-	"os/signal"
-	"syscall"
 	"time"
 )
 
@@ -22,78 +18,13 @@ var design_indoor_air_temperature float32 = 20
 var zero_load_outdoor_air_temperature float32 = 16
 var cooling_mode_high_temp_trigger float32 = 28
 
-var update_signal = make(chan interface{})
-
-func controller_update_service() {
-	defer global.waitgroup.Done()
-
-	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
-	defer stop()
-
-	log.Println("[controller_update_service] started")
-	defer log.Println("[controller_update_service] stopped")
-
-	initControls()
-
-	for {
-		select {
-		case <-update_signal:
-			update_controls()
-
-		case <-ctx.Done():
-			return
-		}
-	}
-}
-
-func initControls() {
-	global.mutex.Lock()
-	defer global.mutex.Unlock()
-
-	global.Controls = Controls{
-		Circulator: ControlMode[Mode]{
-			Mode:       OFF,
-			ValidModes: []Mode{ON, OFF},
-		},
-		Heatpump: ControlMode[Mode]{
-			Mode:       HEAT,
-			ValidModes: []Mode{HEAT, COOL},
-		},
-		SupplyTemp: ControlValue[float32]{
-			Value: design_indoor_air_temperature,
-			Min:   min_cooling_supply_temperature,
-			Max:   max_supply_temperature,
-		},
-	}
-}
-
-func update_controls() {
-	global.mutex.Lock()
-	defer global.mutex.Unlock()
-
-	// can't update controls until both outdoor and
-	// indoor conditions get at least 1 update
-	if global.OutdoorConditions.LastUpdate.IsZero() ||
-		global.IndoorConditions.LastUpdate.IsZero() {
-		return
-	}
-
-	log.Println("[controller] update_controls")
-	update_mode()
-	update_supply_temp()
-	update_circulator()
-
-	applyV2(global.Controls)
-	update_history(global.Controls, global.Conditions)
-}
-
 func update_outdoor_conditions(odc OutdoorConditions) {
 	global.mutex.Lock()
 	defer global.mutex.Unlock()
 
 	odc.LastUpdate = time.Now()
 	global.OutdoorConditions = odc
-	update_signal <- true
+	update_controls_locked()
 }
 
 func update_indoor_conditions(tstat services.Thermostat) {
@@ -119,7 +50,27 @@ func update_indoor_conditions(tstat services.Thermostat) {
 
 	idc.LastUpdate = time.Now()
 	global.IndoorConditions = idc
-	update_signal <- true
+	update_controls_locked()
+}
+
+// global mutex lock must be held when calling
+// these update functions
+func update_controls_locked() {
+
+	// can't update controls until both outdoor and
+	// indoor conditions get at least 1 update
+	if global.OutdoorConditions.LastUpdate.IsZero() ||
+		global.IndoorConditions.LastUpdate.IsZero() {
+		return
+	}
+
+	log.Println("[controller] update_controls")
+	update_mode()
+	update_supply_temp()
+	update_circulator()
+
+	applyV2(global.Controls)
+	update_history(global.Controls, global.Conditions)
 }
 
 func update_mode() {
