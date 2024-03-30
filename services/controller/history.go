@@ -2,6 +2,7 @@ package main
 
 import (
 	"burlo/pkg/lockbox"
+	. "burlo/services/protocols/controller"
 	"time"
 )
 

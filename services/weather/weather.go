@@ -3,7 +3,7 @@ package main
 import (
 	"burlo/config"
 	"burlo/pkg/lockbox"
-	controller "burlo/services/controller/model"
+	"burlo/services/protocols/controller"
 	weather "burlo/services/weather/model"
 	"burlo/services/weather/openmateo"
 	"context"

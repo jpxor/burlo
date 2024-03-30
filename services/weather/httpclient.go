@@ -1,7 +1,7 @@
 package main
 
 import (
-	controller "burlo/services/controller/model"
+	"burlo/services/protocols/controller"
 	"bytes"
 	"encoding/json"
 	"fmt"
