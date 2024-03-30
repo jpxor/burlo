@@ -1,8 +1,6 @@
 package main
 
 import (
-	services "burlo/services/model"
-	. "burlo/services/protocols/controller"
 	"log"
 	"sync"
 )
@@ -12,11 +10,11 @@ type global_vars struct {
 	mutex     sync.Mutex
 	Conditions
 	Controls
-	thermostats map[string]services.Thermostat
+	thermostats map[string]Thermostat
 }
 
 var global = global_vars{
-	thermostats: make(map[string]services.Thermostat),
+	thermostats: make(map[string]Thermostat),
 }
 
 func main() {

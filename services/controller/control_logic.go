@@ -1,8 +1,6 @@
 package main
 
 import (
-	services "burlo/services/model"
-	. "burlo/services/protocols/controller"
 	"fmt"
 	"log"
 	"time"
@@ -22,34 +20,17 @@ func update_outdoor_conditions(odc OutdoorConditions) {
 	global.mutex.Lock()
 	defer global.mutex.Unlock()
 
-	odc.LastUpdate = time.Now()
 	global.OutdoorConditions = odc
 	update_controls_locked()
 }
 
-func update_indoor_conditions(tstat services.Thermostat) {
+func update_indoor_conditions(tstat Thermostat) {
 	global.mutex.Lock()
 	defer global.mutex.Unlock()
 
-	// update thermostat cache, recalculate
-	// average setpoint error
 	global.thermostats[tstat.ID] = tstat
 
-	var idc IndoorConditions
-	for _, tstat := range global.thermostats {
-		idc.IndoorAirTempMax = max(idc.IndoorAirTempMax, tstat.State.Temperature)
-		idc.DewPoint = max(idc.DewPoint, tstat.State.DewPoint)
-		switch global.Heatpump.Mode {
-		case HEAT:
-			idc.SetpointError += tstat.State.Temperature - tstat.HeatSetpoint
-		case COOL:
-			idc.SetpointError += tstat.State.Temperature - tstat.CoolSetpoint
-		}
-	}
-	idc.SetpointError /= float32(len(global.thermostats))
-
-	idc.LastUpdate = time.Now()
-	global.IndoorConditions = idc
+	global.IndoorConditions.From(global.thermostats)
 	update_controls_locked()
 }
 
@@ -169,7 +150,7 @@ func update_circulator() {
 
 	switch global.Heatpump.Mode {
 	case HEAT:
-		if RoomTooHot(global.SetpointError) ||
+		if RoomTooHot(global.HeatSetpointError) ||
 			global.SupplyTemp.Value < global.IndoorAirTempMax {
 			log.Println("[cirlculator] off: room too hot or Ts too low")
 			global.Circulator.Set(OFF)
@@ -177,7 +158,7 @@ func update_circulator() {
 		}
 
 	case COOL:
-		if RoomTooCold(global.SetpointError) ||
+		if RoomTooCold(global.CoolSetpointError) ||
 			global.SupplyTemp.Value > global.IndoorAirTempMax {
 			log.Println("[cirlculator] off: room too cold or Ts too high")
 			global.Circulator.Set(OFF)

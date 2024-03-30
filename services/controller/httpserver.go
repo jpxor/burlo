@@ -1,8 +1,7 @@
 package main
 
 import (
-	services "burlo/services/model"
-	. "burlo/services/protocols/controller"
+	protocol "burlo/services/protocols"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -68,12 +67,15 @@ func GetControllerState() http.HandlerFunc {
 
 func PostThermostatUpdate() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		var tstat services.Thermostat
-		err := json.NewDecoder(r.Body).Decode(&tstat)
+		var data protocol.Thermostat
+		err := json.NewDecoder(r.Body).Decode(&data)
 		if err != nil {
 			http.Error(w, "invalid request", http.StatusBadRequest)
 			return
 		}
+		var tstat Thermostat
+		tstat.From(data)
+
 		update_indoor_conditions(tstat)
 		w.Write([]byte("ACK"))
 	}
@@ -81,12 +83,15 @@ func PostThermostatUpdate() http.HandlerFunc {
 
 func PostWeatherUpdate() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		var conditions OutdoorConditions
-		err := json.NewDecoder(r.Body).Decode(&conditions)
+		var data protocol.OutdoorConditions
+		err := json.NewDecoder(r.Body).Decode(&data)
 		if err != nil {
 			http.Error(w, "invalid request", http.StatusBadRequest)
 			return
 		}
+		var conditions OutdoorConditions
+		conditions.From(data)
+
 		update_outdoor_conditions(conditions)
 		w.Write([]byte("ACK"))
 	}
