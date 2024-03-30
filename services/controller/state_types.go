@@ -21,11 +21,3 @@ type OutdoorConditions struct {
 	OutdoorAir24hHigh float32
 	LastUpdate        time.Time
 }
-
-func (c IndoorConditions) isInitialized() bool {
-	return !c.LastUpdate.IsZero()
-}
-
-func (c OutdoorConditions) isInitialized() bool {
-	return !c.LastUpdate.IsZero()
-}
