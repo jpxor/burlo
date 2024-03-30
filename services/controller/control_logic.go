@@ -235,7 +235,10 @@ func update_circulator() {
 		}
 	}
 
-	// default to ON
+	if global.Circulator.Mode == ON {
+		return
+	}
+	log.Println("[cirlculator] on")
 	global.Circulator.Set(ON)
 }
 
