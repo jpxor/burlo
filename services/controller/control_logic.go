@@ -28,6 +28,12 @@ func update_indoor_conditions(tstat Thermostat) {
 	global.mutex.Lock()
 	defer global.mutex.Unlock()
 
+	// invalidate old data before adding new
+	for id, t := range global.thermostats {
+		if time.Since(t.LastUpdate) > 24*time.Hour {
+			delete(global.thermostats, id)
+		}
+	}
 	global.thermostats[tstat.ID] = tstat
 
 	global.IndoorConditions.From(global.thermostats)
