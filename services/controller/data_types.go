@@ -18,8 +18,8 @@ func (self *Thermostat) From(t protocol.Thermostat) {
 	self.ID = t.ID
 	self.HeatSetpoint = t.HeatSetpoint
 	self.CoolSetpoint = t.CoolSetpoint
-	self.Temperature = t.State.Temperature
-	self.DewPoint = t.State.DewPoint
+	self.Temperature = t.Temperature
+	self.DewPoint = t.DewPoint
 	self.LastUpdate = time.Now()
 }
 
