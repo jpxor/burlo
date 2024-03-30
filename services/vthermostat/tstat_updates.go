@@ -29,29 +29,12 @@ func process_thermostat_updates() {
 	for {
 		select {
 		case tstat := <-tstat_update_queue:
-			sync_process_thermostat_update(tstat)
+			notify_controller(tstat)
+			update_history(tstat)
 
 		case <-ctx.Done():
 			log.Println("[process_thermostat_updates] stopped")
 			return
 		}
-	}
-}
-
-func sync_process_thermostat_update(tstat Thermostat) {
-	// the sensors don't provide dewpoint, but it is critical when cooling
-	tstat.State.DewPoint = calculate_dewpoint_simple(tstat.State.Temperature, tstat.State.Humidity)
-
-	notify_controller(tstat)
-	update_tstat_history(tstat)
-}
-
-// a simple approximation, should err on the side of being
-// too high, but not too low
-func calculate_dewpoint_simple(temp, relH float32) float32 {
-	if relH >= 50 && temp >= 25 {
-		return temp - ((100 - relH) / 5)
-	} else {
-		return temp - ((100 - relH) / 4)
 	}
 }

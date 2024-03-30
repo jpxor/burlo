@@ -2,13 +2,13 @@ package main
 
 import "time"
 
-func update_tstat_history(tstat Thermostat) {
+func update_history(tstat Thermostat) {
 	datum := HistoryData{
 		SensorID:    tstat.ID,
-		Temperature: tstat.State.Temperature,
-		Humidity:    tstat.State.Humidity,
-		DewPoint:    tstat.State.DewPoint,
-		Time:        tstat.State.Time,
+		Temperature: tstat.Temperature,
+		Humidity:    tstat.Humidity,
+		DewPoint:    tstat.DewPoint,
+		Time:        tstat.Time,
 	}
 	history, lbk := global.history.Take()
 

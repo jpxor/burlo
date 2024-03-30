@@ -1,7 +1,7 @@
 package main
 
 import (
-	"burlo/services/model"
+	protocol "burlo/services/protocols"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -11,7 +11,6 @@ import (
 	"os/signal"
 	"strings"
 	"syscall"
-	"time"
 
 	"github.com/eclipse/paho.golang/autopaho"
 	"github.com/eclipse/paho.golang/paho"
@@ -104,7 +103,7 @@ func mqtt_message_handler(topic string, payload []byte) bool {
 	id = url.PathEscape(id)
 	id = strings.ReplaceAll(id, "%", "_")
 
-	var new_state model.SensorData
+	var new_state protocol.SensorData
 	err := json.Unmarshal(payload, &new_state)
 	if err != nil {
 		log.Printf("[mqtt] failed to parse payload: %s --> %s\r\n", id, string(payload))
@@ -124,8 +123,7 @@ func mqtt_message_handler(topic string, payload []byte) bool {
 		}
 		log.Printf("[mqtt] new thermostat %s\r\n", id)
 	}
-	tstat.State = new_state
-	tstat.State.Time = time.Now()
+	tstat.From(new_state)
 
 	log.Printf("[mqtt] %s --> %s\r\n", id, string(payload))
 	go async_process_thermostat_update(tstat)
