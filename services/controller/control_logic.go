@@ -22,6 +22,8 @@ var design_indoor_air_temperature float32 = 20
 var zero_load_outdoor_air_temperature float32 = 16
 var cooling_mode_high_temp_trigger float32 = 28
 
+var update_signal = make(chan interface{})
+
 func controller_update_service() {
 	defer global.waitgroup.Done()
 
@@ -35,7 +37,7 @@ func controller_update_service() {
 
 	for {
 		select {
-		case <-time.After(1 * time.Minute):
+		case <-update_signal:
 			update_controls()
 
 		case <-ctx.Done():
@@ -69,13 +71,10 @@ func update_controls() {
 	global.mutex.Lock()
 	defer global.mutex.Unlock()
 
-	if !global.StateChanged {
-		return
-	}
-	if global.OutdoorConditions.LastUpdate.IsZero() {
-		return
-	}
-	if global.IndoorConditions.LastUpdate.IsZero() {
+	// can't update controls until both outdoor and
+	// indoor conditions get at least 1 update
+	if global.OutdoorConditions.LastUpdate.IsZero() ||
+		global.IndoorConditions.LastUpdate.IsZero() {
 		return
 	}
 
@@ -94,7 +93,7 @@ func update_outdoor_conditions(odc OutdoorConditions) {
 
 	odc.LastUpdate = time.Now()
 	global.OutdoorConditions = odc
-	global.StateChanged = true
+	update_signal <- true
 }
 
 func update_indoor_conditions(tstat services.Thermostat) {
@@ -120,7 +119,7 @@ func update_indoor_conditions(tstat services.Thermostat) {
 
 	idc.LastUpdate = time.Now()
 	global.IndoorConditions = idc
-	global.StateChanged = true
+	update_signal <- true
 }
 
 func update_mode() {

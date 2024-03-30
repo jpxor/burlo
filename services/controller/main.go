@@ -8,9 +8,8 @@ import (
 )
 
 type global_vars struct {
-	waitgroup    sync.WaitGroup
-	mutex        sync.Mutex
-	StateChanged bool
+	waitgroup sync.WaitGroup
+	mutex     sync.Mutex
 	Conditions
 	Controls
 	thermostats map[string]services.Thermostat
