@@ -22,13 +22,21 @@ type Thermostat struct {
 	DewPoint     float32
 	HeatSetpoint float32
 	CoolSetpoint float32
+	Sensor       Sensor
 	Time         time.Time
+}
+
+type Sensor struct {
+	Battery     int32
+	LinkQuality int32
 }
 
 func (t *Thermostat) From(s protocol.SensorData) {
 	t.Temperature = s.Temperature
 	t.Humidity = s.Humidity
 	t.DewPoint = calculate_dewpoint_simple(t.Temperature, t.Humidity)
+	t.Sensor.Battery = s.Battery
+	t.Sensor.LinkQuality = s.LinkQuality
 	t.Time = time.Now()
 }
 

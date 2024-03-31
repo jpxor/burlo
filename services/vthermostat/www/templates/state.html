@@ -133,22 +133,22 @@
 
             <div style="display: flex;">
                 <div class="measurement primary">
-                    <div class="stat">{{ $thermostat.State.Temperature }}°C</div>
+                    <div class="stat">{{ $thermostat.Temperature }}°C</div>
                     <p>Temperature</p>
                 </div>
                 <div class="measurement primary">
-                    <div class="stat">{{ $thermostat.State.Humidity }}%</div>
+                    <div class="stat">{{ $thermostat.Humidity }}%</div>
                     <p>RelHumidity</p>
                 </div>
             </div>
 
             <div style="display: flex;">
                 <div class="measurement secondary">
-                    <div>{{ $thermostat.State.Battery }}%</div>
+                    <div>{{ $thermostat.Sensor.Battery }}%</div>
                     <p>Battery</p>
                 </div>
                 <div class="measurement secondary">
-                    <div>{{ $thermostat.State.LinkQuality }}</div>
+                    <div>{{ $thermostat.Sensor.LinkQuality }}</div>
                     <p>Signal Strength</p>
                 </div>
             </div>
