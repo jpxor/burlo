@@ -51,6 +51,10 @@ func update_controls_locked() {
 }
 
 func update_mode() {
+	if !cooling_enabled {
+		global.Heatpump.Set(HEAT)
+		return
+	}
 	// debounce, don't let the mode switch too often
 	if time.Since(global.Heatpump.LastUpdate) < 24*time.Hour {
 		return
