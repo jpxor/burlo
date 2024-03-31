@@ -1,6 +1,7 @@
 package main
 
 import (
+	"burlo/config"
 	"bytes"
 	"encoding/json"
 	"fmt"
@@ -10,11 +11,8 @@ import (
 	"time"
 )
 
-// TODO: move controller info to config
-var host = "localhost"
-var port = "4005"
-var path = "/controller/thermostat/update"
-var controller_upate_url = fmt.Sprintf("http://%s:%s%s", host, port, path)
+var controller_upate_url string
+var ctr_update_path = "/controller/thermostat/update"
 
 var httpclient = &http.Client{
 	Timeout: 10 * time.Second,
@@ -23,6 +21,11 @@ var httpclient = &http.Client{
 		IdleConnTimeout:    30 * time.Second,
 		DisableCompression: true,
 	},
+}
+
+func load_controller_addr(cpath string) {
+	cfg := config.Load(cpath)
+	controller_upate_url = fmt.Sprintf("http://%s%s", cfg.Services.ControllerAddr, ctr_update_path)
 }
 
 func notify_controller(tstat Thermostat) {

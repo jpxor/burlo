@@ -23,7 +23,7 @@ var design_indoor_air_temperature float32 = 20
 var zero_load_outdoor_air_temperature float32 = 16
 var cooling_mode_high_temp_trigger float32 = 28
 
-func loadConfig(path string) {
+func loadConfig(path string) config.Configuration {
 	global.mutex.Lock()
 	defer global.mutex.Unlock()
 
@@ -40,6 +40,7 @@ func loadConfig(path string) {
 	zero_load_outdoor_air_temperature = cfg.Controller.Heating.ZeroLoadOutdoorAirTemperature
 
 	update_controls_locked()
+	return cfg
 }
 
 func controller_config_watcher(path string) {

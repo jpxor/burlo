@@ -28,6 +28,8 @@ var global = global_vars{
 func main() {
 	log.Println("Running virtual thermostat service")
 
+	load_controller_addr("../../config/config.toml")
+
 	global.waitgroup.Add(1)
 	go process_thermostat_updates()
 

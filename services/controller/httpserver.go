@@ -13,11 +13,8 @@ import (
 	"time"
 )
 
-func controller_http_server() {
+func controller_http_server(addr string) {
 	defer global.waitgroup.Done()
-
-	var port = 4005
-	var addr = fmt.Sprintf(":%d", port)
 
 	mux := http.NewServeMux()
 	server := http.Server{
