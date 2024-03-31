@@ -31,7 +31,7 @@ func main() {
 	defer stop()
 
 	cfg := config.Load("../config/config.toml")
-	initHttpClient(cfg.Services.Controller)
+	initHttpClient(cfg.Services.ControllerAddr)
 
 	// Initialize the Open-Meteo weather service
 	wService, err := openmateo.New(cfg.Weather.Latitude, cfg.Weather.Longitude)
