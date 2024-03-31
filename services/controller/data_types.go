@@ -37,6 +37,11 @@ type IndoorConditions struct {
 }
 
 func (self *IndoorConditions) From(tstats map[string]Thermostat) {
+	// need to reset the setpoint errors before summing since
+	// the IndoorConditions var can be reused
+	self.HeatSetpointError = 0
+	self.CoolSetpointError = 0
+
 	for _, t := range tstats {
 		self.IndoorAirTempMax = max(self.IndoorAirTempMax, t.Temperature)
 		self.DewPoint = max(self.DewPoint, t.DewPoint)
