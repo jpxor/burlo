@@ -40,7 +40,7 @@ type ControlMode[T comparable] struct {
 
 func (cv *ControlValue[T]) Set(val T) {
 	val = clamp(cv.Min, val, cv.Max)
-	if cv.Value == val {
+	if cv.Value == val && !cv.LastUpdate.IsZero() {
 		return
 	}
 	cv.Value = val
@@ -49,7 +49,7 @@ func (cv *ControlValue[T]) Set(val T) {
 
 func (cm *ControlMode[T]) Set(mode T) {
 	assert(slices.Contains(cm.ValidModes, mode))
-	if cm.Mode == mode {
+	if cm.Mode == mode && !cm.LastUpdate.IsZero() {
 		return
 	}
 	cm.Mode = mode
