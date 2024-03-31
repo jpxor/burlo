@@ -182,6 +182,9 @@ func RoomTooHot(setpoint_error float32) bool {
 }
 
 func NightCoolingBoost() bool {
+	if !cooling_overnight_boost_enabled {
+		return false
+	}
 	///////////
 	layout := "15:04"
 	startTime, err := time.Parse(layout, "23:59")

@@ -13,6 +13,7 @@ import (
 
 // configs
 var cooling_enabled bool = true
+var cooling_overnight_boost_enabled bool = true
 var min_cooling_supply_temperature float32 = 12
 var comfort_cooling_supply_temperature float32 = 18
 var max_supply_temperature float32 = 40.55
@@ -28,6 +29,7 @@ func loadConfig(path string) {
 
 	cfg := config.Load(path)
 	cooling_enabled = cfg.Controller.Cooling.Enabled
+	cooling_overnight_boost_enabled = cfg.Controller.Cooling.OvernightBoostEnabled
 	min_cooling_supply_temperature = cfg.Controller.Cooling.OvernightBoostTemperature
 	comfort_cooling_supply_temperature = cfg.Controller.Cooling.CoolingSupplyTemperature
 	cooling_mode_high_temp_trigger = cfg.Controller.Cooling.CoolingTriggerTemperature
