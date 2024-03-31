@@ -6,16 +6,6 @@ import (
 	"time"
 )
 
-// configs
-var min_cooling_supply_temperature float32 = 12
-var comfort_cooling_supply_temperature float32 = 18
-var max_supply_temperature float32 = 40.55
-var design_supply_temperature float32 = 40.55
-var design_outdoor_air_temperature float32 = -25
-var design_indoor_air_temperature float32 = 20
-var zero_load_outdoor_air_temperature float32 = 16
-var cooling_mode_high_temp_trigger float32 = 28
-
 func update_outdoor_conditions(odc OutdoorConditions) {
 	global.mutex.Lock()
 	defer global.mutex.Unlock()

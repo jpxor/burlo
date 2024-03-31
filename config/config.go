@@ -21,18 +21,18 @@ type Configuration struct {
 	} `toml:"weather"`
 	Controller struct {
 		Cooling struct {
-			Enabled                   bool `toml:"enabled"`
-			OvernightBoostEnabled     bool `toml:"overnight_boost_enabled"`
-			OvernightBoostTemperature int  `toml:"overnight_boost_temperature"`
-			CoolingSupplyTemperature  int  `toml:"cooling_supply_temperature"`
-			CoolingTriggerTemperature int  `toml:"cooling_trigger_temperature"`
+			Enabled                   bool    `toml:"enabled"`
+			OvernightBoostEnabled     bool    `toml:"overnight_boost_enabled"`
+			OvernightBoostTemperature float32 `toml:"overnight_boost_temperature"`
+			CoolingSupplyTemperature  float32 `toml:"cooling_supply_temperature"`
+			CoolingTriggerTemperature float32 `toml:"cooling_trigger_temperature"`
 		} `toml:"cooling"`
 		Heating struct {
-			MaxSupplyTemperature            float64 `toml:"max_supply_temperature"`
-			DesignLoadOutdoorAirTemperature int     `toml:"design_load_outdoor_air_temperature"`
-			DesignLoadSupplyTemperature     float64 `toml:"design_load_supply_temperature"`
-			ZeroLoadOutdoorAirTemperature   int     `toml:"zero_load_outdoor_air_temperature"`
-			ZeroLoadSupplyTemperature       int     `toml:"zero_load_supply_temperature"`
+			MaxSupplyTemperature            float32 `toml:"max_supply_temperature"`
+			DesignLoadOutdoorAirTemperature float32 `toml:"design_load_outdoor_air_temperature"`
+			DesignLoadSupplyTemperature     float32 `toml:"design_load_supply_temperature"`
+			ZeroLoadOutdoorAirTemperature   float32 `toml:"zero_load_outdoor_air_temperature"`
+			ZeroLoadSupplyTemperature       float32 `toml:"zero_load_supply_temperature"`
 		} `toml:"heating"`
 	} `toml:"controller"`
 	Thermostats struct {

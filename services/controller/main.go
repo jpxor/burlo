@@ -21,7 +21,11 @@ func main() {
 	log.Println("[controller_update_service] started")
 	defer log.Println("[controller_update_service] stopped")
 
+	loadConfig("config/config.toml")
 	initControls()
+
+	global.waitgroup.Add(1)
+	go controller_config_watcher("config/config.toml")
 
 	global.waitgroup.Add(1)
 	go controller_http_server()
