@@ -10,10 +10,11 @@ import (
 type Configuration struct {
 	Units    string `toml:"units"`
 	Services struct {
-		ControllerAddr   string `toml:"controller"`
-		VthermostatsAddr string `toml:"vthermostats"`
-		MqttServerAddr   string `toml:"mqtt_server"`
-		ActuatorsAddr    string `toml:"actuators"`
+		ControllerAddr        string `toml:"controller"`
+		VthermostatsAddr      string `toml:"vthermostats"`
+		MqttServerAddr        string `toml:"mqtt_server"`
+		ActuatorsPhidgetsAddr string `toml:"actuators_phidgets"`
+		ActuatorsModbusAddr   string `toml:"actuators_modbus"`
 	} `toml:"services"`
 	Weather struct {
 		Latitude  string `toml:"latitude"`

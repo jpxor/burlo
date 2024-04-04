@@ -23,6 +23,7 @@ func main() {
 
 	cfg := loadConfig("config/config.toml")
 	initControls()
+	initHttpClient(cfg.Services.ActuatorsPhidgetsAddr, cfg.Services.ActuatorsModbusAddr)
 
 	global.waitgroup.Add(1)
 	go controller_config_watcher("config/config.toml")

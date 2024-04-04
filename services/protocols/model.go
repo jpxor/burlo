@@ -24,3 +24,16 @@ type SensorData struct {
 	Humidity    float32
 	DewPoint    float32
 }
+
+type PhidgetDO struct {
+	Name    string
+	Channel int32
+	HubPort int32
+	Output  bool
+}
+
+type ModbusReg struct {
+	Name     string
+	Register int32
+	Value    float32
+}

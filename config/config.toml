@@ -5,7 +5,8 @@ units = "celsius"
 controller   = "localhost:4005"
 vthermostats = "localhost:4004"
 mqtt_server  = "localhost:4003"
-actuators    = "localhost:4002"
+actuators_phidgets    = "localhost:4002"
+actuators_modbus    = "localhost:4001"
 
 [weather]
 # current weather conditions and temperature
@@ -59,6 +60,7 @@ primary = "01"
 
 [actuators]
 circulator = {hubport = 0, channel = 0, type="digital_output"}
+hpmode = {hubport = 0, channel = 1, type="digital_output"}
 
 
 [mqtt]

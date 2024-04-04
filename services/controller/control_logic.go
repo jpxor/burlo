@@ -1,6 +1,7 @@
 package main
 
 import (
+	protocol "burlo/services/protocols"
 	"fmt"
 	"log"
 	"time"
@@ -210,4 +211,21 @@ func NightCoolingBoost() bool {
 
 func applyV2(controls Controls) {
 	log.Println("[controller] applying state")
+	set_digital_out(protocol.PhidgetDO{
+		Name:    "HPMode",
+		HubPort: 0,
+		Channel: 1,
+		Output:  controls.Heatpump.Mode == COOL,
+	})
+	set_digital_out(protocol.PhidgetDO{
+		Name:    "Circulator",
+		HubPort: 0,
+		Channel: 0,
+		Output:  controls.Circulator.Mode == ON,
+	})
+	set_modbus_register(protocol.ModbusReg{
+		Name:     "Dewpoint",
+		Register: 100, // TODO: get actual register, this is placeholder
+		Value:    global.IndoorConditions.DewPoint,
+	})
 }
