@@ -34,7 +34,7 @@ func main() {
 	initHttpClient(cfg.Services.ActuatorsPhidgetsAddr, cfg.Services.ActuatorsModbusAddr)
 
 	global.waitgroup.Add(1)
-	go controller_config_watcher("config/config.toml")
+	go controller_config_watcher(configPath)
 
 	global.waitgroup.Add(1)
 	go controller_http_server(cfg.Services.ControllerAddr)
