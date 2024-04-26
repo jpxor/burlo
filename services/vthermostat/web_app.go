@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"path"
 	"strconv"
 	"syscall"
 	"time"
@@ -15,7 +16,7 @@ import (
 
 var DEVEL = true
 
-func go_gadget_web_app() {
+func go_gadget_web_app(www string) {
 	defer global.waitgroup.Done()
 
 	var port = 4004
@@ -44,17 +45,17 @@ func go_gadget_web_app() {
 	//    - allow adjusting setpoints
 	//    - allow setting name
 
-	tmpl_history := template.Must(template.ParseFiles("./www/templates/history.html"))
-	tmpl_state := template.Must(template.ParseFiles("./www/templates/state.html"))
-	tmpl_name_change := template.Must(template.ParseFiles("./www/templates/name-change-form.html"))
-	tmpl_name_change_confirm := template.Must(template.ParseFiles("./www/templates/name-change-confirm.html"))
+	tmpl_history := template.Must(template.ParseFiles(path.Join(www, "templates/history.html")))
+	tmpl_state := template.Must(template.ParseFiles(path.Join(www, "templates/state.html")))
+	tmpl_name_change := template.Must(template.ParseFiles(path.Join(www, "templates/name-change-form.html")))
+	tmpl_name_change_confirm := template.Must(template.ParseFiles(path.Join(www, "templates/name-change-confirm.html")))
 
-	mux.HandleFunc("GET /thermostats/state", GetThermostatsState(tmpl_state))
-	mux.HandleFunc("GET /thermostats/history", GetThermostatsHistory(tmpl_history))
-	mux.HandleFunc("GET /", GetIndex)
+	mux.HandleFunc("GET /thermostats/state", GetThermostatsState(tmpl_state, www))
+	mux.HandleFunc("GET /thermostats/history", GetThermostatsHistory(tmpl_history, www))
+	mux.HandleFunc("GET /", GetIndex(www))
 
-	mux.HandleFunc("GET /thermostat/{id}/name-change-form", GetThermostatNameChangeForm(tmpl_name_change))
-	mux.HandleFunc("PUT /thermostat/{id}/name", PutThermostatName(tmpl_name_change_confirm))
+	mux.HandleFunc("GET /thermostat/{id}/name-change-form", GetThermostatNameChangeForm(tmpl_name_change, www))
+	mux.HandleFunc("PUT /thermostat/{id}/name", PutThermostatName(tmpl_name_change_confirm, www))
 	mux.HandleFunc("PUT /thermostat/{id}/setpoint", PutThermostatSetpoint)
 
 	log.Println("[web_app] started", addr)
@@ -66,15 +67,19 @@ func go_gadget_web_app() {
 	log.Println("[web_app] stopped")
 }
 
-func GetIndex(w http.ResponseWriter, r *http.Request) {
-	http.ServeFile(w, r, "./www/index.html")
+func GetIndex(www string) http.HandlerFunc {
+	file := path.Join(www, "index.html")
+	return func(w http.ResponseWriter, r *http.Request) {
+		http.ServeFile(w, r, file)
+	}
 }
 
-func GetThermostatsState(tmpl *template.Template) http.HandlerFunc {
+func GetThermostatsState(tmpl *template.Template, www string) http.HandlerFunc {
+	tmpl_file := path.Join(www, "templates/state.html")
 	return func(w http.ResponseWriter, r *http.Request) {
 		if DEVEL {
 			// reload the template on each request when in development
-			tmpl = template.Must(template.ParseFiles("./www/templates/state.html"))
+			tmpl = template.Must(template.ParseFiles(tmpl_file))
 		}
 		thermostats, lbk := global.thermostats.Take()
 		err := tmpl.Execute(w, thermostats)
@@ -85,21 +90,23 @@ func GetThermostatsState(tmpl *template.Template) http.HandlerFunc {
 	}
 }
 
-func GetThermostatsHistory(tmpl *template.Template) http.HandlerFunc {
+func GetThermostatsHistory(tmpl *template.Template, www string) http.HandlerFunc {
+	tmpl_file := path.Join(www, "templates/history.html")
 	return func(w http.ResponseWriter, r *http.Request) {
 		if DEVEL {
 			// reload the template on each request when in development
-			tmpl = template.Must(template.ParseFiles("./www/templates/history.html"))
+			tmpl = template.Must(template.ParseFiles(tmpl_file))
 		}
 		tmpl.Execute(w, nil)
 	}
 }
 
-func GetThermostatNameChangeForm(tmpl *template.Template) http.HandlerFunc {
+func GetThermostatNameChangeForm(tmpl *template.Template, www string) http.HandlerFunc {
+	tmpl_file := path.Join(www, "templates/name-change-form.html")
 	return func(w http.ResponseWriter, r *http.Request) {
 		if DEVEL {
 			// reload the template on each request when in development
-			tmpl = template.Must(template.ParseFiles("./www/templates/name-change-form.html"))
+			tmpl = template.Must(template.ParseFiles(tmpl_file))
 		}
 		id := r.PathValue("id")
 		thermostats, lbk := global.thermostats.Take()
@@ -114,11 +121,12 @@ func GetThermostatNameChangeForm(tmpl *template.Template) http.HandlerFunc {
 	}
 }
 
-func PutThermostatName(tmpl *template.Template) http.HandlerFunc {
+func PutThermostatName(tmpl *template.Template, www string) http.HandlerFunc {
+	tmpl_file := path.Join(www, "templates/name-change-confirm.html")
 	return func(w http.ResponseWriter, r *http.Request) {
 		if DEVEL {
 			// reload the template on each request when in development
-			tmpl = template.Must(template.ParseFiles("./www/templates/name-change-confirm.html"))
+			tmpl = template.Must(template.ParseFiles(tmpl_file))
 		}
 		err := r.ParseForm()
 		if err != nil {
