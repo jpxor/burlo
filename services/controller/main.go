@@ -1,7 +1,9 @@
 package main
 
 import (
+	"fmt"
 	"log"
+	"os"
 	"sync"
 )
 
@@ -18,10 +20,16 @@ var global = global_vars{
 }
 
 func main() {
+	if len(os.Args) < 2 {
+		fmt.Println("provide path to config file")
+		os.Exit(1)
+	}
+	configPath := os.Args[1]
+	cfg := loadConfig(configPath)
+
 	log.Println("[controller_update_service] started")
 	defer log.Println("[controller_update_service] stopped")
 
-	cfg := loadConfig("config/config.toml")
 	initControls()
 	initHttpClient(cfg.Services.ActuatorsPhidgetsAddr, cfg.Services.ActuatorsModbusAddr)
 

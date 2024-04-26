@@ -2,7 +2,9 @@ package main
 
 import (
 	"burlo/pkg/lockbox"
+	"fmt"
 	"log"
+	"os"
 	"sync"
 )
 
@@ -26,9 +28,14 @@ var global = global_vars{
 }
 
 func main() {
-	log.Println("Running virtual thermostat service")
+	if len(os.Args) < 2 {
+		fmt.Println("provide path to config file")
+		os.Exit(1)
+	}
+	configPath := os.Args[1]
+	load_controller_addr(configPath)
 
-	load_controller_addr("../../config/config.toml")
+	log.Println("Running virtual thermostat service")
 
 	global.waitgroup.Add(1)
 	go process_thermostat_updates()

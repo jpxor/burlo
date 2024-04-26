@@ -7,6 +7,7 @@ import (
 	weather "burlo/services/weather/model"
 	"burlo/services/weather/openmateo"
 	"context"
+	"fmt"
 	"log"
 	"os"
 	"os/signal"
@@ -25,12 +26,18 @@ var outdoor_conditions = lockbox.New(protocol.OutdoorConditions{})
 var lastForcastUpdate time.Time
 
 func main() {
+	if len(os.Args) < 2 {
+		fmt.Println("provide path to config file")
+		os.Exit(1)
+	}
+	configPath := os.Args[1]
+	cfg := config.Load(configPath)
+
 	log.Println("[weather] started weather service")
 
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer stop()
 
-	cfg := config.Load("../config/config.toml")
 	initHttpClient(cfg.Services.ControllerAddr)
 
 	// Initialize the Open-Meteo weather service
