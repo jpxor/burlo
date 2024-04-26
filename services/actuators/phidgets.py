@@ -129,6 +129,31 @@ async def get_phidgets_state(request):
     serializables = [phiwrap.toSerializable() for phiwrap in named_phidgets.values()]
     out = "<p>[OK] /services/actuators/phidgets<p>"
     out += "<pre>" + json.dumps(serializables, indent=4) + "</pre>"
+    out += """
+            <script>
+            async function sendPostRequest(val) {
+                console.log("sendPostRequest", val);
+                const url = '/phidgets/digital_out';
+                const payload = {
+                    'name': 'zone1',
+                    'channel': 0,
+                    'hub_port': 0,
+                    'target_state': val
+                };
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(payload)
+                });
+                const data = await response.json();
+                console.log(data);
+            }
+            </script>
+            """
+    out += "<button onclick=sendPostRequest(true)>digital_out_0 set true</button>"
+    out += "<button onclick=sendPostRequest(false)>digital_out_0 set false</button>"
     return web.Response(status=200, text=out, content_type="text/html")
 
 
