@@ -28,11 +28,13 @@ var global = global_vars{
 }
 
 func main() {
-	if len(os.Args) < 2 {
-		fmt.Println("provide path to config file")
+	if len(os.Args) < 3 {
+		fmt.Println("1. provide path to config file")
+		fmt.Println("2. provide path to www directory")
 		os.Exit(1)
 	}
 	configPath := os.Args[1]
+	wwwPath := os.Args[2]
 	load_controller_addr(configPath)
 
 	log.Println("Running virtual thermostat service")
@@ -44,7 +46,7 @@ func main() {
 	go process_mqtt_updates()
 
 	global.waitgroup.Add(1)
-	go go_gadget_web_app()
+	go go_gadget_web_app(wwwPath)
 
 	// waits for all service type goroutines to complete
 	global.waitgroup.Wait()
