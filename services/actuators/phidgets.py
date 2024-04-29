@@ -203,7 +203,6 @@ async def get_phidgets_state(request):
     </pre>
     <script>
         async function sendDO(val) {
-            console.log("set DigitalOut", val);
             const url = '/phidgets/digital_out';
             const payload = {
                 'name': 'zone1',
@@ -219,10 +218,9 @@ async def get_phidgets_state(request):
                 body: JSON.stringify(payload)
             });
             const data = await response.text();
-            console.log(data);
+            location.reload();
         }
         async function sendVO(val) {
-            console.log("set VoltageOut", val);
             const url = '/phidgets/voltage_out';
             const payload = {
                 'name': 'dewpoint',
@@ -238,7 +236,7 @@ async def get_phidgets_state(request):
                 body: JSON.stringify(payload)
             });
             const data = await response.text();
-            console.log(data);
+            location.reload();
         }
     </script>
     <p>Testing:</p>
