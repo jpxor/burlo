@@ -119,8 +119,8 @@ async def set_voltage_output(request):
             return web.Response(status=400, text="name must be a string")
 
         target_state = data["target_state"]
-        if not isinstance(target_state, float):
-            return web.Response(status=400, text="target_state must be an float")
+        if type(target_state) not in (int, float):
+            return web.Response(status=400, text="target_state must be an int or float")
 
         if target_state > 10.0 or target_state < -10.0:
             return web.Response(status=400, text="target_state must be +/- 10V")
@@ -190,39 +190,73 @@ async def close_phidget_channel(request):
 
 async def get_phidgets_state(request):
     serializables = [phiwrap.toSerializable() for phiwrap in named_phidgets.values()]
-    out = "<p>[OK] /services/actuators/phidgets<p>"
-    out += "<pre>" + json.dumps(serializables, indent=4) + "</pre>"
-    out += """
-            <script>
-            async function sendPostRequest(val) {
-                console.log("sendPostRequest", val);
-                const url = '/phidgets/digital_out';
-                const payload = {
-                    'name': 'zone1',
-                    'channel': 0,
-                    'hub_port': 0,
-                    'target_state': val
-                };
-                const response = await fetch(url, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(payload)
-                });
-                const data = await response.text();
-                console.log(data);
-            }
-            </script>
-            """
-    out += "<button onclick=sendPostRequest(true)>digital_out_0 set true</button>"
-    out += "<button onclick=sendPostRequest(false)>digital_out_0 set false</button>"
+    out = """
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Phidgets State</title>
+</head>
+<body>
+    <p>[OK] /services/actuators/phidgets<p>
+    <pre>
+""" + json.dumps(serializables, indent=4) + """
+    </pre>
+    <script>
+        async function sendDO(val) {
+            console.log("set DigitalOut", val);
+            const url = '/phidgets/digital_out';
+            const payload = {
+                'name': 'zone1',
+                'channel': 0,
+                'hub_port': 0,
+                'target_state': val
+            };
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(payload)
+            });
+            const data = await response.text();
+            console.log(data);
+        }
+        async function sendVO(val) {
+            console.log("set VoltageOut", val);
+            const url = '/phidgets/voltage_out';
+            const payload = {
+                'name': 'dewpoint',
+                'channel': 0,
+                'hub_port': 1,
+                'target_state': val
+            };
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(payload)
+            });
+            const data = await response.text();
+            console.log(data);
+        }
+    </script>
+    <p>Testing:</p>
+    <button onclick="sendDO(true)">digital_out set true</button>
+    <button onclick="sendDO(false)">digital_out set false</button>
+    <br>
+    <button onclick="sendVO(0)">voltage_out set 0.0V</button>
+    <button onclick="sendVO(5.0)">voltage_out set 5.0V</button>
+    <button onclick="sendVO(10.0)">voltage_out set 10.0V</button>
+</body>
+</html>"""
     return web.Response(status=200, text=out, content_type="text/html")
 
 
 app = web.Application()
 app.add_routes([
     web.post('/phidgets/digital_out', set_digital_output),
+    web.post('/phidgets/voltage_out', set_voltage_output),
     web.post('/phidgets/close', close_phidget_channel),
     web.get('/phidgets/state', get_phidgets_state),
 ])
