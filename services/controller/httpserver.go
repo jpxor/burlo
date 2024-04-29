@@ -4,7 +4,6 @@ import (
 	protocol "burlo/services/protocols"
 	"context"
 	"encoding/json"
-	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -52,13 +51,20 @@ func CatchAll() http.HandlerFunc {
 }
 
 func GetControllerState() http.HandlerFunc {
+	jsonBytes := func(data interface{}) []byte {
+		json, err := json.MarshalIndent(data, "", "    ")
+		if err != nil {
+			return []byte(err.Error())
+		}
+		return json
+	}
 	return func(w http.ResponseWriter, r *http.Request) {
 		global.mutex.Lock()
 		defer global.mutex.Unlock()
-		w.Write([]byte(fmt.Sprintf("%+v\r\n", global.Controls)))
-		w.Write([]byte(fmt.Sprintf("%+v\r\n", global.OutdoorConditions)))
-		w.Write([]byte(fmt.Sprintf("%+v\r\n", global.IndoorConditions)))
-		w.Write([]byte(fmt.Sprintf("%+v\r\n", global.thermostats)))
+		w.Write(jsonBytes(global.Controls))
+		w.Write(jsonBytes(global.OutdoorConditions))
+		w.Write(jsonBytes(global.IndoorConditions))
+		w.Write(jsonBytes(global.thermostats))
 	}
 }
 
