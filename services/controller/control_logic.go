@@ -223,9 +223,11 @@ func applyV2(controls Controls) {
 		Channel: 0,
 		Output:  controls.Circulator.Mode == ON,
 	})
-	set_modbus_register(protocol.ModbusReg{
-		Name:     "Dewpoint",
-		Register: 100, // TODO: get actual register, this is placeholder
-		Value:    global.IndoorConditions.DewPoint,
+	set_voltage_out(protocol.PhidgetVO{
+		Name:    "Dewpoint",
+		HubPort: 1,
+		Channel: 0,
+		// TODO convert dewpoint to voltage (need to determine mapping)
+		Output: global.IndoorConditions.DewPoint,
 	})
 }

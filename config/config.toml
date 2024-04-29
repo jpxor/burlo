@@ -61,6 +61,7 @@ primary = "01"
 [actuators]
 circulator = {hubport = 0, channel = 0, type="digital_output"}
 hpmode = {hubport = 0, channel = 1, type="digital_output"}
+dewpoint = {hubport = 1, channel = 0, type="voltage_output"}
 
 
 [mqtt]

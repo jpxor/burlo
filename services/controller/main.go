@@ -31,7 +31,7 @@ func main() {
 	defer log.Println("[controller_update_service] stopped")
 
 	initControls()
-	initHttpClient(cfg.Services.ActuatorsPhidgetsAddr, cfg.Services.ActuatorsModbusAddr)
+	initHttpClient(cfg.Services.ActuatorsPhidgetsAddr)
 
 	global.waitgroup.Add(1)
 	go controller_config_watcher(configPath)

@@ -32,8 +32,9 @@ type PhidgetDO struct {
 	Output  bool
 }
 
-type ModbusReg struct {
-	Name     string
-	Register int32
-	Value    float32
+type PhidgetVO struct {
+	Name    string
+	Channel int32
+	HubPort int32
+	Output  float32
 }

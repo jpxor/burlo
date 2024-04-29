@@ -20,21 +20,21 @@ var httpclient = &http.Client{
 	},
 }
 
-var urlPhi string
-var urlMB string
+var uriDO string
+var uriVO string
 
-func initHttpClient(addrPhidgets, addrModbus string) {
-	urlPhi = fmt.Sprintf("http://%s%s", addrPhidgets, "/phidgets/digital_out")
-	urlMB = fmt.Sprintf("http://%s%s", addrModbus, "/modbus/register/float")
+func initHttpClient(addrPhidgets string) {
+	uriDO = fmt.Sprintf("http://%s%s", addrPhidgets, "/phidgets/digital_out")
+	uriVO = fmt.Sprintf("http://%s%s", addrPhidgets, "/phidgets/voltage_out")
 }
 
 func set_digital_out(data protocol.PhidgetDO) {
 	payload, err := json.Marshal(data)
 	if err != nil {
-		log.Println("[controller] set_digital_out: failed to encode protocol.PhidgetDO data:", err)
+		log.Println("[controller] set_digital_out: failed to encode protocol.PhidgetDO:", err)
 		return
 	}
-	req, err := http.NewRequest("POST", urlPhi, bytes.NewBuffer(payload))
+	req, err := http.NewRequest("POST", uriDO, bytes.NewBuffer(payload))
 	if err != nil {
 		log.Println("[controller] set_digital_out: failed to create request:", err)
 		return
@@ -57,22 +57,22 @@ func set_digital_out(data protocol.PhidgetDO) {
 	}
 }
 
-func set_modbus_register(data protocol.ModbusReg) {
+func set_voltage_out(data protocol.PhidgetVO) {
 	payload, err := json.Marshal(data)
 	if err != nil {
-		log.Println("[controller] set_modbus_register: failed to encode protocol.PhidgetDO data:", err)
+		log.Println("[controller] set_voltage_out: failed to encode protocol.PhidgetVO:", err)
 		return
 	}
-	req, err := http.NewRequest("POST", urlMB, bytes.NewBuffer(payload))
+	req, err := http.NewRequest("POST", uriVO, bytes.NewBuffer(payload))
 	if err != nil {
-		log.Println("[controller] set_modbus_register: failed to create request:", err)
+		log.Println("[controller] set_voltage_out: failed to create request:", err)
 		return
 	}
 	req.Header.Set("Content-Type", "application/json")
 
 	resp, err := httpclient.Do(req)
 	if err != nil {
-		log.Println("[controller] set_modbus_register: failed to send request:", err)
+		log.Println("[controller] set_voltage_out: failed to send request:", err)
 		return
 	}
 	defer resp.Body.Close()
@@ -80,8 +80,8 @@ func set_modbus_register(data protocol.ModbusReg) {
 	if resp.StatusCode != 200 {
 		bodyBytes, err := io.ReadAll(resp.Body)
 		if err != nil {
-			log.Println("[controller] set_modbus_register: failed to read response body:", err)
+			log.Println("[controller] set_voltage_out: failed to read response body:", err)
 		}
-		log.Println("[controller] set_modbus_register: bad status:", resp.StatusCode, string(bodyBytes))
+		log.Println("[controller] set_voltage_out: bad status:", resp.StatusCode, string(bodyBytes))
 	}
 }
