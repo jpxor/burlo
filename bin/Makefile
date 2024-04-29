@@ -1,30 +1,16 @@
-#########
+actuator:
+	systemctl restart hvac.actuator.phidgets.service
 
 controller:
 	go build ../services/controller
+	systemctl restart hvac.controller.service
 
 vthermostat:
 	go build ../services/vthermostat
+	systemctl restart hvac.vthermostat.service
 
 weather:
 	go build ../services/weather
-
-all: controller vthermostat weather
-	
-#########
-
-deploy_actuator:
-	systemctl restart hvac.actuator.phidgets.service
-
-deploy_controller: controller
-	systemctl restart hvac.controller.service
-
-deploy_vthermostat: vthermostat
-	systemctl restart hvac.vthermostat.service
-
-deploy_weather: weather
 	systemctl restart hvac.weather.service
 
-deploy_all: deploy_actuator deploy_controller deploy_weather deploy_vthermostat
-
-##########
+all: actuator controller vthermostat weather
