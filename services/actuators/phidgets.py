@@ -261,7 +261,7 @@ app.add_routes([
 
 
 def run():
-    web.run_app(app, port=4000)
+    web.run_app(app, port=4002)
 
 
 def sanity_test(): # happy paths only
