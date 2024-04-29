@@ -26,15 +26,15 @@ type SensorData struct {
 }
 
 type PhidgetDO struct {
-	Name    string
-	Channel int32
-	HubPort int32
-	Output  bool
+	Name    string `json:"name"`
+	Channel int32  `json:"channel"`
+	HubPort int32  `json:"hub_port"`
+	Output  bool   `json:"target_state"`
 }
 
 type PhidgetVO struct {
-	Name    string
-	Channel int32
-	HubPort int32
-	Output  float32
+	Name    string  `json:"name"`
+	Channel int32   `json:"channel"`
+	HubPort int32   `json:"hub_port"`
+	Output  float32 `json:"target_state"`
 }
