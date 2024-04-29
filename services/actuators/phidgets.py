@@ -3,6 +3,7 @@ from aiohttp import web
 from Phidget22.Phidget import *
 from Phidget22.PhidgetException import *
 from Phidget22.Devices.DigitalOutput import *
+from Phidget22.Devices.VoltageOutput import *
 
 import sys
 import json
@@ -19,11 +20,18 @@ class NamedPhidget:
         self.name = name
     
     def toSerializable(self):
-        return {
-            "name": self.name,
-            "phidget": str(self.phidget),
-            "state": self.phidget.getState(), # DigitalOutput only
-        }
+        if isinstance(self.phidget, DigitalOutput):
+            return {
+                "name": self.name,
+                "phidget": str(self.phidget),
+                "state": self.phidget.getState(),
+            }
+        if isinstance(self.phidget, VoltageOutput): 
+            return {
+                "name": self.name,
+                "phidget": str(self.phidget),
+                "voltage": self.phidget.getVoltage(),
+            }
 
 
 def name_from_phidget(phidget):
@@ -42,6 +50,7 @@ def onDetach(self):
 
 
 def onError(self, code, description):
+    print("Device: " + str(self.phidget))
     print("Code: " + ErrorEventCode.getName(code))
     print("Description: " + str(description))
     print("----------")
@@ -95,6 +104,60 @@ async def set_digital_output(request):
             return web.Response(status=500, text=str(ex))
 
     phiwrap.phidget.setState(target_state)
+    return web.Response(status=200, text="ACK")
+
+
+async def set_voltage_output(request):
+    try:
+        data = await request.json()
+
+        if "name" not in data or "target_state" not in data:
+            return web.Response(status=400, text="requires name (str) and target_state (float)")
+        
+        name = data["name"]
+        if not isinstance(name, str):
+            return web.Response(status=400, text="name must be a string")
+
+        target_state = data["target_state"]
+        if not isinstance(target_state, float):
+            return web.Response(status=400, text="target_state must be an float")
+
+        if target_state > 10.0 or target_state < -10.0:
+            return web.Response(status=400, text="target_state must be +/- 10V")
+
+        channel = data.get("channel", -2)
+        if not isinstance(channel, int):
+            return web.Response(status=400, text="channel must be an integer")
+
+        hub_port = data.get("hub_port", -2)
+        if not isinstance(hub_port, int):
+            return web.Response(status=400, text="hub_port must be an integer")
+    
+    except:
+        return web.Response(status=400, text="bad request")
+
+    phiwrap = named_phidgets.get(name)
+    if not phiwrap:
+        if channel == -1 or hub_port == -1:
+            return web.Response(status=400, text="name not found; channel and hub_port must be set")
+        try:
+            vo = VoltageOutput()
+            vo.setChannel(channel)
+            vo.setHubPort(hub_port)
+            
+            vo.setOnAttachHandler(onAttach)
+            vo.setOnDetachHandler(onDetach)
+            vo.setOnErrorHandler(onError)
+            vo.openWaitForAttachment(5000)
+
+            phiwrap = NamedPhidget(name, vo)
+            named_phidgets[name] = phiwrap
+
+        except PhidgetException as ex:
+            traceback.print_exc()
+            return web.Response(status=500, text=str(ex))
+
+    phiwrap.phidget.setVoltage(target_state)
     return web.Response(status=200, text="ACK")
 
 
