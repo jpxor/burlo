@@ -14,3 +14,8 @@ weather:
 	systemctl restart hvac.weather.service
 
 all: actuator controller vthermostat weather
+
+clean:
+	rm ./controller
+	rm ./vthermostat
+	rm ./weather
