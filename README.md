@@ -34,3 +34,7 @@ outdoor weather service
 Phidgets relay is used to signal the zone pump via Taco Zone Controller the same way a thermostat would.
 https://www.phidgets.com/?prodid=720&pcid=39
 
+
+## Logs
+Navigate to the webpage: http://phidgetsbc.local/cgi-bin/system-logs.sh
+Access(admin:root)
