@@ -50,7 +50,7 @@ def onDetach(self):
 
 
 def onError(self, code, description):
-    print("Device: " + str(self.phidget))
+    print("Device: " + str(self))
     print("Code: " + ErrorEventCode.getName(code))
     print("Description: " + str(description))
     print("----------")
