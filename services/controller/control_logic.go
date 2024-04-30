@@ -212,13 +212,13 @@ func NightCoolingBoost() bool {
 func applyV2(controls Controls) {
 	log.Println("[controller] applying state")
 	set_digital_out(protocol.PhidgetDO{
-		Name:    "HPMode",
+		Name:    "CoolingMode",
 		HubPort: 0,
 		Channel: 1,
 		Output:  controls.Heatpump.Mode == COOL,
 	})
 	set_digital_out(protocol.PhidgetDO{
-		Name:    "Circulator",
+		Name:    "ZoneCirculator",
 		HubPort: 0,
 		Channel: 0,
 		Output:  controls.Circulator.Mode == ON,

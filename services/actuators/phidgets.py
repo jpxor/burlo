@@ -205,7 +205,7 @@ async def get_phidgets_state(request):
         async function sendDO(val) {
             const url = '/phidgets/digital_out';
             const payload = {
-                'name': 'zone1',
+                'name': 'ZoneCirculator',
                 'channel': 0,
                 'hub_port': 0,
                 'target_state': val
@@ -223,7 +223,7 @@ async def get_phidgets_state(request):
         async function sendVO(val) {
             const url = '/phidgets/voltage_out';
             const payload = {
-                'name': 'dewpoint',
+                'name': 'Dewpoint',
                 'channel': 0,
                 'hub_port': 1,
                 'target_state': val
