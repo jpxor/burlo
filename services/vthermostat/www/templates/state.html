@@ -144,12 +144,16 @@
 
             <div style="display: flex;">
                 <div class="measurement secondary">
+                    <div>{{ $thermostat.Sensor.Dewpoint }}°C</div>
+                    <p>Dewpoint</p>
+                </div>
+                <div class="measurement secondary">
                     <div>{{ $thermostat.Sensor.Battery }}%</div>
                     <p>Battery</p>
                 </div>
                 <div class="measurement secondary">
                     <div>{{ $thermostat.Sensor.LinkQuality }}</div>
-                    <p>Signal Strength</p>
+                    <p>Signal</p>
                 </div>
             </div>
 
