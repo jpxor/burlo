@@ -227,7 +227,18 @@ func applyV2(controls Controls) {
 		Name:    "Dewpoint",
 		HubPort: 1,
 		Channel: 0,
-		// TODO convert dewpoint to voltage (need to determine mapping)
-		Output: global.IndoorConditions.DewPoint,
+		Output:  DewpointToVoltage(global.IndoorConditions.DewPoint),
 	})
+}
+
+func DewpointToVoltage(temperature float32) float32 {
+	convertToFahrenheit := func(celsius float32) float32 {
+		return celsius*9.0/5.0 + 32.0
+	}
+	temperature = convertToFahrenheit(temperature)
+	var x1, y1 float32 = 94.4, 10.0
+	var x2, y2 float32 = 32.0, 0.00
+	m := (y2 - y1) / (x2 - x1)
+	b := y1 - m*x1
+	return m * +b
 }
