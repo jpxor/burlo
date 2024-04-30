@@ -240,5 +240,5 @@ func DewpointToVoltage(temperature float32) float32 {
 	var x2, y2 float32 = 32.0, 0.00
 	m := (y2 - y1) / (x2 - x1)
 	b := y1 - m*x1
-	return m * +b
+	return m*temperature + b
 }
