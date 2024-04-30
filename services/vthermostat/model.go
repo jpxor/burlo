@@ -42,7 +42,8 @@ func (t *Thermostat) From(s protocol.SensorData) {
 
 func calculate_dewpoint_simple(temp, relH float32) float32 {
 	// a simple approximation, should err on the side of
-	// being too high, never too low
+	// being too high, never too low. Temperature must be
+	// in celcius. Accureate to within 1 degC when RelH > 50%
 	if relH >= 50 && temp >= 25 {
 		return temp - ((100 - relH) / 5)
 	} else {
