@@ -13,9 +13,14 @@ weather:
 	go build ../services/weather
 	systemctl restart hvac.weather.service
 
-all: actuator controller vthermostat weather
+modbus:
+	go build ../services/modbus
+	systemctl restart hvac.weather.service
+
+all: actuator controller vthermostat weather modbus
 
 clean:
 	rm ./controller
 	rm ./vthermostat
 	rm ./weather
+	rm ./modbus
