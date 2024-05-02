@@ -1,0 +1,516 @@
+DeviceURI = "tcp://192.168.50.60:502"
+DeviceID = 200
+
+[[Register]]
+Name = "AUX_BOILER_BALANCE_POINT"
+Address = 336
+Factor = 1.0
+Writable = true
+Type = "INT16"
+Units = "°F"
+
+[[Register]]
+Name = "AUX_BOILER_KW"
+Address = 530
+Factor = 0.01
+Writable = false
+Type = "INT16"
+Units = "kW"
+
+[[Register]]
+Name = "AUX_CT"
+Address = 152
+Factor = 0.1
+Writable = true
+Type = "INT16"
+Units = "A"
+
+[[Register]]
+Name = "AUX_DISABLE"
+Address = 542
+Factor = 1.0
+Writable = false
+Type = "BOOL"
+
+[[Register]]
+Name = "AUX_KWH"
+Address = 580
+Factor = 1.0
+Writable = true
+Type = "UINT16"
+Units = "kWh"
+
+[[Register]]
+Name = "BOILER_CALL_DELAY_DURATION"
+Address = 335
+Factor = 1.0
+Writable = true
+Type = "INT16"
+Units = "min"
+
+[[Register]]
+Name = "BOILER_CALL_DELAY_STATUS"
+Address = 631
+Factor = 1.0
+Writable = false
+Type = "BOOL"
+
+[[Register]]
+Name = "BUFFER_FLOW"
+Address = 338
+Factor = 0.1
+Writable = true
+Type = "INT16"
+Units = "gpm"
+
+[[Register]]
+Name = "BUFFER_TANK_DIFFERENTIAL"
+Address = 538
+Factor = 1.0
+Writable = false
+Type = "INT16"
+Units = "°F"
+
+[[Register]]
+Name = "BUFFER_TANK_SETPOINT"
+Address = 537
+Factor = 1.0
+Writable = false
+Type = "INT16"
+Units = "°F"
+
+[[Register]]
+Name = "BUFFER_TANK_TEMP"
+Address = 131
+Factor = 0.1
+Writable = false
+Type = "INT16"
+Units = "°F"
+
+[[Register]]
+Name = "BUFFER_THERMOSTAT"
+Address = 544
+Factor = 1.0
+Writable = false
+Type = "BOOL"
+
+[[Register]]
+Name = "CHILLED_WATER_DIFFERENTIAL"
+Address = 352
+Factor = 1.0
+Writable = true
+Type = "INT16"
+Units = "°F"
+
+[[Register]]
+Name = "CHILLED_WATER_SETPOINT"
+Address = 351
+Factor = 1.0
+Writable = true
+Type = "INT16"
+Units = "°F"
+
+[[Register]]
+Name = "COMP_STALL_OR_DELAY_COUNTER"
+Address = 554
+Factor = 1.0
+Writable = true
+Type = "INT16"
+
+[[Register]]
+Name = "COMPRESSOR_CALL"
+Address = 651
+Factor = 1.0
+Writable = false
+Type = "BOOL"
+
+[[Register]]
+Name = "COMPRESSOR_RUNTIME"
+Address = 555
+Factor = 1.0
+Writable = true
+Type = "INT16"
+Units = "hr"
+
+[[Register]]
+Name = "COMPRESSOR_SESSION_RUNTIME"
+Address = 551
+Factor = 0.1
+Writable = false
+Type = "INT16"
+Units = "min"
+
+[[Register]]
+Name = "COMPRESSOR_STALL_DELAY"
+Address = 553
+Factor = 1.0
+Writable = false
+Type = "BOOL"
+
+[[Register]]
+Name = "CONDENSATE_WARNING"
+Address = 536
+Factor = 1.0
+Writable = false
+Type = "BOOL"
+
+[[Register]]
+Name = "COOLING_MODE"
+Address = 652
+Factor = 1.0
+Writable = false
+Type = "BOOL"
+
+[[Register]]
+Name = "DEFROST"
+Address = 655
+Factor = 1.0
+Writable = false
+Type = "BOOL"
+
+[[Register]]
+Name = "DEW_POINT"
+Address = 179
+Factor = 0.1
+Writable = false
+Type = "INT16"
+Units = "°F"
+
+[[Register]]
+Name = "DEW_POINT_SAFETY_FACTOR"
+Address = 370
+Factor = 0.1
+Writable = true
+Type = "INT16"
+Units = "°F"
+
+[[Register]]
+Name = "DIVERSION_THERMOSTAT"
+Address = 546
+Factor = 1.0
+Writable = false
+Type = "BOOL"
+
+[[Register]]
+Name = "DIVERSION_VALVE_%_CLOSED"
+Address = 532
+Factor = 1.0
+Writable = false
+Type = "INT16"
+Units = "%"
+
+[[Register]]
+Name = "DIVERSION_VALVE_CLOSED"
+Address = 632
+Factor = 1.0
+Writable = false
+Type = "BOOL"
+
+[[Register]]
+Name = "DIVERSION_VALVE_DIFFERENTIAL"
+Address = 337
+Factor = 1.0
+Writable = true
+Type = "INT16"
+Units = "°F"
+
+[[Register]]
+Name = "DIVERSION_VALVE_SETPOINT"
+Address = 539
+Factor = 1.0
+Writable = false
+Type = "INT16"
+Units = "°F"
+
+[[Register]]
+Name = "DX2W_POWER"
+Address = 474
+Factor = 1.0
+Writable = true
+Type = "BOOL"
+
+[[Register]]
+Name = "EXWT_OFFSET"
+Address = 138
+Factor = 1.0
+Writable = true
+Type = "INT16"
+Units = "°F"
+
+[[Register]]
+Name = "FORCED_DEFROST"
+Address = 471
+Factor = 1.0
+Writable = true
+Type = "BOOL"
+
+[[Register]]
+Name = "HEATING_MODE"
+Address = 654
+Factor = 1.0
+Writable = true
+Type = "BOOL"
+
+[[Register]]
+Name = "HOT_WATER_DESIGN_TEMP"
+Address = 331
+Factor = 1.0
+Writable = true
+Type = "INT16"
+Units = "°F"
+
+[[Register]]
+Name = "HOT_WATER_DIFFERENTIAL"
+Address = 334
+Factor = 1.0
+Writable = true
+Type = "INT16"
+Units = "°F"
+
+[[Register]]
+Name = "HOT_WATER_MAX_TEMP"
+Address = 332
+Factor = 1.0
+Writable = true
+Type = "INT16"
+Units = "°F"
+
+[[Register]]
+Name = "HOT_WATER_MIN_TEMP"
+Address = 333
+Factor = 1.0
+Writable = true
+Type = "INT16"
+Units = "°F"
+
+[[Register]]
+Name = "HOT_WATER_TARGET"
+Address = 534
+Factor = 1.0
+Writable = false
+Type = "INT16"
+Units = "°F"
+
+[[Register]]
+Name = "HP_CIRCULATOR"
+Address = 831
+Factor = 1.0
+Writable = false
+Type = "BOOL"
+
+[[Register]]
+Name = "HP_CT"
+Address = 151
+Factor = 0.1
+Writable = false
+Type = "INT16"
+Units = "A"
+
+[[Register]]
+Name = "HP_ENTERING_WATER_TEMP"
+Address = 133
+Factor = 0.1
+Writable = false
+Type = "INT16"
+Units = "°F"
+
+[[Register]]
+Name = "HP_EXITING_WATER_TEMP"
+Address = 134
+Factor = 0.1
+Writable = false
+Type = "INT16"
+Units = "°F"
+
+[[Register]]
+Name = "HP_INPUT_KW"
+Address = 550
+Factor = 0.01
+Writable = false
+Type = "INT16"
+Units = "kW"
+
+[[Register]]
+Name = "HP_KWH"
+Address = 575
+Factor = 1.0
+Writable = true
+Type = "INT16"
+Units = "kWh"
+
+[[Register]]
+Name = "HP_OPERATING_MODE"
+Address = 357
+Factor = 1.0
+Writable = true
+Type = "INT16"
+
+[[Register]]
+Name = "HP_OUTPUT_KW"
+Address = 574
+Factor = 0.01
+Writable = false
+Type = "INT16"
+Units = "kW"
+
+[[Register]]
+Name = "HP_OUTPUT_KWH"
+Address = 578
+Factor = 1.0
+Writable = true
+Type = "UINT16"
+Units = "kWh"
+
+[[Register]]
+Name = "HP_POWER_RESET"
+Address = 374
+Factor = 1.0
+Writable = true
+Type = "BOOL"
+
+[[Register]]
+Name = "HP_TEST_JUMPER_STATUS"
+Address = 559
+Factor = 1.0
+Writable = false
+Type = "BOOL"
+
+[[Register]]
+Name = "HP_WATER_DELTA-T"
+Address = 531
+Factor = 0.1
+Writable = false
+Type = "INT16"
+Units = "°F"
+
+[[Register]]
+Name = "INDOOR_AIR_TEMP"
+Address = 111
+Factor = 0.1
+Writable = false
+Type = "INT16"
+Units = "°C"
+
+[[Register]]
+Name = "INDOOR_RELATIVE_HUMIDITY"
+Address = 171
+Factor = 0.1
+Writable = true
+Type = "INT16"
+Units = "RH%"
+
+[[Register]]
+Name = "LIQUID_SUB-COOLING"
+Address = 558
+Factor = 1.0
+Writable = false
+Type = "INT16"
+Units = "°F"
+
+[[Register]]
+Name = "LL_PRESSURE"
+Address = 174
+Factor = 1.0
+Writable = false
+Type = "INT16"
+Units = "psi"
+
+[[Register]]
+Name = "LL_TEMP"
+Address = 173
+Factor = 1.0
+Writable = false
+Type = "INT16"
+Units = "°F"
+
+[[Register]]
+Name = "MIX_WATER_TEMP"
+Address = 135
+Factor = 0.1
+Writable = false
+Type = "INT16"
+Units = "°F"
+
+[[Register]]
+Name = "NET_COP"
+Address = 573
+Factor = 0.01
+Writable = false
+Type = "INT16"
+
+[[Register]]
+Name = "ODR_TARGET_WATER_TEMP"
+Address = 533
+Factor = 1.0
+Writable = true
+Type = "INT16"
+Units = "°F"
+
+[[Register]]
+Name = "OUTDOOR_AIR_DESIGN_TEMP"
+Address = 311
+Factor = 1.0
+Writable = true
+Type = "INT16"
+Units = "°F"
+
+[[Register]]
+Name = "OUTSIDE_AIR_TEMP"
+Address = 112
+Factor = 0.1
+Writable = false
+Type = "INT16"
+Units = "°F"
+
+[[Register]]
+Name = "RADIANT_COOLING_MIN"
+Address = 180
+Factor = 1.0
+Writable = true
+Type = "INT16"
+Units = "°F"
+
+[[Register]]
+Name = "RADIANT_COOLING_MODE"
+Address = 451
+Factor = 1.0
+Writable = true
+Type = "BOOL"
+
+[[Register]]
+Name = "RESET_HP_RUNTIME"
+Address = 475
+Factor = 1.0
+Writable = true
+Type = "BOOL"
+
+[[Register]]
+Name = "RESET_KWH_COUNTERS"
+Address = 481
+Factor = 1.0
+Writable = true
+Type = "BOOL"
+
+[[Register]]
+Name = "RETURN_WATER_TEMP"
+Address = 136
+Factor = 0.1
+Writable = false
+Type = "INT16"
+Units = "°F"
+
+[[Register]]
+Name = "SATURATED_TEMP"
+Address = 557
+Factor = 1.0
+Writable = false
+Type = "INT16"
+Units = "°F"
+
+[[Register]]
+Name = "TIME_SINCE_LAST_DEFROST"
+Address = 552
+Factor = 0.1
+Writable = false
+Type = "INT16"
+Units = "min"
