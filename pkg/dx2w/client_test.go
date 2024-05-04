@@ -8,8 +8,6 @@ import (
 )
 
 func TestClient_ReadAll(t *testing.T) {
-	// Mock modbus client and responses
-
 	client := New(
 		TCPDevice{
 			Url: "tcp://192.168.50.60:502",
