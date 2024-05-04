@@ -29,7 +29,7 @@ type Config struct {
 	Register  []Register
 }
 
-func ParseConfig(rawconf []byte) Config {
+func parseConfig(rawconf []byte) Config {
 	var cfg Config
 	err := toml.Unmarshal(rawconf, &cfg)
 	if err != nil {
@@ -39,4 +39,17 @@ func ParseConfig(rawconf []byte) Config {
 		return cmp.Compare(a.Address, b.Address)
 	})
 	return cfg
+}
+
+func (cfg Config) withFields(fields []string) Config {
+	newConf := Config{
+		DeviceURI: cfg.DeviceURI,
+		DeviceID:  cfg.DeviceID,
+	}
+	for _, reg := range cfg.Register {
+		if slices.Contains(fields, reg.Name) {
+			newConf.Register = append(newConf.Register, reg)
+		}
+	}
+	return newConf
 }
