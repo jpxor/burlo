@@ -24,9 +24,7 @@ type Register struct {
 }
 
 type Config struct {
-	DeviceURI string
-	DeviceID  uint8
-	Register  []Register
+	Register []Register
 }
 
 func parseConfig(rawconf []byte) Config {
@@ -42,10 +40,7 @@ func parseConfig(rawconf []byte) Config {
 }
 
 func (cfg Config) withFields(fields []string) Config {
-	newConf := Config{
-		DeviceURI: cfg.DeviceURI,
-		DeviceID:  cfg.DeviceID,
-	}
+	newConf := Config{}
 	for _, reg := range cfg.Register {
 		if slices.Contains(fields, reg.Name) {
 			newConf.Register = append(newConf.Register, reg)
