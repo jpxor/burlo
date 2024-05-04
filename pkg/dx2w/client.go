@@ -75,6 +75,7 @@ func (c Client) ReadAll() map[string]Value {
 	client.SetUnitId(c.device.Id)
 
 	now := time.Now()
+	nretries := 0
 
 	nread := 0
 	for nread < len(c.config.Register) {
@@ -104,9 +105,12 @@ func (c Client) ReadAll() map[string]Value {
 		if err != nil {
 			log.Printf("Failed to read modbus registers %v - %v: %v", firstAddr, lastAddr, err)
 
-			// retry after giving the device a short rest
-			time.Sleep(200 * time.Millisecond)
-			continue
+			if nretries < 5 {
+				// retry after giving the device a short rest
+				time.Sleep(200 * time.Millisecond)
+				nretries += 1
+				continue
+			}
 
 		} else {
 			for _, reg := range registers[:count] {
