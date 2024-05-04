@@ -3,7 +3,6 @@ package main
 import (
 	"cmp"
 	"log"
-	"os"
 	"slices"
 
 	toml "github.com/pelletier/go-toml/v2"
@@ -30,13 +29,9 @@ type Config struct {
 	Register  []Register
 }
 
-func LoadConfig(filepath string) Config {
-	cfg_str, err := os.ReadFile(filepath)
-	if err != nil {
-		log.Fatalln(err)
-	}
+func ParseConfig(rawconf []byte) Config {
 	var cfg Config
-	err = toml.Unmarshal(cfg_str, &cfg)
+	err := toml.Unmarshal(rawconf, &cfg)
 	if err != nil {
 		log.Fatalln(err)
 	}

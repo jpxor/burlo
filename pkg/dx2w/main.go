@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	_ "embed"
 	"flag"
 	"os"
 	"os/signal"
@@ -9,6 +10,9 @@ import (
 	"syscall"
 	"time"
 )
+
+//go:embed dx2w-modbus.toml
+var modbusConf []byte
 
 type global_vars struct {
 	waitgroup sync.WaitGroup
@@ -19,10 +23,9 @@ var global = global_vars{}
 func main() {
 
 	printRegs := flag.Bool("print", false, "[debug] just print all register values")
-	confpath := flag.String("c", "./dx2w-modbus.toml", "path to the modbus register configurations file")
 	flag.Parse()
 
-	cfg := LoadConfig(*confpath)
+	cfg := ParseConfig(modbusConf)
 
 	if *printRegs {
 		printRegisters(cfg)
