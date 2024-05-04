@@ -1,8 +1,10 @@
 package main
 
 import (
+	"cmp"
 	"log"
 	"os"
+	"slices"
 
 	toml "github.com/pelletier/go-toml/v2"
 )
@@ -38,5 +40,8 @@ func LoadConfig(filepath string) Config {
 	if err != nil {
 		log.Fatalln(err)
 	}
+	slices.SortFunc(cfg.Register, func(a, b Register) int {
+		return cmp.Compare(a.Address, b.Address)
+	})
 	return cfg
 }
