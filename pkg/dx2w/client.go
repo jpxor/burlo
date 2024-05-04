@@ -58,7 +58,7 @@ func (c Client) ReadAll() map[string]Value {
 	}
 	client, err := modbus.NewClient(&modbus.ClientConfiguration{
 		URL:     c.device.Url,
-		Timeout: 1 * time.Second,
+		Timeout: 4 * time.Second,
 	})
 	if err != nil {
 		log.Println("Error creating Modbus client:", err)
@@ -82,13 +82,13 @@ func (c Client) ReadAll() map[string]Value {
 		// registers that have not yet been read
 		registers := c.config.Register[nread:]
 
-		// will read up to 100 registers per request
+		// will read up to 16 registers per request
 		firstAddr := registers[0].Address
-		lastAddr := firstAddr + 100
+		lastAddr := firstAddr + 16
 		count := 0
 
 		for _, reg := range registers {
-			if reg.Address > lastAddr {
+			if reg.Address >= lastAddr {
 				break
 			}
 			count += 1
@@ -98,11 +98,15 @@ func (c Client) ReadAll() map[string]Value {
 		lastAddr = registers[count-1].Address
 		nregisters := 1 + lastAddr - firstAddr
 
-		log.Printf("Reading modbus registers %v - %v", firstAddr, lastAddr)
+		log.Printf("Reading modbus registers %v - %v, count %v", firstAddr, lastAddr, nregisters)
 		rawvals, err := client.ReadRegisters(firstAddr, nregisters, modbus.HOLDING_REGISTER)
 
 		if err != nil {
-			log.Printf("Failed to read modbus registers %v - %v", firstAddr, lastAddr)
+			log.Printf("Failed to read modbus registers %v - %v: %v", firstAddr, lastAddr, err)
+
+			// retry after giving the device a short rest
+			time.Sleep(200 * time.Millisecond)
+			continue
 
 		} else {
 			for _, reg := range registers[:count] {
