@@ -20,9 +20,8 @@ type TCPDevice struct {
 }
 
 type TCPClient struct {
-	interval time.Duration
-	device   TCPDevice
-	config   Config
+	device TCPDevice
+	config Config
 
 	lastRead time.Time
 	cached   map[string]Value
@@ -37,18 +36,17 @@ type Value struct {
 	Timestamp time.Time
 }
 
-func New(device TCPDevice, interval time.Duration) *TCPClient {
+func New(device TCPDevice) *TCPClient {
 	client := &TCPClient{
-		device:   device,
-		interval: interval,
-		config:   globalRegisterConfig,
-		cached:   map[string]Value{},
+		device: device,
+		config: globalRegisterConfig,
+		cached: map[string]Value{},
 	}
 	return client
 }
 
-func NewWithFields(device TCPDevice, interval time.Duration, fields []string) *TCPClient {
-	client := New(device, interval)
+func NewWithFields(device TCPDevice, fields []string) *TCPClient {
+	client := New(device)
 	client.config = client.config.withFields(fields)
 	return client
 }
@@ -60,9 +58,6 @@ func (c TCPClient) PrintFields() {
 }
 
 func (c TCPClient) ReadAll() map[string]Value {
-	if time.Since(c.lastRead) < c.interval {
-		return c.cached
-	}
 	client, err := modbus.NewClient(&modbus.ClientConfiguration{
 		URL:     c.device.Url,
 		Timeout: 4 * time.Second,

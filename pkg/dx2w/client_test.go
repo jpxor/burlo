@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"testing"
-	"time"
 )
 
 func TestClient_ReadAll(t *testing.T) {
@@ -13,7 +12,6 @@ func TestClient_ReadAll(t *testing.T) {
 			Url: "tcp://192.168.50.60:502",
 			Id:  200,
 		},
-		time.Minute,
 	)
 
 	jsonBytes := func(data interface{}) []byte {
