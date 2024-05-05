@@ -1,15 +1,10 @@
 package main
 
 import (
-	"context"
-	"log"
 	"sync"
 	"time"
 
 	"burlo/pkg/dx2w"
-
-	influxdb2 "github.com/influxdata/influxdb-client-go/v2"
-	"github.com/influxdata/influxdb-client-go/v2/api"
 )
 
 var global_mutex sync.Mutex
@@ -23,15 +18,6 @@ func main() {
 		Url: "tcp://192.168.50.60:502",
 		Id:  200,
 	}
-
-	// TODO: create config for influxdb settings
-	// The following api key is safe to post publicly
-	apikey := "JnIBQToNwvj9ThIrrvvhRmT0-w_lgPx0JyyQm3V4lqJRp-YiIzIlZ_atr5qRlmUjMnq9RMvNO28C_fKdSnD6Ig=="
-	influx := influxdb2.NewClient("http://192.168.50.2:8086", apikey)
-	defer influx.Close()
-
-	bucket_dx2w := influx.WriteAPIBlocking("home", "dx2w")
-	bucket_dx2w.EnableBatching()
 
 	var timer_60min time.Time
 	var timer_10min time.Time
@@ -70,27 +56,9 @@ func main() {
 		update_register_map(results)
 		global_mutex.Unlock()
 
-		logResults(results, bucket_dx2w)
-		bucket_dx2w.Flush(context.Background())
-
 		// wait the shortest interval
 		wait := (15 * time.Second) - time.Since(start)
 		time.Sleep(wait)
-	}
-}
-
-func logResults(results map[string]dx2w.Value, influx_bucket api.WriteAPIBlocking) {
-	for measurement, value := range results {
-		point := influxdb2.NewPointWithMeasurement(measurement).
-			AddTag("device", "dx2w").
-			AddTag("units", value.Units).
-			AddField("value", value.Float32).
-			SetTime(value.Timestamp)
-
-		err := influx_bucket.WritePoint(context.Background(), point)
-		if err != nil {
-			log.Println("failed to WritePoint:", err)
-		}
 	}
 }
 
