@@ -15,8 +15,8 @@ import (
 var global_mutex sync.Mutex
 var register_map = make(map[string]dx2w.Value)
 
-// write a service that logs data from dx2w modbus client to influxdb2
 func main() {
+	go http_server()
 
 	// DX2W Modbus TCP device
 	dev := dx2w.TCPDevice{
