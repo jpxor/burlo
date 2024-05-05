@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -11,11 +12,11 @@ import (
 	"time"
 )
 
-func http_server() {
+func http_server(port uint) {
 
 	mux := http.NewServeMux()
 	server := http.Server{
-		Addr:         ":4006",
+		Addr:         fmt.Sprintf(":%v", port),
 		ReadTimeout:  time.Minute,
 		WriteTimeout: time.Minute,
 		Handler:      mux,

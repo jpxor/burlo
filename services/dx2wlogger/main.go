@@ -1,6 +1,8 @@
 package main
 
 import (
+	"flag"
+	"fmt"
 	"sync"
 	"time"
 
@@ -11,12 +13,18 @@ var global_mutex sync.Mutex
 var register_map = make(map[string]dx2w.Value)
 
 func main() {
-	go http_server()
+
+	tcpAddr := flag.String("tcp", "192.168.50.60:502", "Modbus TCP address including port number")
+	devId := flag.Uint("d", 200, "Target Modbus server device id")
+	port := flag.Uint("p", 4006, "HTTP server port")
+	flag.Parse()
+
+	go http_server(*port)
 
 	// DX2W Modbus TCP device
 	dev := dx2w.TCPDevice{
-		Url: "tcp://192.168.50.60:502",
-		Id:  200,
+		Url: fmt.Sprintf("tcp://%s", *tcpAddr),
+		Id:  uint8(*devId),
 	}
 
 	var timer_60min time.Time
