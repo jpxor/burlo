@@ -2,6 +2,7 @@ package dx2w
 
 import (
 	_ "embed"
+	"fmt"
 	"log"
 	"time"
 
@@ -18,7 +19,7 @@ type TCPDevice struct {
 	Id  uint8
 }
 
-type Client struct {
+type TCPClient struct {
 	interval time.Duration
 	device   TCPDevice
 	config   Config
@@ -36,8 +37,8 @@ type Value struct {
 	Timestamp time.Time
 }
 
-func New(device TCPDevice, interval time.Duration) *Client {
-	client := &Client{
+func New(device TCPDevice, interval time.Duration) *TCPClient {
+	client := &TCPClient{
 		device:   device,
 		interval: interval,
 		config:   globalRegisterConfig,
@@ -46,13 +47,19 @@ func New(device TCPDevice, interval time.Duration) *Client {
 	return client
 }
 
-func NewWithFields(device TCPDevice, interval time.Duration, fields []string) *Client {
+func NewWithFields(device TCPDevice, interval time.Duration, fields []string) *TCPClient {
 	client := New(device, interval)
 	client.config = client.config.withFields(fields)
 	return client
 }
 
-func (c Client) ReadAll() map[string]Value {
+func (c TCPClient) PrintFields() {
+	for _, reg := range c.config.Register {
+		fmt.Println(reg.Name)
+	}
+}
+
+func (c TCPClient) ReadAll() map[string]Value {
 	if time.Since(c.lastRead) < c.interval {
 		return c.cached
 	}
