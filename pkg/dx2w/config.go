@@ -46,5 +46,8 @@ func (cfg Config) withFields(fields []string) Config {
 			newConf.Register = append(newConf.Register, reg)
 		}
 	}
+	slices.SortFunc(newConf.Register, func(a, b Register) int {
+		return cmp.Compare(a.Address, b.Address)
+	})
 	return newConf
 }
