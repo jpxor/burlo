@@ -1,0 +1,29 @@
+
+# for config & display
+units = "celsius"
+
+[service_http_addresses]
+dx2wmodbus = "192.168.50.60:502"
+dx2wlogger = "192.168.50.193:4006"
+controller = "192.168.50.193:4005"
+thermostat = "192.168.50.193:4004"
+mqttserver = "192.168.50.193:4003"
+actuators  = "192.168.50.193:4002"
+
+[location] # for weather data
+latitude = "45.41117"
+longitude = "-75.69812"
+
+[thermostat.mqtt]
+prefix = "/zigbee2mqtt/thermostats"
+user = "hvac"
+pass = "hvac_pass"
+
+[controller.radiant_cooling]
+enabled = true
+overnight_boost = true
+
+[controller.phidgets] # actuators
+circulator = {hubport = 0, channel = 0, type="digital_output"}
+hpmode = {hubport = 0, channel = 1, type="digital_output"}
+dewpoint = {hubport = 1, channel = 0, type="voltage_output"}
