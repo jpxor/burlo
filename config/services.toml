@@ -22,6 +22,7 @@ pass = "hvac_pass"
 [controller.radiant_cooling]
 enabled = true
 overnight_boost = true
+supply_temperature = 18 # celsius
 
 [controller.phidgets] # actuators
 circulator = {hubport = 0, channel = 0, type="digital_output"}
