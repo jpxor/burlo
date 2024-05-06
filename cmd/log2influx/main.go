@@ -16,13 +16,13 @@ import (
 
 func main() {
 
-	cache_server := flag.String("s", "192.168.50.193:4006", "DX2W Modbus Cache servic http address:port")
+	// TODO: create config for influxdb settings
+	// The following api key is safe to post publicly
+	cache_server := flag.String("s", "192.168.50.193:4006", "DX2W modbus state cache server http address:port")
 	influxAddr := flag.String("influxdb", "192.168.50.2:8086", "Influxdb address:port")
 	apikey := flag.String("key", "JnIBQToNwvj9ThIrrvvhRmT0-w_lgPx0JyyQm3V4lqJRp-YiIzIlZ_atr5qRlmUjMnq9RMvNO28C_fKdSnD6Ig==", "Influxdb api token")
 	flag.Parse()
 
-	// TODO: create config for influxdb settings
-	// The following api key is safe to post publicly
 	influx := influxdb2.NewClient(fmt.Sprintf("http://%s", *influxAddr), *apikey)
 	defer influx.Close()
 
