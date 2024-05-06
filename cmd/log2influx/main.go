@@ -9,6 +9,7 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"os"
 	"time"
 
 	influxdb2 "github.com/influxdata/influxdb-client-go/v2"
@@ -32,6 +33,8 @@ func main() {
 	request_url := fmt.Sprintf("http://%s/dx2w/registers", *cache_server)
 
 	for {
+		start := time.Now()
+
 		resp, err := http.Get(request_url)
 		if err != nil {
 			fmt.Println("Error making the request:", err)
@@ -51,9 +54,10 @@ func main() {
 		err = json.Unmarshal(body, &results)
 		if err != nil {
 			fmt.Printf("Error decoding the JSON response: %v\n", err)
-			return
+			os.Exit(1)
 		}
 
+		log.Println("writing measurements to influxdb")
 		for measurement, value := range results {
 			point := influxdb2.NewPointWithMeasurement(measurement).
 				AddTag("device", "dx2w").
@@ -66,6 +70,15 @@ func main() {
 				log.Println("failed to WritePoint:", err)
 			}
 		}
-		bucket_dx2w.Flush(context.Background())
+
+		err = bucket_dx2w.Flush(context.Background())
+		if err != nil {
+			log.Println("failed to flush:", err)
+		}
+
+		// the dx2w/registers cache is updated at most once
+		// every 15 seconds
+		wait := 15*time.Second - time.Since(start)
+		time.Sleep(wait)
 	}
 }
