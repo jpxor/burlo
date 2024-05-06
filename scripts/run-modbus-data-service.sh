@@ -1,3 +1,3 @@
 #!/usr/bin/sh
 cd /usr/userapps/hvac-controller/burlo
-./bin/modbus -c ./services/modbus/dx2w-modbus.toml
+./bin/dx2wlogger -c ./config/services.toml
