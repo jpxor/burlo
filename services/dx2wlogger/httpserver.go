@@ -33,7 +33,7 @@ func http_server(port uint) {
 	mux.HandleFunc("GET /dx2w", GetPageUI())
 	mux.HandleFunc("/", CatchAll())
 
-	log.Println("http_server started, port: 4006")
+	log.Println("http_server started, port:", port)
 	defer log.Println("http_server stopped")
 
 	if err := server.ListenAndServe(); err != http.ErrServerClosed {
