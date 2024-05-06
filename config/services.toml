@@ -3,12 +3,15 @@
 units = "celsius"
 
 [service_http_addresses]
-dx2wmodbus = "192.168.50.60:502"
 dx2wlogger = "192.168.50.193:4006"
 controller = "192.168.50.193:4005"
 thermostat = "192.168.50.193:4004"
 mqttserver = "192.168.50.193:4003"
 actuators  = "192.168.50.193:4002"
+
+[dx2w_modbus]
+tcp_address = "192.168.50.60:502"
+device_id = 200
 
 [location] # for weather data
 latitude = "45.41117"

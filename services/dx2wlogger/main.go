@@ -6,6 +6,7 @@ import (
 	"sync"
 	"time"
 
+	"burlo/config"
 	"burlo/pkg/dx2w"
 )
 
@@ -14,17 +15,18 @@ var register_map = make(map[string]dx2w.Value)
 
 func main() {
 
-	tcpAddr := flag.String("tcp", "192.168.50.60:502", "Modbus TCP address including port number")
-	devId := flag.Uint("d", 200, "Target Modbus server device id")
-	port := flag.Uint("p", 4006, "HTTP server port")
+	config_path := flag.String("c", "./services.toml", "Path to the services config file")
 	flag.Parse()
 
-	go http_server(*port)
+	cfg := config.LoadV2(*config_path)
+
+	port := config.GetPort(cfg.ServiceHTTPAddresses.Dx2Wlogger)
+	go http_server(port)
 
 	// DX2W Modbus TCP device
 	dev := dx2w.TCPDevice{
-		Url: fmt.Sprintf("tcp://%s", *tcpAddr),
-		Id:  uint8(*devId),
+		Url: fmt.Sprintf("tcp://%s", cfg.Dx2WModbus.TCPAddress),
+		Id:  cfg.Dx2WModbus.DeviceID,
 	}
 
 	var timer_60min time.Time

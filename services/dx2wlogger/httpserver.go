@@ -12,7 +12,7 @@ import (
 	"time"
 )
 
-func http_server(port uint) {
+func http_server(port string) {
 
 	mux := http.NewServeMux()
 	server := http.Server{
