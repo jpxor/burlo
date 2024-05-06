@@ -13,14 +13,14 @@ weather:
 	go build ../services/weather
 	systemctl restart hvac.weather.service
 
-modbus:
-	go build ../services/modbus
+dx2wlogger:
+	go build ../services/dx2wlogger
 	systemctl restart hvac.modbus.service
 
-all: actuator controller vthermostat weather modbus
+all: actuator controller vthermostat weather dx2wlogger
 
 clean:
 	rm ./controller
 	rm ./vthermostat
 	rm ./weather
-	rm ./modbus
+	rm ./dx2wlogger
