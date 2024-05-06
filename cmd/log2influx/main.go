@@ -4,6 +4,7 @@ import (
 	"burlo/pkg/dx2w"
 	"context"
 	"encoding/json"
+	"flag"
 	"fmt"
 	"io"
 	"log"
@@ -15,17 +16,20 @@ import (
 
 func main() {
 
+	cache_server := flag.String("s", "192.168.50.193:4006", "DX2W Modbus Cache servic http address:port")
+	influxAddr := flag.String("influxdb", "192.168.50.2:8086", "Influxdb address:port")
+	apikey := flag.String("key", "JnIBQToNwvj9ThIrrvvhRmT0-w_lgPx0JyyQm3V4lqJRp-YiIzIlZ_atr5qRlmUjMnq9RMvNO28C_fKdSnD6Ig==", "Influxdb api token")
+	flag.Parse()
+
 	// TODO: create config for influxdb settings
 	// The following api key is safe to post publicly
-	apikey := "JnIBQToNwvj9ThIrrvvhRmT0-w_lgPx0JyyQm3V4lqJRp-YiIzIlZ_atr5qRlmUjMnq9RMvNO28C_fKdSnD6Ig=="
-	influx := influxdb2.NewClient("http://192.168.50.2:8086", apikey)
+	influx := influxdb2.NewClient(fmt.Sprintf("http://%s", *influxAddr), *apikey)
 	defer influx.Close()
 
 	bucket_dx2w := influx.WriteAPIBlocking("home", "dx2w")
 	bucket_dx2w.EnableBatching()
 
-	modbus_cache_server := "localhost:4006"
-	request_url := fmt.Sprintf("http://%s/dx2w/registers", modbus_cache_server)
+	request_url := fmt.Sprintf("http://%s/dx2w/registers", *cache_server)
 
 	for {
 		resp, err := http.Get(request_url)
