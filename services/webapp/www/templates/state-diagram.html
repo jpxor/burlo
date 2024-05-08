@@ -1,0 +1,122 @@
+<style>
+    .box {
+        border-radius: 5px;
+    }
+
+    .value {
+        border-radius: 5px;
+        border: 1px solid rgba(29, 87, 23, 0.493);
+        font-size: 1.1vw;
+        text-align: center;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-family: consolas, monospace;
+        background-color: aliceblue;
+    }
+</style>
+
+<div style="position: relative;" hx-trigger="every 15s" hx-get="/state-diagram" hx-target="this" hx-swap="outerHTML">
+
+    <img src="/static/hvac-system.png" style="max-width: 100%; max-height: 100%;">
+
+    {{ if eq .COOLING_MODE "true" }}
+    <!-- COOLING SELECTOR -->
+    <div class="box"
+        style="position: absolute; top: 11%; left: 18%; width: 5.2%; height: 3%; border: 2px solid rgba(0, 38, 255, 0.493);">
+    </div>
+
+    {{ else }}
+
+    <!-- HEATING SELECTOR -->
+    <div class="box"
+        style="position: absolute; top: 11%; left: 11%; width: 5.5%; height: 3%; border: 2px solid rgba(255, 0, 0, 0.493);">
+    </div>
+
+    {{ end }}
+
+    <!-- OUTSIDE_AIR_TEMP -->
+    <div class="value" style="position: absolute; top: 25%; left: 9.5%; width: 5.2%; height: 3%;">
+        {{ .OUTSIDE_AIR_TEMP }}</div>
+
+    <!-- INDOOR DEW_POINT -->
+    <div class="value" style="position: absolute; top: 25%; left: 21.5%; width: 5.2%; height: 3%;">
+        {{ .DEW_POINT }}</div>
+
+    <!-- INPUT KW -->
+    <div class="value" style="position: absolute; top: 66.4%; left: 9.5%; width: 5.2%; height: 3%;">
+        {{ .HP_INPUT_KW }}</div>
+
+    <!-- COP -->
+    <div class="value" style="position: absolute; top: 70%; left: 9.5%; width: 5.2%; height: 3%;">
+        {{ .NET_COP }}</div>
+
+    <!-- LL PRESSURE -->
+    <div class="value" style="position: absolute; top: 55%; left: 21%; width: 5.2%; height: 3%;">
+        {{ .LL_PRESSURE }}</div>
+
+    <!-- LL Temperature -->
+    <div class="value" style="position: absolute; top: 58.6%; left: 21%; width: 5.2%; height: 3%;">
+        {{ .LL_TEMP }}</div>
+
+    <!-- LL SUBCOOLING  -->
+    <div class="value" style="position: absolute; top: 62.2%; left: 21%; width: 5.2%; height: 3%;">
+        {{ .LIQUID_SUB_COOLING }}</div>
+
+    <!-- DELTA-T  -->
+    <div class="value" style="position: absolute; top: 50%; left: 37.5%; width: 5.2%; height: 3%;">
+        {{ .HP_WATER_DELTA_T }}</div>
+
+    <!-- OUTPUT KW  -->
+    <div class="value" style="position: absolute; top: 57.5%; left: 37.5%; width: 5.2%; height: 3%;">
+        {{ .HP_OUTPUT_KW }}</div>
+
+    <!-- EXIT TEMP  -->
+    <div class="value" style="position: absolute; top: 51.3%; left: 45.5%; width: 5.2%; height: 3%;">
+        {{ .HP_EXITING_WATER_TEMP }}</div>
+
+    <!-- ENTER TEMP  -->
+    <div class="value" style="position: absolute; top: 61.8%; left: 45.5%; width: 5.2%; height: 3%;">
+        {{ .HP_ENTERING_WATER_TEMP }}</div>
+
+    <!-- BUFFER FLOW (hp circ)  -->
+    <div class="value" style="position: absolute; top: 78.5%; left: 47%; width: 5.2%; height: 3%;">
+        {{ .BUFFER_FLOW }}</div>
+
+    <!-- BUFFER SETPOINT  -->
+    <div class="value" style="position: absolute; top: 61.8%; left: 61%; width: 5.2%; height: 3%;">
+        {{ .BUFFER_TANK_SETPOINT }}</div>
+
+    <!-- BUFFER TEMP  -->
+    <div class="value" style="position: absolute; top: 70.3%; left: 61%; width: 5.2%; height: 3%;">
+        {{ .BUFFER_TANK_TEMP }}</div>
+
+    <!-- MIX VALVE % CLOSED  -->
+    <div class="value" style="position: absolute; top: 85.3%; left: 78%; width: 5.2%; height: 3%;">
+        {{ .DIVERSION_VALVE_PERCENT_CLOSED }}</div>
+
+    <!-- AUX KW  -->
+    <div class="value" style="position: absolute; top: 32%; left: 81.3%; width: 5.2%; height: 3%;">
+        {{ .AUX_BOILER_KW }}</div>
+
+    <!-- AUX SUPPRESS 
+    <div class="value" style="position: absolute; top: 45.5%; left: 81.3%; width: 5.2%; height: 3%;">
+        {{ .NET_COP }}</div> -->
+
+    <!-- DISTRIBUTION CIRC  -->
+    <div class="value" style="position: absolute; top: 30.8%; left: 69.5%; width: 5.2%; height: 3%;">
+        {{ .DISTRIBUTION_FLOW }}</div>
+
+    <!-- SUPPLY TEMP  -->
+    <div class="value" style="position: absolute; top: 28.2%; left: 55%; width: 5.2%; height: 3%;">
+        {{ .MIX_WATER_TEMP }}</div>
+
+    <!-- RETURN TEMP  -->
+    <div class="value" style="position: absolute; top: 17%; left: 55%; width: 5.2%; height: 3%;">
+        {{ .RETURN_WATER_TEMP }}</div>
+
+    <!-- HEAT DELIVERED  -->
+    <div class="value" style="position: absolute; top: 21%; left: 40%; width: 8.2%; height: 3%;">
+        {{ .HEAT_DELIVERED }}</div>
+
+</div>
