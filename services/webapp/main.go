@@ -97,10 +97,14 @@ func create_value_formatter_func(units_temp, units_heat string) value_formatter_
 		formatted["DIVERSION_VALVE_PERCENT_CLOSED"] = formatted["DIVERSION_VALVE_%_CLOSED"]
 
 		// calculate it
-		formatted["DISTRIBUTION_FLOW"] = "6 gpm?"
+		formatted["DISTRIBUTION_FLOW"] = "6 gpm(?)"
 
 		dt := valmap["MIX_WATER_TEMP"].Float32 - valmap["RETURN_WATER_TEMP"].Float32
 		formatted["HEAT_DELIVERED"] = formatEnergy(units_heat, 500.4*6.0*dt)
+
+		if valmap["COMPRESSOR_CALL"].Float32 == 0 {
+			formatted["BUFFER_FLOW"] = "0 gpm"
+		}
 
 		return formatted
 	}
@@ -122,7 +126,7 @@ func formatVal(units_temp, units_heat, key string, val dx2w.Value) string {
 		return fmt.Sprintf("%.1f", val.Float32)
 
 	case "LL_PRESSURE":
-		return fmt.Sprintf("%.1f psi", val.Float32)
+		return fmt.Sprintf("%.0f psi", val.Float32)
 
 	case "LL_TEMP":
 		return formatTemperature(units_temp, val.Float32)
@@ -134,7 +138,7 @@ func formatVal(units_temp, units_heat, key string, val dx2w.Value) string {
 		if val.Float32 == 0 {
 			return "--"
 		}
-		return formatTemperature(units_temp, val.Float32)
+		return formatDeltaTemperature(units_temp, val.Float32)
 
 	case "HP_OUTPUT_KW":
 		return fmt.Sprintf("%.2fkW", val.Float32)
@@ -180,6 +184,14 @@ func formatVal(units_temp, units_heat, key string, val dx2w.Value) string {
 func formatTemperature(units string, val float32) string {
 	if strings.ToLower(units) == "celcius" {
 		val = (val - 32.0) * 5.0 / 9.0
+		return fmt.Sprintf("%.1f℃", val)
+	}
+	return fmt.Sprintf("%.1f℉", val)
+}
+
+func formatDeltaTemperature(units string, val float32) string {
+	if strings.ToLower(units) == "celcius" {
+		val = val * 5.0 / 9.0
 		return fmt.Sprintf("%.1f℃", val)
 	}
 	return fmt.Sprintf("%.1f℉", val)
