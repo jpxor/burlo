@@ -97,10 +97,10 @@ func create_value_formatter_func(units_temp, units_heat string) value_formatter_
 		formatted["DIVERSION_VALVE_PERCENT_CLOSED"] = formatted["DIVERSION_VALVE_%_CLOSED"]
 
 		// calculate it
-		formatted["DISTRIBUTION_FLOW"] = "6 gpm(?)"
+		formatted["DISTRIBUTION_FLOW"] = "4.8 gpm"
 
 		dt := valmap["MIX_WATER_TEMP"].Float32 - valmap["RETURN_WATER_TEMP"].Float32
-		formatted["HEAT_DELIVERED"] = formatEnergy(units_heat, 500.4*6.0*dt)
+		formatted["HEAT_DELIVERED"] = formatEnergy(units_heat, 500.4*4.8*dt)
 
 		if valmap["COMPRESSOR_CALL"].Float32 == 0 {
 			formatted["BUFFER_FLOW"] = "0 gpm"
