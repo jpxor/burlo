@@ -55,8 +55,10 @@ func GetRegisters() http.HandlerFunc {
 		return json
 	}
 	return func(w http.ResponseWriter, r *http.Request) {
+		// use lock just to get reference to register_map
 		global_mutex.Lock()
-		defer global_mutex.Unlock()
-		w.Write(jsonBytes(register_map))
+		ref := register_map
+		global_mutex.Unlock()
+		w.Write(jsonBytes(ref))
 	}
 }

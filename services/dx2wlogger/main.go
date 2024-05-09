@@ -70,9 +70,17 @@ func main() {
 }
 
 func update_register_map(results map[string]dx2w.Value) {
-	global_mutex.Lock()
-	defer global_mutex.Unlock()
-	for k, v := range results {
-		register_map[k] = v
+	new_map := make(map[string]dx2w.Value)
+	// copy existing
+	for k, v := range register_map {
+		new_map[k] = v
 	}
+	// update values
+	for k, v := range results {
+		new_map[k] = v
+	}
+	// lock to replace old with new
+	global_mutex.Lock()
+	register_map = new_map
+	global_mutex.Unlock()
 }
