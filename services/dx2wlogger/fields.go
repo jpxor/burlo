@@ -37,8 +37,6 @@ var fields_slow = []string{
 // 1 min interval
 var fields_1min_interval = []string{
 	"BUFFER_TANK_TEMP",
-	"HP_CIRCULATOR",
-	"COMPRESSOR_CALL",
 	"COOLING_MODE",
 	"HEATING_MODE",
 	"COMPRESSOR_RUNTIME",
@@ -63,4 +61,6 @@ var fields_15sec_interval = []string{
 	"HP_EXITING_WATER_TEMP",
 	"MIX_WATER_TEMP",
 	"RETURN_WATER_TEMP",
+	"HP_CIRCULATOR",
+	"COMPRESSOR_CALL",
 }
