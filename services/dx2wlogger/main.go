@@ -35,7 +35,6 @@ func main() {
 
 	for {
 
-		global_mutex.Lock()
 		start := time.Now()
 
 		// build up the fields list based on which fields are
@@ -62,9 +61,7 @@ func main() {
 
 		client := dx2w.NewWithFields(dev, fields)
 		results := client.ReadAll()
-
 		update_register_map(results)
-		global_mutex.Unlock()
 
 		// wait the shortest interval
 		wait := (15 * time.Second) - time.Since(start)
@@ -73,6 +70,8 @@ func main() {
 }
 
 func update_register_map(results map[string]dx2w.Value) {
+	global_mutex.Lock()
+	defer global_mutex.Unlock()
 	for k, v := range results {
 		register_map[k] = v
 	}
