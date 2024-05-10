@@ -60,6 +60,8 @@ func filter(data map[string]float32) map[string]float32 {
 		"HP_ENTERING_WATER_TEMP",
 		"HP_EXITING_WATER_TEMP",
 		"OUTSIDE_AIR_TEMP",
+		"MIX_WATER_TEMP",
+		"RETURN_WATER_TEMP",
 	}
 	ret := make(map[string]float32)
 	for k, v := range data {
