@@ -30,10 +30,10 @@ func controller_http_server(addr string) {
 		server.Shutdown(context.Background())
 	}()
 
-	mux.HandleFunc("GET /controller/state", GetControllerState())
+	mux.HandleFunc("GET /controller/state", GetControllerStateJSON())
 	mux.HandleFunc("POST /controller/thermostat/update", PostThermostatUpdate())
 	mux.HandleFunc("POST /controller/weather/update", PostWeatherUpdate())
-	mux.HandleFunc("/", CatchAll())
+	mux.HandleFunc("/", GetControllerStateUI())
 
 	log.Println("[controller_http_server] started", addr)
 	defer log.Println("[controller_http_server] stopped")
@@ -50,7 +50,7 @@ func CatchAll() http.HandlerFunc {
 	}
 }
 
-func GetControllerState() http.HandlerFunc {
+func GetControllerStateUI() http.HandlerFunc {
 	jsonBytes := func(data interface{}) []byte {
 		json, err := json.MarshalIndent(data, "", "    ")
 		if err != nil {
@@ -65,6 +65,33 @@ func GetControllerState() http.HandlerFunc {
 		w.Write(jsonBytes(global.OutdoorConditions))
 		w.Write(jsonBytes(global.IndoorConditions))
 		w.Write(jsonBytes(global.thermostats))
+	}
+}
+
+func GetControllerStateJSON() http.HandlerFunc {
+	jsonBytes := func(data interface{}) []byte {
+		json, err := json.MarshalIndent(data, "", "    ")
+		if err != nil {
+			return []byte(err.Error())
+		}
+		return json
+	}
+	bool2float := func(b bool) float32 {
+		if b {
+			return 1.0
+		}
+		return 0.0
+	}
+	return func(w http.ResponseWriter, r *http.Request) {
+		global.mutex.Lock()
+		defer global.mutex.Unlock()
+		var state = make(map[string]float32)
+		state["tstat_call"] = bool2float(global.Controls.Circulator.Mode == "ON")
+		state["hp_cooling_mode"] = bool2float(global.Controls.Heatpump.Mode == "Cool")
+		state["outdoor_air_temp"] = global.OutdoorConditions.OutdoorAirTemp
+		state["indoor_dewpoint"] = global.IndoorConditions.DewPoint
+		state["indoor_air_temp"] = global.IndoorConditions.IndoorAirTempMax
+		w.Write(jsonBytes(state))
 	}
 }
 
