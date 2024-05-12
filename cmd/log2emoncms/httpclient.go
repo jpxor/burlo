@@ -58,7 +58,7 @@ func filter(data map[string]float32) map[string]float32 {
 		"HP_OUTPUT_KW",
 		"BUFFER_FLOW",
 		"BUFFER_TANK_SETPOINT",
-		"BUFFER_TANK_TEMPERATURE",
+		"BUFFER_TANK_TEMP",
 		"HP_ENTERING_WATER_TEMP",
 		"HP_EXITING_WATER_TEMP",
 		"OUTSIDE_AIR_TEMP",
