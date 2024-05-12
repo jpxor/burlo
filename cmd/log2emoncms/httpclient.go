@@ -53,10 +53,12 @@ func format(data map[string]dx2w.Value) map[string]float32 {
 func filter(data map[string]float32) map[string]float32 {
 	var selected = []string{
 		"COMPRESSOR_CALL",
+		"HP_CIRCULATOR",
 		"HP_INPUT_KW",
 		"HP_OUTPUT_KW",
 		"BUFFER_FLOW",
 		"BUFFER_TANK_SETPOINT",
+		"BUFFER_TANK_TEMPERATURE",
 		"HP_ENTERING_WATER_TEMP",
 		"HP_EXITING_WATER_TEMP",
 		"OUTSIDE_AIR_TEMP",
