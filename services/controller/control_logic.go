@@ -137,13 +137,13 @@ func update_supply_temp() {
 
 func update_circulator() {
 	// debounce, don't let the circulator switch too often
+	// run for at least 15 mins
+	// stay off for at least 1 min
 	if global.Circulator.Mode == ON {
-		// run for at least 15 mins
 		if time.Since(global.Circulator.LastUpdate) < 15*time.Minute {
 			return
 		}
 	} else {
-		// stay off for at least 1 min
 		if time.Since(global.Circulator.LastUpdate) < 1*time.Minute {
 			return
 		}
