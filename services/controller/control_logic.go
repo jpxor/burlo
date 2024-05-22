@@ -151,17 +151,15 @@ func update_circulator() {
 
 	switch global.Heatpump.Mode {
 	case HEAT:
-		if RoomTooHot(global.HeatSetpointError) ||
-			global.SupplyTemp.Value < global.IndoorAirTempMax {
-			log.Println("[cirlculator] off: room too hot or Ts too low")
+		if RoomTooHot(global.HeatSetpointError) {
+			log.Println("[cirlculator] off: room too hot")
 			global.Circulator.Set(OFF)
 			return
 		}
 
 	case COOL:
-		if RoomTooCold(global.CoolSetpointError) ||
-			global.SupplyTemp.Value > global.IndoorAirTempMax {
-			log.Println("[cirlculator] off: room too cold or Ts too high")
+		if RoomTooCold(global.CoolSetpointError) {
+			log.Println("[cirlculator] off: room too cold")
 			global.Circulator.Set(OFF)
 			return
 		}
