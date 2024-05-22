@@ -176,13 +176,13 @@ func update_circulator() {
 // RoomTooCold is a helper that returns true if the
 // room temperature falls below the target (with some margin)
 func RoomTooCold(setpoint_error float32) bool {
-	return setpoint_error <= -1 // example: {target=20, too_cold=19.0}
+	return setpoint_error <= -0.5 // example: {target=20, too_cold=19.5}
 }
 
 // RoomTooHot is a helper that returns true if the
 // room temperature rises above the target (with some margin)
 func RoomTooHot(setpoint_error float32) bool {
-	return setpoint_error >= 1 // example: {target=20, too_hot=21}
+	return setpoint_error >= 0.5 // example: {target=20, too_hot=20.5}
 }
 
 func NightCoolingBoost() bool {
