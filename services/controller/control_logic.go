@@ -156,10 +156,22 @@ func update_circulator() {
 			global.Circulator.Set(OFF)
 			return
 		}
+		if !RoomTooCold(global.HeatSetpointError) &&
+			global.Conditions.OutdoorAirTemp > global.IndoorConditions.IndoorAirTempMax {
+			log.Println("[cirlculator] off: outdoor temp warmer than indoor (no heat loss)")
+			global.Circulator.Set(OFF)
+			return
+		}
 
 	case COOL:
 		if RoomTooCold(global.CoolSetpointError) {
 			log.Println("[cirlculator] off: room too cold")
+			global.Circulator.Set(OFF)
+			return
+		}
+		if !RoomTooHot(global.CoolSetpointError) &&
+			global.Conditions.OutdoorAirTemp < global.IndoorConditions.IndoorAirTempMax {
+			log.Println("[cirlculator] off: outdoor temp cooler than indoor (no heat gain)")
 			global.Circulator.Set(OFF)
 			return
 		}
