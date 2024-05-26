@@ -42,7 +42,7 @@ func main() {
 	go process_thermostat_updates()
 
 	global.waitgroup.Add(1)
-	go process_mqtt_updates()
+	go process_mqtt_updates(cfg)
 
 	global.waitgroup.Add(1)
 	go go_gadget_web_app(*wwwPath)

@@ -77,6 +77,7 @@ func NewClient(opts Opts) *Client {
 			if err != nil {
 				fmt.Println("[Error] failed to subscribe:", err)
 			}
+			fmt.Printf("subscribed to %+v\r\n", subs)
 		}
 	}
 
