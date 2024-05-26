@@ -1,10 +1,10 @@
 package main
 
 import (
+	"burlo/config"
 	"burlo/pkg/lockbox"
+	"flag"
 	"fmt"
-	"log"
-	"os"
 	"sync"
 )
 
@@ -28,16 +28,15 @@ var global = global_vars{
 }
 
 func main() {
-	if len(os.Args) < 3 {
-		fmt.Println("1. provide path to config file")
-		fmt.Println("2. provide path to www directory")
-		os.Exit(1)
-	}
-	configPath := os.Args[1]
-	wwwPath := os.Args[2]
-	load_controller_addr(configPath)
+	configPath := flag.String("c", "", "Path to config file")
+	wwwPath := flag.String("w", "", "Path to thermostatd webserver root")
+	flag.Parse()
 
-	log.Println("Running virtual thermostat service")
+	cfg := config.LoadV2(*configPath)
+	load_controller_addr(cfg)
+
+	fmt.Println("started")
+	defer fmt.Println("stopped")
 
 	global.waitgroup.Add(1)
 	go process_thermostat_updates()
@@ -46,7 +45,7 @@ func main() {
 	go process_mqtt_updates()
 
 	global.waitgroup.Add(1)
-	go go_gadget_web_app(wwwPath)
+	go go_gadget_web_app(*wwwPath)
 
 	// waits for all service type goroutines to complete
 	global.waitgroup.Wait()

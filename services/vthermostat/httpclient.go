@@ -23,9 +23,8 @@ var httpclient = &http.Client{
 	},
 }
 
-func load_controller_addr(cpath string) {
-	cfg := config.Load(cpath)
-	controller_upate_url = fmt.Sprintf("http://%s%s", cfg.Services.ControllerAddr, ctr_update_path)
+func load_controller_addr(cfg config.ServiceConf) {
+	controller_upate_url = fmt.Sprintf("http://%s%s", cfg.ServiceHTTPAddresses.Controller, ctr_update_path)
 }
 
 func notify_controller(tstat Thermostat) {
