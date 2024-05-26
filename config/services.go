@@ -15,6 +15,7 @@ type ServiceConf struct {
 	Location             Location             `toml:"location"`
 	Thermostat           Thermostat           `toml:"thermostat"`
 	Controller           Controller           `toml:"controller"`
+	Mqtt                 Mqtt                 `toml:"mqtt"`
 }
 type ServiceHTTPAddresses struct {
 	Dx2Wlogger string `toml:"dx2wlogger"`
@@ -32,9 +33,10 @@ type Location struct {
 	Longitude string `toml:"longitude"`
 }
 type Mqtt struct {
-	Prefix string `toml:"prefix"`
-	User   string `toml:"user"`
-	Pass   string `toml:"pass"`
+	Address string `toml:"address"`
+	Prefix  string `toml:"prefix"`
+	User    string `toml:"user"`
+	Pass    string `toml:"pass"`
 }
 type Thermostat struct {
 	Mqtt Mqtt `toml:"mqtt"`

@@ -14,8 +14,14 @@ tcp_address = "192.168.50.60:502"
 device_id = 200
 
 [location] # for weather data
-latitude = "45.41117"
-longitude = "-75.69812"
+latitude = "45.360114"
+longitude = "-75.803988"
+
+[mqtt]
+address = "192.168.50.193:1883"
+prefix = "burlo"
+user = "hvac"
+pass = "hvac_pass"
 
 [thermostat.mqtt]
 prefix = "/zigbee2mqtt/thermostats"
