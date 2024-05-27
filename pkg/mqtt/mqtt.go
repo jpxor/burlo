@@ -34,7 +34,6 @@ func NewClient(opts Opts) *Client {
 	if err != nil {
 		panic(err)
 	}
-
 	cliCfg := autopaho.ClientConfig{
 		ServerUrls:            []*url.URL{u},
 		KeepAlive:             20,
@@ -59,7 +58,6 @@ func NewClient(opts Opts) *Client {
 			},
 		},
 	}
-
 	var subs []paho.SubscribeOptions
 	for _, topic := range opts.Topics {
 		subs = append(subs, paho.SubscribeOptions{
@@ -67,7 +65,6 @@ func NewClient(opts Opts) *Client {
 			QoS:   1,
 		})
 	}
-
 	cliCfg.OnConnectionUp = func(cm *autopaho.ConnectionManager, connAck *paho.Connack) {
 		fmt.Println("connected to", u.String())
 		if len(subs) > 0 {
@@ -77,10 +74,11 @@ func NewClient(opts Opts) *Client {
 			if err != nil {
 				fmt.Println("[Error] failed to subscribe:", err)
 			}
-			fmt.Printf("subscribed to %+v\r\n", subs)
+			for _, subopt := range subs {
+				fmt.Printf("subscribed to %+v\r\n", subopt.Topic)
+			}
 		}
 	}
-
 	if opts.OnPublishRecv != nil {
 		cliCfg.ClientConfig.OnPublishReceived = []func(paho.PublishReceived) (bool, error){
 			func(pr paho.PublishReceived) (bool, error) {
@@ -89,16 +87,13 @@ func NewClient(opts Opts) *Client {
 			},
 		}
 	}
-
 	client.cm, err = autopaho.NewConnection(opts.Context, cliCfg)
 	if err != nil {
 		panic(err)
 	}
-
 	if err = client.cm.AwaitConnection(opts.Context); err != nil {
 		panic(err)
 	}
-
 	return client
 }
 
