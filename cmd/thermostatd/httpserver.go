@@ -49,7 +49,6 @@ func GetThermostats(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	w.Write(bytes)
-	w.WriteHeader(http.StatusOK)
 }
 
 func PutThermostatName(w http.ResponseWriter, r *http.Request) {
