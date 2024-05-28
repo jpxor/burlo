@@ -66,7 +66,7 @@ func NewClient(opts Opts) *Client {
 		})
 	}
 	cliCfg.OnConnectionUp = func(cm *autopaho.ConnectionManager, connAck *paho.Connack) {
-		fmt.Println("connected to", u.String())
+		fmt.Println(client.opts.ClientID, "connected to", u.String())
 		if len(subs) > 0 {
 			_, err := cm.Subscribe(context.Background(), &paho.Subscribe{
 				Subscriptions: subs,
@@ -75,7 +75,7 @@ func NewClient(opts Opts) *Client {
 				fmt.Println("[Error] failed to subscribe:", err)
 			}
 			for _, subopt := range subs {
-				fmt.Printf("subscribed to %+v\r\n", subopt.Topic)
+				fmt.Printf("%s subscribed to %+v\r\n", client.opts.ClientID, subopt.Topic)
 			}
 		}
 	}
