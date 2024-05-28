@@ -39,7 +39,7 @@ func main() {
 	defer fmt.Println("stopped")
 
 	global.waitgroup.Add(1)
-	go process_thermostat_updates()
+	go process_thermostat_updates(cfg)
 
 	global.waitgroup.Add(1)
 	go process_mqtt_updates(cfg)
