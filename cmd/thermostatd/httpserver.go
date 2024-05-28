@@ -29,8 +29,14 @@ func http_server(ctx context.Context, cfg config.ServiceConf) {
 	mux.HandleFunc("PUT /thermostat/{id}/setpoint", PutThermostatSetpoint)
 	mux.HandleFunc("GET /thermostats", GetThermostats)
 
-	fmt.Println("http server listening on", server.Addr)
-	server.ListenAndServe()
+	for {
+		fmt.Println("http server listening on", server.Addr)
+		err := server.ListenAndServe()
+		if err == http.ErrServerClosed {
+			break
+		}
+		fmt.Println(err)
+	}
 }
 
 func GetThermostats(w http.ResponseWriter, r *http.Request) {
