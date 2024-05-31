@@ -12,7 +12,7 @@ import (
 	"time"
 )
 
-type ForcastResp struct {
+type ForecastResp struct {
 	Timezone    string `json:"timezone"`
 	HourlyUnits struct {
 		Time                string `json:"time"`
@@ -58,8 +58,8 @@ type CurrentResp struct {
 }
 
 type OpenMeteoService struct {
-	forcast string
-	current string
+	forecast string
+	current  string
 }
 
 func New(lat, long string) (*OpenMeteoService, error) {
@@ -68,8 +68,8 @@ func New(lat, long string) (*OpenMeteoService, error) {
 		return nil, err
 	}
 	return &OpenMeteoService{
-		forcast: buildURL(lat, long, tzname, "hourly=temperature_2m,relative_humidity_2m,precipitation_probability,precipitation,cloud_cover&forecast_days=3"),
-		current: buildURL(lat, long, tzname, "current=temperature_2m,relative_humidity_2m,precipitation,weather_code,cloud_cover"),
+		forecast: buildURL(lat, long, tzname, "hourly=temperature_2m,relative_humidity_2m,precipitation_probability,precipitation,cloud_cover&forecast_days=3"),
+		current:  buildURL(lat, long, tzname, "current=temperature_2m,relative_humidity_2m,precipitation,weather_code,cloud_cover"),
 	}, nil
 }
 
@@ -112,31 +112,31 @@ func (om *OpenMeteoService) CurrentConditions() (weather.Current, error) {
 	}, nil
 }
 
-func (om *OpenMeteoService) Forcast24h() (weather.Forcast, error) {
-	resp, err := http.Get(om.forcast)
+func (om *OpenMeteoService) Forecast24h() (weather.Forecast, error) {
+	resp, err := http.Get(om.forecast)
 	if err != nil {
-		return weather.Forcast{}, err
+		return weather.Forecast{}, err
 	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		return weather.Forcast{}, fmt.Errorf("unexpected status code: %d", resp.StatusCode)
+		return weather.Forecast{}, fmt.Errorf("unexpected status code: %d", resp.StatusCode)
 	}
 
 	bytes, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return weather.Forcast{}, err
+		return weather.Forecast{}, err
 	}
 
-	var data ForcastResp
+	var data ForecastResp
 	err = json.Unmarshal(bytes, &data)
 	if err != nil {
-		return weather.Forcast{}, err
+		return weather.Forecast{}, err
 	}
 
 	location, err := time.LoadLocation(data.Timezone)
 	if err != nil {
-		return weather.Forcast{}, err
+		return weather.Forecast{}, err
 	}
 
 	layout := "2006-01-02T15:04"
@@ -166,7 +166,7 @@ func (om *OpenMeteoService) Forcast24h() (weather.Forcast, error) {
 		}
 	}
 
-	// only forcast the next 24hours
+	// only forecast the next 24hours
 	limit := now.Add(24 * time.Hour)
 
 	for i, time_str := range data.Hourly.Time {
@@ -185,7 +185,7 @@ func (om *OpenMeteoService) Forcast24h() (weather.Forcast, error) {
 		}
 	}
 
-	return weather.Forcast{
+	return weather.Forecast{
 		Temperature:         data.Hourly.Temperatures,
 		RelHumidity:         data.Hourly.RelHumidity,
 		ProbPrecipitation:   data.Hourly.ProbPrecipitation,

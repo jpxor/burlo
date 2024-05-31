@@ -1,6 +1,6 @@
 package weather
 
-type Forcast struct {
+type Forecast struct {
 	Temperature         []float32
 	RelHumidity         []float32
 	ProbPrecipitation   []float32
@@ -19,5 +19,5 @@ type Current struct {
 
 type WeatherService interface {
 	CurrentConditions() (Current, error)
-	Forcast24h() (Forcast, error)
+	Forecast24h() (Forecast, error)
 }

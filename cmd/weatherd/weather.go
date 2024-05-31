@@ -61,11 +61,11 @@ func main() {
 	// and publish to mqtt
 	go func() {
 		for {
-			forcast, err := wService.Forcast24h()
+			forecast, err := wService.Forecast24h()
 			if err == nil {
-				mqttc.Publish(true, "weather/forcast", forcast)
+				mqttc.Publish(true, "weather/forecast", forecast)
 			} else {
-				mqttc.Publish(false, "error/weather/forcast", err.Error())
+				mqttc.Publish(false, "error/weather/forecast", err.Error())
 				fmt.Println("[Error] fetching forecast:", err)
 			}
 			time.Sleep(time.Hour)
