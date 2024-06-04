@@ -7,6 +7,11 @@ const IndoorReady bitflag = 0b001
 const CurrentReady bitflag = 0b010
 const ForecastReady bitflag = 0b100
 
+type State struct {
+	Inputs  CtrlInput
+	Outputs CtrlOutput
+}
+
 type CtrlInput struct {
 	Ready  bitflag
 	Indoor struct {

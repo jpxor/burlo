@@ -25,6 +25,7 @@ func main() {
 	defer fmt.Println("stopped")
 
 	initPhidgetsClient(cfg.ServiceHTTPAddresses.Actuators)
+	go httpserver(ctx, cfg)
 
 	mqtt.NewClient(mqtt.Opts{
 		Context:     ctx,
