@@ -13,7 +13,7 @@ COPY * ./
 COPY ../config ./config
 
 # Build the application
-RUN CGO_ENABLED=0 GOOS=linux go build -o /thermostatd
+RUN CGO_ENABLED=0 GOOS=linux go build -o /controllerd
 
 # Run the application
-CMD ["/thermostatd", "-c", "./config/services.toml"]
+CMD ["/controllerd", "-c", "./config/services.toml"]
