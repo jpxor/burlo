@@ -9,7 +9,9 @@ import (
 	"sync"
 )
 
-var inputs CtrlInput
+var inputs = CtrlInput{
+	ModeOverride: DX2W_AUTO,
+}
 var inputMutex sync.Mutex
 var thermostats = make(map[string]controller.Thermostat)
 
