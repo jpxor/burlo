@@ -1,3 +1,4 @@
 #!/usr/bin/sh
 cd /usr/userapps/hvac-controller/burlo
-./bin/controller ./config/config.toml
+go build ./cmd/controllerd
+./controllerd -c ./config/config.toml
