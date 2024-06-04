@@ -1,3 +1,4 @@
 #!/usr/bin/sh
 cd /usr/userapps/hvac-controller/burlo
-./bin/weather ./config/config.toml
+go build ./cmd/weatherd
+./weatherd -c ./config/services.toml
