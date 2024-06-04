@@ -1,5 +1,4 @@
-#!/usr/bin/sh
--x
+#!/usr/bin/sh -x
 
 cd /usr/userapps/hvac-controller/burlo
 go build ./cmd/weatherd
@@ -11,5 +10,3 @@ systemctl restart hvac.controller.service
 systemctl restart hvac.vthermostat.service
 systemctl restart hvac.weather.service
 systemctl restart hvac.modbus.service
-
-+x
