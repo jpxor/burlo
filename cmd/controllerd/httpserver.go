@@ -16,7 +16,7 @@ func splitAddr(addr string) (string, string) {
 }
 
 func httpserver(ctx context.Context, cfg config.ServiceConf) {
-	_, port := splitAddr(cfg.ServiceHTTPAddresses.Thermostat)
+	_, port := splitAddr(cfg.ServiceHTTPAddresses.Controller)
 
 	mux := http.NewServeMux()
 	server := http.Server{
