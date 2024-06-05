@@ -22,7 +22,7 @@ func main() {
 	emoncms := NewClient(fmt.Sprintf("http://%s", *emoncmsAddr), *emoncmsKey)
 	defer emoncms.Close()
 
-	url := fmt.Sprintf("http://%s/controller/state", *controllerAddr)
+	url := fmt.Sprintf("http://%s/controller/emoncms", *controllerAddr)
 
 	for {
 		start := time.Now()
