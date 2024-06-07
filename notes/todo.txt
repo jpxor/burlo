@@ -3,3 +3,4 @@ TODO
 - integrate ntfy service, notices: window open/close recommendations, system on/off, system heat/cool 
 - webview / HUB / dashboard
 - add outdoor air quality to weather / ventilation mode
+- always run zone pumps when compressor call is active
