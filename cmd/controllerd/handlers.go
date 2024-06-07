@@ -14,6 +14,7 @@ var inputs = CtrlInput{
 }
 var inputMutex sync.Mutex
 var thermostats = make(map[string]controller.Thermostat)
+var humidistats = make(map[string]controller.Thermostat)
 
 func onThermostatUpdate(payload []byte) {
 	var tstat controller.Thermostat
@@ -26,7 +27,11 @@ func onThermostatUpdate(payload []byte) {
 	defer inputMutex.Unlock()
 
 	// update thermostats mapping
-	thermostats[tstat.ID] = tstat
+	if tstat.DewpointOnly {
+		humidistats[tstat.ID] = tstat
+	} else {
+		thermostats[tstat.ID] = tstat
+	}
 
 	// find max and mean values
 	var maxTemp float32 = 0.0
@@ -42,6 +47,10 @@ func onThermostatUpdate(payload []byte) {
 	}
 	meanHeatSetpointErr /= float32(len(thermostats))
 	meanCoolSetpointErr /= float32(len(thermostats))
+
+	for _, hstat := range humidistats {
+		maxDewpoint = max(maxDewpoint, hstat.Dewpoint)
+	}
 
 	// update inputs and trigger controller routine
 	inputs.Indoor.Temperature = maxTemp

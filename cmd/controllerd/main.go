@@ -36,6 +36,7 @@ func main() {
 		TopicPrefix: "burlo",
 		Topics: []string{
 			"controller/thermostats/#",
+			"controller/humidistat/#",
 			"weather/current",
 			"weather/forecast",
 		},
@@ -44,6 +45,7 @@ func main() {
 
 			switch true {
 			case strings.HasPrefix(topic, "controller/thermostats/"):
+			case strings.HasPrefix(topic, "controller/humidistat/"):
 				onThermostatUpdate(payload)
 
 			case strings.HasPrefix(topic, "weather/current"):
