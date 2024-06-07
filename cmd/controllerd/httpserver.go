@@ -46,6 +46,7 @@ func GetControllerState() http.HandlerFunc {
 	jsonBytes := func(data interface{}) []byte {
 		json, err := json.MarshalIndent(data, "", "    ")
 		if err != nil {
+			fmt.Println("json.MarshalIndent error", err, data)
 			return []byte(err.Error())
 		}
 		return json

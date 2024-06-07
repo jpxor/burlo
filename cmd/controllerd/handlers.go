@@ -60,8 +60,10 @@ func onThermostatUpdate(payload []byte) {
 		meanHeatSetpointErr += tstat.Temperature - tstat.HeatSetpoint
 		meanCoolSetpointErr += tstat.Temperature - tstat.CoolSetpoint
 	}
-	meanHeatSetpointErr /= float32(len(thermostats))
-	meanCoolSetpointErr /= float32(len(thermostats))
+	if len(thermostats) > 0 {
+		meanHeatSetpointErr /= float32(len(thermostats))
+		meanCoolSetpointErr /= float32(len(thermostats))
+	}
 
 	for _, hstat := range humidistats {
 		maxDewpoint = max(maxDewpoint, hstat.Dewpoint)
@@ -72,8 +74,12 @@ func onThermostatUpdate(payload []byte) {
 	inputs.Indoor.Dewpoint = maxDewpoint
 	inputs.Indoor.HeatSetpointErr = meanHeatSetpointErr
 	inputs.Indoor.CoolSetpointErr = meanCoolSetpointErr
-	inputs.Ready |= IndoorReady
 
+	// we need at least one thermostat to provide a room
+	// temperature before the controller is ready
+	if len(thermostats) > 0 {
+		inputs.Ready |= IndoorReady
+	}
 	tryRunController(inputs)
 }
 
