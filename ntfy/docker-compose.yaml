@@ -9,8 +9,9 @@ services:
     environment:
       - TZ=America/Toronto
     volumes:
-      - /var/cache/ntfy:/var/cache/ntfy
-      - /etc/ntfy:/etc/ntfy
+      - ./cache:/var/cache/ntfy
+      - ./config:/etc/ntfy
+      - ./db:/var/lib/ntfy/
     ports:
       - 8081:80
     healthcheck:
