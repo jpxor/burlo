@@ -2,11 +2,12 @@ package main
 
 import (
 	protocol "burlo/services/protocols"
+	"fmt"
 )
 
 var currentState = CtrlOutput{
 	DX2W:     DX2W{Mode: DX2W_AUTO},
-	Window:   WCLOSE,
+	Window:   CLOSE,
 	Dewpoint: 0,
 	ZoneCall: false,
 }
@@ -38,7 +39,27 @@ func runController(inputs CtrlInput) {
 	// order is important here, we need the dewpoint decide on
 	// ventilation, and ventilation to
 	output.Dewpoint = inputs.Indoor.Dewpoint
-	output.Window = selectWindowMode(inputs, output)
+
+	window := selectWindowMode(inputs, output)
+	if window != output.Window {
+		output.Window = window
+		if window == OPEN {
+			notify.Publish(
+				"Its nice out there!",
+				"Now is a good time to open those windows and get some fresh air",
+				[]string{"house_with_garden", "sun_behind_small_cloud"},
+			)
+		} else {
+			notify.Publish(
+				"Keep windows closed",
+				fmt.Sprintf("Outdoors: %.1f°C and %.0f%% relH",
+					inputs.Outdoor.Temperature,
+					inputs.Outdoor.Humidity),
+				[]string{"house_with_garden", "window"},
+			)
+		}
+	}
+
 	output.ZoneCall = updateZoneCalls(inputs, output)
 
 	// apply new state
@@ -88,7 +109,7 @@ func selectWindowMode(inputs CtrlInput, current CtrlOutput) wmode {
 	case DX2W_HEAT:
 		// no need to worry about dewpoint in heating mode
 		if inputs.Outdoor.Temperature >= 20 && inputs.Outdoor.Temperature <= 24 {
-			return WOPEN
+			return OPEN
 		}
 	case DX2W_COOL:
 		// important to take dewpoint into account in cooling mode,
@@ -96,21 +117,21 @@ func selectWindowMode(inputs CtrlInput, current CtrlOutput) wmode {
 		if inputs.Outdoor.Dewpoint <= 12 || inputs.Outdoor.Dewpoint <= inputs.Indoor.Dewpoint {
 			if inputs.Outdoor.Temperature <= 22 || inputs.Outdoor.Temperature < inputs.Indoor.Temperature-2 {
 				if inputs.Indoor.Temperature >= 22 && inputs.Outdoor.Temperature >= 15 {
-					return WOPEN
+					return OPEN
 				}
 				if inputs.Outdoor.Temperature >= 18 {
-					return WOPEN
+					return OPEN
 				}
 			}
 		}
 	}
-	return WCLOSE
+	return CLOSE
 }
 
 func updateZoneCalls(inputs CtrlInput, current CtrlOutput) bool {
 	// no calls for heat/cool when the windows should be open instead
 	// or if the system is off
-	if current.Window == WOPEN || current.DX2W.State == DX2W_OFF {
+	if current.Window == OPEN || current.DX2W.State == DX2W_OFF {
 		return false
 	}
 	switch current.DX2W.Mode {

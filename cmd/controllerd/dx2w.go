@@ -33,6 +33,20 @@ func (dx2w *DX2W) setMode(mode dx2wmode) {
 	}
 	dx2w.Mode = mode
 	dx2w.LastChange = time.Now()
+
+	if mode == DX2W_HEAT {
+		notify.Publish(
+			"Heating mode activated",
+			"Its getting chilly out there",
+			[]string{"house_with_garden", "fire"},
+		)
+	} else {
+		notify.Publish(
+			"Cooling mode activated",
+			"Wow its hot out there",
+			[]string{"house_with_garden", "snowflake"},
+		)
+	}
 }
 
 func (dx2w DX2W) String() string {

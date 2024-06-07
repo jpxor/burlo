@@ -120,6 +120,7 @@ func onCurrentWeatherUpdate(payload []byte) {
 	defer inputMutex.Unlock()
 
 	inputs.Outdoor.Temperature = data.Temperature
+	inputs.Outdoor.Humidity = data.RelHumidity
 	inputs.Outdoor.Dewpoint = calculate_dewpoint_simple(data.Temperature, data.RelHumidity)
 	inputs.Ready |= CurrentReady
 

@@ -22,6 +22,7 @@ type CtrlInput struct {
 	}
 	Outdoor struct {
 		Temperature float32
+		Humidity    float32
 		Dewpoint    float32
 		T24hHigh    float32
 		T24hLow     float32
@@ -31,8 +32,8 @@ type CtrlInput struct {
 	StateOverride dx2wstate
 }
 
-var WOPEN wmode = "OPEN"
-var WCLOSE wmode = "CLOSE"
+var OPEN wmode = "OPEN"
+var CLOSE wmode = "CLOSE"
 
 type CtrlOutput struct {
 	DX2W     DX2W
