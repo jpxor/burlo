@@ -1,2 +1,5 @@
 auth-file: "/var/lib/ntfy/user.db"
 auth-default-access: "deny-all"
+
+enable-signup: false
+enable-login: true
