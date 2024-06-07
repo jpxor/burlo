@@ -45,6 +45,8 @@ func main() {
 
 			switch true {
 			case strings.HasPrefix(topic, "controller/thermostats/"):
+				onThermostatUpdate(payload)
+
 			case strings.HasPrefix(topic, "controller/humidistat/"):
 				onThermostatUpdate(payload)
 
