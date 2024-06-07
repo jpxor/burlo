@@ -27,7 +27,8 @@ type CtrlInput struct {
 		T24hLow     float32
 		T24hMean    float32
 	}
-	ModeOverride dx2wmode
+	ModeOverride  dx2wmode
+	StateOverride dx2wstate
 }
 
 var WOPEN wmode = "OPEN"

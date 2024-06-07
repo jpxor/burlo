@@ -6,18 +6,23 @@ import (
 )
 
 type dx2wmode string
+type dx2wstate string
 
 var DX2W_AUTO dx2wmode = "AUTO"
 var DX2W_HEAT dx2wmode = "HEAT"
 var DX2W_COOL dx2wmode = "COOL"
-var DX2W_OFF dx2wmode = "OFF"
+
+var DX2W_ON dx2wstate = "ON"
+var DX2W_OFF dx2wstate = "OFF"
+var DX2W_STATE_AUTO dx2wstate = "AUTO"
 
 type DX2W struct {
 	Mode       dx2wmode
+	State      dx2wstate
 	LastChange time.Time
 }
 
-func (dx2w *DX2W) set(mode dx2wmode) {
+func (dx2w *DX2W) setMode(mode dx2wmode) {
 	if mode == dx2w.Mode {
 		return
 	}
@@ -31,7 +36,7 @@ func (dx2w *DX2W) set(mode dx2wmode) {
 }
 
 func (dx2w DX2W) String() string {
-	return fmt.Sprintf("DX2W_Mode_%s", dx2w.Mode)
+	return fmt.Sprintf("DX2W_Mode_%s_%s", dx2w.Mode, dx2w.State)
 }
 
 func dewpointToVoltage(temperature float32) float32 {

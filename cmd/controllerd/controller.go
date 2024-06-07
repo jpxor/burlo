@@ -21,12 +21,20 @@ func tryRunController(inputs CtrlInput) {
 func runController(inputs CtrlInput) {
 	var output CtrlOutput = currentState
 
+	mode, state := selectDX2WMode(inputs, output)
+
 	if inputs.ModeOverride != DX2W_AUTO {
 		output.DX2W.Mode = inputs.ModeOverride
 	} else {
-		selected := selectDX2WMode(inputs, output)
-		output.DX2W.set(selected)
+		output.DX2W.setMode(mode)
 	}
+
+	if inputs.StateOverride != DX2W_STATE_AUTO {
+		output.DX2W.State = inputs.StateOverride
+	} else {
+		output.DX2W.State = state
+	}
+
 	// order is important here, we need the dewpoint decide on
 	// ventilation, and ventilation to
 	output.Dewpoint = inputs.Indoor.Dewpoint
@@ -52,21 +60,25 @@ func runController(inputs CtrlInput) {
 		Channel: 0,
 		Output:  dewpointToVoltage(output.Dewpoint),
 	})
+	// TODO: use modbus to set dx2w state (on/off)
 	currentState = output
 }
 
-func selectDX2WMode(inputs CtrlInput, _ CtrlOutput) dx2wmode {
+func selectDX2WMode(inputs CtrlInput, current CtrlOutput) (dx2wmode, dx2wstate) {
 	// zero load outdoor temp is 16degC
 	// turn on heating mode if the house is losing heat and rooms are not too hot
 	if inputs.Outdoor.T24hMean < 16 && !RoomTooHot(inputs.Indoor.HeatSetpointErr) {
-		return DX2W_HEAT
+		return DX2W_HEAT, DX2W_ON
 	}
 	// comfortable summer temp is 22degC
 	// turn on cooling mode if house is gaining heat and rooms already too hot
 	if inputs.Outdoor.T24hMean > 20 && !RoomTooCold(inputs.Indoor.CoolSetpointErr) {
-		return DX2W_COOL
+		return DX2W_COOL, DX2W_ON
 	}
-	return DX2W_OFF
+	// OFF means the heatpump will stop maintaining the buffer temperature
+	// which will save energy during long periods when heating/cooling is not
+	// needed, especially when switching between heat/cool mode
+	return current.DX2W.Mode, DX2W_OFF
 }
 
 func selectWindowMode(inputs CtrlInput, current CtrlOutput) wmode {
@@ -79,7 +91,6 @@ func selectWindowMode(inputs CtrlInput, current CtrlOutput) wmode {
 			return WOPEN
 		}
 	case DX2W_COOL:
-	case DX2W_OFF:
 		// important to take dewpoint into account in cooling mode,
 		// it can get very humid out during the summer
 		if inputs.Outdoor.Dewpoint <= 12 || inputs.Outdoor.Dewpoint <= inputs.Indoor.Dewpoint {
@@ -98,23 +109,22 @@ func selectWindowMode(inputs CtrlInput, current CtrlOutput) wmode {
 
 func updateZoneCalls(inputs CtrlInput, current CtrlOutput) bool {
 	// no calls for heat/cool when the windows should be open instead
-	if current.Window == WOPEN {
+	// or if the system is off
+	if current.Window == WOPEN || current.DX2W.State == DX2W_OFF {
 		return false
 	}
 	switch current.DX2W.Mode {
-	case DX2W_OFF:
-		return false
-
 	case DX2W_HEAT:
 		if !RoomTooHot(inputs.Indoor.HeatSetpointErr) {
 			return true
 		}
-
 	case DX2W_COOL:
 		if !RoomTooCold(inputs.Indoor.CoolSetpointErr) {
 			return true
 		}
 	}
+	// TODO: return true when the compressor is running
+
 	// default to off
 	return false
 }
