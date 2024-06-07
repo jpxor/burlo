@@ -111,7 +111,7 @@ func selectWindowMode(inputs CtrlInput, current CtrlOutput) wmode {
 		if inputs.Outdoor.Temperature >= 20 && inputs.Outdoor.Temperature <= 24 {
 			return OPEN
 		}
-	case DX2W_COOL:
+	case DX2W_COOL, DX2W_AUTO:
 		// important to take dewpoint into account in cooling mode,
 		// it can get very humid out during the summer
 		if inputs.Outdoor.Dewpoint <= 12 || inputs.Outdoor.Dewpoint <= inputs.Indoor.Dewpoint {
