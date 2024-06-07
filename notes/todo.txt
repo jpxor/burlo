@@ -4,4 +4,3 @@ TODO
 - integrate ntfy service, notices: window open/close recommendations, system on/off, system heat/cool 
 - webview / HUB / dashboard
 - add outdoor air quality to weather / ventilation mode
-- clean up old tstat/hstat data in controller

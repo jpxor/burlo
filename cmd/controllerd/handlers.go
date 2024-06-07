@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"slices"
 	"sync"
+	"time"
 )
 
 var inputs = CtrlInput{
@@ -25,6 +26,20 @@ func onThermostatUpdate(payload []byte) {
 	}
 	inputMutex.Lock()
 	defer inputMutex.Unlock()
+
+	// remove thermostats and humidistats whose last update is
+	// greater than 24hr old. Stale data can cause the controller
+	// to perform the wrong action.
+	for id, tstat := range thermostats {
+		if time.Since(tstat.Time) > 24*time.Hour {
+			delete(thermostats, id)
+		}
+	}
+	for id, hstat := range humidistats {
+		if time.Since(hstat.Time) > 24*time.Hour {
+			delete(humidistats, id)
+		}
+	}
 
 	// update thermostats mapping
 	if tstat.DewpointOnly {
