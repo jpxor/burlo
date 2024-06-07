@@ -23,6 +23,7 @@ type ServiceHTTPAddresses struct {
 	Thermostat string `toml:"thermostat"`
 	Mqttserver string `toml:"mqttserver"`
 	Actuators  string `toml:"actuators"`
+	NtfyServer string `toml:"ntfy"`
 }
 type Dx2WModbus struct {
 	TCPAddress string `toml:"tcp_address"`

@@ -8,6 +8,7 @@ controller = "192.168.50.193:4005"
 thermostat = "192.168.50.193:4004"
 mqttserver = "192.168.50.193:4003"
 actuators  = "192.168.50.193:4002"
+ntfyserver = "192.168.50.193:8081"
 
 [dx2w_modbus]
 tcp_address = "192.168.50.60:502"
