@@ -72,7 +72,7 @@ func PutThermostatName(w http.ResponseWriter, r *http.Request) {
 	tstat.Name = req.Name
 	thermostats[id] = tstat
 
-	publish(tstat)
+	publishThermostat(tstat)
 	w.WriteHeader(http.StatusOK)
 }
 
@@ -103,7 +103,7 @@ func PutThermostatSetpoint(w http.ResponseWriter, r *http.Request) {
 	tstat.CoolSetpoint = req.CoolSetpoint
 
 	thermostats[id] = tstat
-	publish(tstat)
+	publishThermostat(tstat)
 
 	w.WriteHeader(http.StatusOK)
 }

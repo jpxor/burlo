@@ -1,6 +1,5 @@
 TODO
 - monitord: collect all data needed for HeatPumpMonitor.org, write to Emoncms
-- integrate humidistats
 - fix dx2w mode:  mode is only heat or cool.  On/off is a separate state
 - integrate ntfy service, notices: window open/close recommendations, system on/off, system heat/cool 
 - webview / HUB / dashboard

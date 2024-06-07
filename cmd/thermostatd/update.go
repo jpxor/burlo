@@ -12,13 +12,23 @@ func update(tstat controller.Thermostat) {
 	mutex.Lock()
 	defer mutex.Unlock()
 
-	// default values for the thermostat
-	tstat.HeatSetpoint = 21
-	tstat.CoolSetpoint = 24
-
 	// id needs to be safe to use in URL paths
 	// as well as in css class names
 	tstat.ID = safeID(tstat.ID)
+
+	tstat.Time = time.Now()
+	tstat.Dewpoint = calculate_dewpoint_simple(tstat.Temperature, tstat.Humidity)
+
+	// humiditstats don't need temperature setpoints
+	// and friendly/customizable names
+	if tstat.DewpointOnly {
+		publishHumidistat(tstat)
+		return
+	}
+
+	// default values for the thermostat
+	tstat.HeatSetpoint = 21
+	tstat.CoolSetpoint = 24
 
 	// match with existing tstat
 	existing, ok := thermostats[tstat.ID]
@@ -27,17 +37,20 @@ func update(tstat controller.Thermostat) {
 		tstat.HeatSetpoint = existing.HeatSetpoint
 		tstat.CoolSetpoint = existing.CoolSetpoint
 	}
-	tstat.Time = time.Now()
-	tstat.Dewpoint = calculate_dewpoint_simple(tstat.Temperature, tstat.Humidity)
-
 	thermostats[tstat.ID] = tstat
-	publish(tstat)
+	publishThermostat(tstat)
 }
 
 // writes to mqtt for other services to consume
-func publish(tstat controller.Thermostat) {
+func publishThermostat(tstat controller.Thermostat) {
 	const RETAIN = true
 	topic := fmt.Sprintf("controller/thermostats/%s", tstat.ID)
+	publisher.Publish(RETAIN, topic, tstat)
+}
+
+func publishHumidistat(tstat controller.Thermostat) {
+	const RETAIN = true
+	topic := fmt.Sprintf("controller/humidistat/%s", tstat.ID)
 	publisher.Publish(RETAIN, topic, tstat)
 }
 

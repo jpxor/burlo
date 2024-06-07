@@ -10,7 +10,7 @@ import (
 	"strings"
 )
 
-// SNZB-02D
+// SNZB-02D and SNZB-02P
 type SonoffSensor struct {
 	Battery     int32   `json:"battery"`
 	LinkQuality int32   `json:"linkquality"`
@@ -25,11 +25,25 @@ func monitor_sonoff_zigbee2mqtt(ctx context.Context, cfg config.ServiceConf) {
 		User:     cfg.Mqtt.User,
 		Pass:     []byte(cfg.Mqtt.Pass),
 		ClientID: "thermostatd_zigbee2mqtt",
-		Topics:   []string{"zigbee2mqtt/thermostats/#"},
+		Topics: []string{
+			"zigbee2mqtt/thermostats/#",
+			"zigbee2mqtt/humidistat/#",
+		},
 		OnPublishRecv: func(topic string, payload []byte) {
 
+			var topicPrefix string
+			var isHumidistat bool
+
+			if strings.Contains(topic, "/thermostats/") {
+				topicPrefix = "zigbee2mqtt/thermostats/"
+
+			} else if strings.Contains(topic, "/humidistat/") {
+				topicPrefix = "zigbee2mqtt/humidistat/"
+				isHumidistat = true
+			}
+
 			// expected format: "name/id"
-			name := strings.TrimPrefix(topic, "zigbee2mqtt/thermostats/")
+			name := strings.TrimPrefix(topic, topicPrefix)
 			id, _, _ := strings.Cut(name, "/")
 
 			var sensor SonoffSensor
@@ -40,12 +54,13 @@ func monitor_sonoff_zigbee2mqtt(ctx context.Context, cfg config.ServiceConf) {
 			}
 
 			go update(controller.Thermostat{
-				ID:          id,
-				Name:        name,
-				Temperature: sensor.Temperature,
-				Humidity:    sensor.Humidity,
-				Battery:     sensor.Battery,
-				LinkQuality: sensor.LinkQuality,
+				ID:           id,
+				Name:         name,
+				DewpointOnly: isHumidistat,
+				Temperature:  sensor.Temperature,
+				Humidity:     sensor.Humidity,
+				Battery:      sensor.Battery,
+				LinkQuality:  sensor.LinkQuality,
 			})
 		},
 	})

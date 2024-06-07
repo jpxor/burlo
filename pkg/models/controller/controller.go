@@ -7,6 +7,11 @@ type Thermostat struct {
 	Name string
 	Time time.Time
 
+	// sensors near the radiators and at floor level are
+	// used to get accurate dewpoints to prevent condensation,
+	// but they would report incorrect room temperature
+	DewpointOnly bool
+
 	Temperature  float32
 	Humidity     float32
 	Dewpoint     float32
