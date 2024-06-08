@@ -6,6 +6,7 @@ type bitflag uint8
 const IndoorReady bitflag = 0b001
 const CurrentReady bitflag = 0b010
 const ForecastReady bitflag = 0b100
+const AQHIReady bitflag = 0b1000
 
 type State struct {
 	Inputs  CtrlInput
@@ -27,6 +28,7 @@ type CtrlInput struct {
 		T24hHigh    float32
 		T24hLow     float32
 		T24hMean    float32
+		AQHI        int32
 	}
 	ModeOverride  dx2wmode
 	StateOverride dx2wstate

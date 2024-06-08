@@ -12,7 +12,7 @@ var currentState = CtrlOutput{
 }
 
 func tryRunController(inputs CtrlInput) {
-	if inputs.Ready != (IndoorReady | CurrentReady | ForecastReady) {
+	if inputs.Ready != (IndoorReady | CurrentReady | ForecastReady | AQHIReady) {
 		return
 	}
 	runController(inputs)
@@ -88,8 +88,12 @@ func selectDX2WMode(inputs CtrlInput, current CtrlOutput) (dx2wmode, dx2wstate) 
 }
 
 func selectWindowMode(inputs CtrlInput, current CtrlOutput) wmode {
-	// todo: keep windows closed if air quality is low
-
+	// keep windows closed if air quality health risk is Moderate to high
+	// Risk: Low (1-3)	Moderate (4-6)	High (7-10)	Very high (above 10)
+	// TODO: make configurable
+	if inputs.Outdoor.AQHI > 5 {
+		return CLOSE
+	}
 	switch current.DX2W.Mode {
 	case DX2W_HEAT:
 		// no need to worry about dewpoint in heating mode

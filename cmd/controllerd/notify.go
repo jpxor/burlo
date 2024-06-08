@@ -42,17 +42,19 @@ func notifyWindow(window wmode) {
 	if window == OPEN {
 		notify.Publish(
 			"Its nice out there!",
-			fmt.Sprintf("Now is a good time to open those windows and get some fresh air. Outdoors: %.1f°C and %.0f%% relH",
+			fmt.Sprintf("Now is a good time to open those windows and get some fresh air. %.1f°C, %.0f%% relH, AQHI: %d",
 				inputs.Outdoor.Temperature,
-				inputs.Outdoor.Humidity),
+				inputs.Outdoor.Humidity,
+				inputs.Outdoor.AQHI),
 			[]string{"house_with_garden", "sun_behind_small_cloud"},
 		)
 	} else {
 		notify.Publish(
 			"Keep windows closed",
-			fmt.Sprintf("Outdoors: %.1f°C and %.0f%% relH",
+			fmt.Sprintf("%.1f°C, %.0f%% relH, AQHI: %d",
 				inputs.Outdoor.Temperature,
-				inputs.Outdoor.Humidity),
+				inputs.Outdoor.Humidity,
+				inputs.Outdoor.AQHI),
 			[]string{"house_with_garden", "window"},
 		)
 	}

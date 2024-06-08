@@ -3,6 +3,7 @@ package main
 import (
 	"burlo/pkg/models/controller"
 	"burlo/pkg/models/weather"
+	"burlo/pkg/weathergcca"
 	"encoding/json"
 	"fmt"
 	"slices"
@@ -124,6 +125,21 @@ func onCurrentWeatherUpdate(payload []byte) {
 	inputs.Outdoor.Dewpoint = calculate_dewpoint_simple(data.Temperature, data.RelHumidity)
 	inputs.Ready |= CurrentReady
 
+	tryRunController(inputs)
+}
+
+func onAQHIUpdate(payload []byte) {
+	var data weathergcca.AqhiForecast
+	err := json.Unmarshal(payload, &data)
+	if err != nil {
+		fmt.Println("onAQHIUpdate:", err)
+		return
+	}
+	inputMutex.Lock()
+	defer inputMutex.Unlock()
+
+	inputs.Outdoor.AQHI = int32(data.AQHI[0])
+	inputs.Ready |= AQHIReady
 	tryRunController(inputs)
 }
 

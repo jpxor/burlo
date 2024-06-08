@@ -40,6 +40,7 @@ func main() {
 			"controller/humidistat/#",
 			"weather/current",
 			"weather/forecast",
+			"weather/aqhi",
 		},
 		OnPublishRecv: func(topic string, payload []byte) {
 			topic = strings.TrimPrefix(topic, "burlo/")
@@ -56,6 +57,9 @@ func main() {
 
 			case strings.HasPrefix(topic, "weather/forecast"):
 				onForecastUpdate(payload)
+
+			case strings.HasPrefix(topic, "weather/aqhi"):
+				onAQHIUpdate(payload)
 
 			default:
 				fmt.Println("unhandled topic:", topic)
