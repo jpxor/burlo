@@ -2,7 +2,6 @@ package main
 
 import (
 	protocol "burlo/services/protocols"
-	"fmt"
 )
 
 var currentState = CtrlOutput{
@@ -33,7 +32,7 @@ func runController(inputs CtrlInput) {
 	if inputs.StateOverride != DX2W_STATE_AUTO {
 		output.DX2W.State = inputs.StateOverride
 	} else {
-		output.DX2W.State = state
+		output.DX2W.setState(state)
 	}
 
 	// order is important here, we need the dewpoint decide on
@@ -43,21 +42,7 @@ func runController(inputs CtrlInput) {
 	window := selectWindowMode(inputs, output)
 	if window != output.Window {
 		output.Window = window
-		if window == OPEN {
-			notify.Publish(
-				"Its nice out there!",
-				"Now is a good time to open those windows and get some fresh air",
-				[]string{"house_with_garden", "sun_behind_small_cloud"},
-			)
-		} else {
-			notify.Publish(
-				"Keep windows closed",
-				fmt.Sprintf("Outdoors: %.1f°C and %.0f%% relH",
-					inputs.Outdoor.Temperature,
-					inputs.Outdoor.Humidity),
-				[]string{"house_with_garden", "window"},
-			)
-		}
+		notifyWindow(window)
 	}
 
 	output.ZoneCall = updateZoneCalls(inputs, output)
