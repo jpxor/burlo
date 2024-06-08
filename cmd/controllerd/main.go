@@ -3,7 +3,6 @@ package main
 import (
 	"burlo/config"
 	"burlo/pkg/mqtt"
-	"burlo/pkg/ntfy"
 	"context"
 	"flag"
 	"fmt"
@@ -12,8 +11,6 @@ import (
 	"strings"
 	"syscall"
 )
-
-var notify ntfy.Notify
 
 func main() {
 	configPath := flag.String("c", "", "Path to config file")
@@ -27,8 +24,7 @@ func main() {
 	fmt.Println("started")
 	defer fmt.Println("stopped")
 
-	notify = ntfy.New(cfg.ServiceHTTPAddresses.NtfyServer, "burlo")
-
+	initNotifyClient(cfg.ServiceHTTPAddresses.NtfyServer)
 	initPhidgetsClient(cfg.ServiceHTTPAddresses.Actuators)
 	go httpserver(ctx, cfg)
 

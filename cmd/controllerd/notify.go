@@ -1,6 +1,15 @@
 package main
 
-import "fmt"
+import (
+	"burlo/pkg/ntfy"
+	"fmt"
+)
+
+var notify ntfy.Notify
+
+func initNotifyClient(ntfyHost string) {
+	notify = ntfy.New(ntfyHost, "burlo")
+}
 
 func notifyMode(mode dx2wmode) {
 	if mode == DX2W_HEAT {
