@@ -1,4 +1,3 @@
 TODO
 - monitord: collect all data needed for HeatPumpMonitor.org, write to Emoncms
 - webview / HUB / dashboard
-- add outdoor air quality to weather / ventilation mode
