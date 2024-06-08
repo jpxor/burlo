@@ -26,9 +26,8 @@ func (dx2w *DX2W) setMode(mode dx2wmode) {
 	if mode == dx2w.Mode {
 		return
 	}
-	// debounce when setting heat or cool
-	if (mode == DX2W_HEAT || mode == DX2W_COOL) &&
-		time.Since(dx2w.LastChange) < 24*time.Hour {
+	// debounce when changing mode
+	if time.Since(dx2w.LastChange) < 24*time.Hour {
 		return
 	}
 	dx2w.Mode = mode
