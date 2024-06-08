@@ -73,7 +73,8 @@ func runController(inputs CtrlInput) {
 func selectDX2WMode(inputs CtrlInput, current CtrlOutput) (dx2wmode, dx2wstate) {
 	// zero load outdoor temp is 16degC
 	// turn on heating mode if the house is losing heat and rooms are not too hot
-	if inputs.Outdoor.T24hMean < 16 && !RoomTooHot(inputs.Indoor.HeatSetpointErr) {
+	if inputs.Outdoor.T24hMean < 16 && !RoomTooHot(inputs.Indoor.HeatSetpointErr) &&
+		inputs.Outdoor.Temperature < 16 {
 		return DX2W_HEAT, DX2W_ON
 	}
 	// comfortable summer temp is 22degC
