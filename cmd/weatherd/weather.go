@@ -5,6 +5,7 @@ import (
 	"burlo/pkg/models/weather"
 	"burlo/pkg/mqtt"
 	"burlo/pkg/openmateo"
+	"burlo/pkg/weathergcca"
 	"context"
 	"flag"
 	"fmt"
@@ -67,6 +68,24 @@ func main() {
 			} else {
 				mqttc.Publish(false, "error/weather/forecast", err.Error())
 				fmt.Println("[Error] fetching forecast:", err)
+			}
+			time.Sleep(time.Hour)
+		}
+	}()
+
+	// Poll air quality health index (AQHI) current+forecast once per hour
+	// and publish to mqtt
+	go func() {
+		for {
+			// TODO: location needs to be configurable
+			fmt.Println("getting aqhi")
+			forecast, err := weathergcca.GetAqhiForecast(3, "Ottawa")
+			if err == nil {
+				fmt.Println(forecast)
+				mqttc.Publish(true, "weather/aqhi", forecast)
+			} else {
+				mqttc.Publish(false, "error/weather/aqhi", err.Error())
+				fmt.Println("[Error] fetching aqhi:", err)
 			}
 			time.Sleep(time.Hour)
 		}
