@@ -71,21 +71,30 @@ func runController(inputs CtrlInput) {
 }
 
 func selectDX2WMode(inputs CtrlInput, current CtrlOutput) (dx2wmode, dx2wstate) {
+	currentMode := current.DX2W.Mode
+	if currentMode == DX2W_AUTO {
+		currentMode = DX2W_HEAT
+	}
 	// zero load outdoor temp is 16degC
-	// turn on heating mode if the house is losing heat and rooms are not too hot
-	if inputs.Outdoor.T24hMean < 16 && !RoomTooHot(inputs.Indoor.HeatSetpointErr) &&
-		inputs.Outdoor.Temperature < 16 {
+	// maintain heat mode if house is losing heat and rooms are below the cool setpoint
+	// switch to heat mode if house is losing heat and rooms are below the heat setpoint
+	if inputs.Outdoor.T24hMean < 16 &&
+		(currentMode == DX2W_HEAT && RoomTooCold(inputs.Indoor.CoolSetpointErr)) ||
+		(currentMode == DX2W_COOL && RoomTooCold(inputs.Indoor.HeatSetpointErr)) {
 		return DX2W_HEAT, DX2W_ON
 	}
 	// comfortable summer temp is 22degC
-	// turn on cooling mode if house is gaining heat and rooms already too hot
-	if inputs.Outdoor.T24hMean > 20 && !RoomTooCold(inputs.Indoor.CoolSetpointErr) {
+	// switch to cool mode if house is gaining heat and rooms are over the cool setpoint
+	// maintain cool mode if house is gaining heat and rooms are over the heat setpoint
+	if inputs.Outdoor.T24hMean > 20 &&
+		(currentMode == DX2W_HEAT && RoomTooHot(inputs.Indoor.CoolSetpointErr)) ||
+		(currentMode == DX2W_COOL && RoomTooHot(inputs.Indoor.HeatSetpointErr)) {
 		return DX2W_COOL, DX2W_ON
 	}
 	// OFF means the heatpump will stop maintaining the buffer temperature
-	// which will save energy during long periods when heating/cooling is not
+	// which will save energy during long periods when heat/cool is not
 	// needed, especially when switching between heat/cool mode
-	return current.DX2W.Mode, DX2W_OFF
+	return currentMode, DX2W_OFF
 }
 
 func selectWindowMode(inputs CtrlInput, current CtrlOutput) wmode {
