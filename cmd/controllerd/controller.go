@@ -141,37 +141,35 @@ func selectWindowMode(inputs CtrlInput, current CtrlOutput) wmode {
 }
 
 func updateZoneCalls(inputs CtrlInput, current CtrlOutput) bool {
-	// no calls for heat/cool when the windows should be open instead
-	// or if the system is off
 	if current.Window == OPEN || current.DX2W.State == DX2W_OFF {
 		return false
 	}
 	switch current.DX2W.Mode {
 	case DX2W_HEAT:
-		if !RoomTooHot(inputs.Indoor.HeatSetpointErr) {
-			return true
-		}
-	case DX2W_COOL:
-		if !RoomTooCold(inputs.Indoor.CoolSetpointErr) {
-			return true
-		}
-	}
-	// TODO: return true when the compressor is running
+		condA := RoomTooCold(inputs.Indoor.HeatSetpointErr) && inputs.Outdoor.Temperature < 20
+		condB := !RoomTooHot(inputs.Indoor.HeatSetpointErr) && inputs.Outdoor.Temperature < 16
+		return condA || condB
 
-	// default to off
-	return false
+	case DX2W_COOL:
+		condA := RoomTooHot(inputs.Indoor.CoolSetpointErr) && inputs.Outdoor.Temperature > 16
+		condB := !RoomTooCold(inputs.Indoor.CoolSetpointErr) && inputs.Outdoor.Temperature > 20
+		return condA || condB
+
+	default:
+		return false
+	}
 }
 
 // RoomTooCold is a helper that returns true if the
 // room temperature falls below the target (with some margin)
-func RoomTooCold(setpoint_error float32) bool {
-	return setpoint_error < -0.5 // example: {target=20, too_cold=19.5}
+func RoomTooCold(setpointErr float32) bool {
+	return setpointErr < -0.5 // example: {target=20, too_cold=19.5}
 }
 
 // RoomTooHot is a helper that returns true if the
 // room temperature rises above the target (with some margin)
-func RoomTooHot(setpoint_error float32) bool {
-	return setpoint_error > 0.5 // example: {target=20, too_hot=20.5}
+func RoomTooHot(setpointErr float32) bool {
+	return setpointErr > 0.5 // example: {target=20, too_hot=20.5}
 }
 
 func belowSetpoint(setpointErr float32) bool {
