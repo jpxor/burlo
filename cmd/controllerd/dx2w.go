@@ -12,6 +12,9 @@ var DX2W_AUTO dx2wmode = "AUTO"
 var DX2W_HEAT dx2wmode = "HEAT"
 var DX2W_COOL dx2wmode = "COOL"
 
+// OFF means the heatpump will stop maintaining the buffer temperature
+// which will save energy during long periods when heat/cool is not
+// needed, especially when switching between heat/cool mode
 var DX2W_ON dx2wstate = "ON"
 var DX2W_OFF dx2wstate = "OFF"
 var DX2W_STATE_AUTO dx2wstate = "AUTO"
