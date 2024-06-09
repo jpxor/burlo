@@ -27,7 +27,7 @@ func update(tstat controller.Thermostat) {
 	}
 
 	// default values for the thermostat
-	tstat.HeatSetpoint = 21
+	tstat.HeatSetpoint = 20
 	tstat.CoolSetpoint = 24
 
 	// match with existing tstat
