@@ -120,24 +120,54 @@ func selectWindowMode(inputs CtrlInput, current CtrlOutput) wmode {
 	switch current.DX2W.Mode {
 	case DX2W_HEAT:
 		// no need to worry about dewpoint in heating mode
-		if inputs.Outdoor.Temperature >= 20 && inputs.Outdoor.Temperature <= 24 {
-			return OPEN
+		if inputs.Outdoor.Temperature < (16+20)/2 {
+			return CLOSE
 		}
-	case DX2W_COOL, DX2W_AUTO:
+		return OPEN
+
+	case DX2W_COOL:
+		dT := inputs.Outdoor.Temperature - inputs.Indoor.Temperature
+		coolSetpoint := inputs.Indoor.Temperature - inputs.Indoor.CoolSetpointErr
+		heatSetpoint := inputs.Indoor.Temperature - inputs.Indoor.HeatSetpointErr
+
+		midpoint := (coolSetpoint + heatSetpoint) / 2
+		lowpoint := heatSetpoint + min(0, heatSetpoint-inputs.Indoor.Temperature) - 1
+
+		outdoorTempLow := inputs.Outdoor.Temperature < lowpoint
+		outdoorTempHigh := inputs.Outdoor.Temperature > coolSetpoint
+
 		// important to take dewpoint into account in cooling mode,
 		// it can get very humid out during the summer
-		if inputs.Outdoor.Dewpoint <= 12 || inputs.Outdoor.Dewpoint <= inputs.Indoor.Dewpoint {
-			if inputs.Outdoor.Temperature <= 22 || inputs.Outdoor.Temperature < inputs.Indoor.Temperature-2 {
-				if inputs.Indoor.Temperature >= 22 && inputs.Outdoor.Temperature >= 15 {
-					return OPEN
-				}
-				if inputs.Outdoor.Temperature >= 18 {
-					return OPEN
-				}
-			}
+		dewpointLow := inputs.Outdoor.Dewpoint <= 12 || inputs.Outdoor.Dewpoint <= inputs.Indoor.Dewpoint
+		dewpointOk := inputs.Outdoor.Dewpoint < 16 && inputs.Outdoor.Dewpoint < inputs.Indoor.Dewpoint+1
+		dewpointCheck := dewpointLow || (dewpointOk && dT < -4)
+
+		// keep windows closed if dewpoint is too high
+		if !dewpointCheck {
+			return CLOSE
 		}
+
+		// keep windows closed if outdoor temp is too high
+		if outdoorTempHigh && dT > -2 {
+			return CLOSE
+		}
+
+		// keep windows closed if outdoor temp is too low
+		if outdoorTempLow {
+			return CLOSE
+		}
+
+		// open windows to help cool
+		if dT < 0 && inputs.Indoor.Temperature >= midpoint {
+			return OPEN
+		}
+
+		// open the windows because its nice out
+		return OPEN
+
+	default:
+		return CLOSE
 	}
-	return CLOSE
 }
 
 func updateZoneCalls(inputs CtrlInput, current CtrlOutput) bool {
