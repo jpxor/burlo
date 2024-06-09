@@ -45,7 +45,7 @@ func main() {
 		OnPublishRecv: func(topic string, payload []byte) {
 			topic = strings.TrimPrefix(topic, "burlo/")
 
-			switch true {
+			switch {
 			case strings.HasPrefix(topic, "controller/thermostats/"):
 				onThermostatUpdate(payload)
 
