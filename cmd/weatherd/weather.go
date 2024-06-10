@@ -78,14 +78,20 @@ func main() {
 	go func() {
 		for {
 			// TODO: location needs to be configurable
-			fmt.Println("getting aqhi")
 			forecast, err := weathergcca.GetAqhiForecast(3, "Ottawa")
-			if err == nil {
-				mqttc.Publish(true, "weather/aqhi", forecast)
-			} else {
+			if err != nil {
 				mqttc.Publish(false, "error/weather/aqhi", err.Error())
-				fmt.Println("[Error] fetching aqhi:", err)
+				fmt.Println("[Error] get aqhi forecast:", err)
+				time.Sleep(15 * time.Minute)
+				continue
 			}
+			if len(forecast.AQHI) == 0 {
+				mqttc.Publish(false, "error/weather/aqhi", "no data")
+				fmt.Println("[Error] aqhi forecast returned no data")
+				time.Sleep(15 * time.Minute)
+				continue
+			}
+			mqttc.Publish(true, "weather/aqhi", forecast)
 			time.Sleep(time.Hour)
 		}
 	}()
