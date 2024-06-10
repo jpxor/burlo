@@ -81,7 +81,6 @@ func main() {
 			fmt.Println("getting aqhi")
 			forecast, err := weathergcca.GetAqhiForecast(3, "Ottawa")
 			if err == nil {
-				fmt.Println(forecast)
 				mqttc.Publish(true, "weather/aqhi", forecast)
 			} else {
 				mqttc.Publish(false, "error/weather/aqhi", err.Error())
