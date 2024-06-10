@@ -3,7 +3,6 @@ package dx2w
 import (
 	_ "embed"
 	"fmt"
-	"log"
 	"time"
 
 	"github.com/simonvetter/modbus"
@@ -63,13 +62,13 @@ func (c TCPClient) ReadAll() map[string]Value {
 		Timeout: 4 * time.Second,
 	})
 	if err != nil {
-		log.Println("Error creating Modbus client:", err)
+		fmt.Println("Error creating Modbus client:", err)
 		return c.cached
 	}
 
 	err = client.Open()
 	for err != nil {
-		log.Println("Error opening Modbus client:", err)
+		fmt.Println("Error opening Modbus client:", err)
 		return c.cached
 	}
 
@@ -101,18 +100,16 @@ func (c TCPClient) ReadAll() map[string]Value {
 		lastAddr = registers[count-1].Address
 		nregisters := 1 + lastAddr - firstAddr
 
-		log.Printf("Reading modbus registers %v - %v, count %v", firstAddr, lastAddr, nregisters)
 		rawvals, err := client.ReadRegisters(firstAddr, nregisters, modbus.HOLDING_REGISTER)
 
 		if err != nil {
-			log.Printf("Failed to read modbus registers %v - %v: %v", firstAddr, lastAddr, err)
-
-			if nretries < 5 {
-				// retry after giving the device a short rest
-				time.Sleep(200 * time.Millisecond)
+			if nretries < 3 {
+				time.Sleep(100 * time.Millisecond)
 				nretries += 1
 				continue
 			}
+			fmt.Printf("Failed to read modbus registers %v - %v: %v", firstAddr, lastAddr, err)
+			nretries = 0
 
 		} else {
 			for _, reg := range registers[:count] {
