@@ -21,9 +21,6 @@ type TCPDevice struct {
 type TCPClient struct {
 	device TCPDevice
 	config Config
-
-	lastRead time.Time
-	cached   map[string]Value
 }
 
 type Value struct {
@@ -39,7 +36,6 @@ func New(device TCPDevice) *TCPClient {
 	client := &TCPClient{
 		device: device,
 		config: globalRegisterConfig,
-		cached: map[string]Value{},
 	}
 	return client
 }
@@ -57,19 +53,21 @@ func (c TCPClient) PrintFields() {
 }
 
 func (c TCPClient) ReadAll() map[string]Value {
+	regmap := make(map[string]Value)
+
 	client, err := modbus.NewClient(&modbus.ClientConfiguration{
 		URL:     c.device.Url,
 		Timeout: 4 * time.Second,
 	})
 	if err != nil {
 		fmt.Println("Error creating Modbus client:", err)
-		return c.cached
+		return regmap
 	}
 
 	err = client.Open()
 	for err != nil {
 		fmt.Println("Error opening Modbus client:", err)
-		return c.cached
+		return regmap
 	}
 
 	defer client.Close()
@@ -114,7 +112,7 @@ func (c TCPClient) ReadAll() map[string]Value {
 		} else {
 			for _, reg := range registers[:count] {
 				i := reg.Address - firstAddr
-				c.cached[reg.Name] = Value{
+				regmap[reg.Name] = Value{
 					Uint16:    rawvals[i],
 					Float32:   float32(int16(rawvals[i])) * reg.Factor,
 					Bool:      asBool(rawvals[i]),
@@ -126,7 +124,7 @@ func (c TCPClient) ReadAll() map[string]Value {
 		}
 		nread += count
 	}
-	return c.cached
+	return regmap
 }
 
 func asBool(val uint16) bool {
