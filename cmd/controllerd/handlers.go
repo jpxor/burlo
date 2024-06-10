@@ -135,6 +135,11 @@ func onAQHIUpdate(payload []byte) {
 		fmt.Println("onAQHIUpdate:", err)
 		return
 	}
+	if len(data.AQHI) == 0 {
+		fmt.Println("bad data from AQHI update")
+		return
+	}
+
 	inputMutex.Lock()
 	defer inputMutex.Unlock()
 
