@@ -40,7 +40,6 @@ Zone controller and wireless (virtual) thermostats which control hydronic radian
 - posts to NTFY service to send notifications (mode and state changes, suggest windows open/close),
 - simple httpserver to allow querying current state (inputs and outputs).
 
-
 ## Phidgets service
 
 - phidgets are physical devices used to programatically interact with the real world,
@@ -51,6 +50,12 @@ Zone controller and wireless (virtual) thermostats which control hydronic radian
 This system is built on the Phidgets SBC which comes with its own web server. This isn't really used, but can be access here:
     http://phidgetsbc.local/cgi-bin/system-logs.sh
     Access(admin:root)
+
+## Modbus service
+
+- reads and writes from the heatpump modbus device
+- reads are scheduled (every 15 seconds for fast changing data like flow and return temperatures, longer periods for slow changing data like buffer setpoint) and cached to limit the number of simultanous modbus requests,
+- simple httpserver to allow reading cached values, and writing control/config registers.
 
 ## Monitor service (work in progress)
 
