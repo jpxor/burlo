@@ -1,7 +1,37 @@
-# Burlo: Hydronics Control System and Smart Thermostat
+# Burlo: Hydronics Control System and Smart Wireless Thermostat
 
-Zone controller and wireless (virtual) thermostats which control hydronic radiant heating/cooling using Zigbee sensors and Phidgets actuators.  Written in Golang and Python using microservice architecture with both HTTP and MQTT messaging.
+<pre>
+Inputs:
+     Multiple indoor temperature & relHumidity sensors,
+     Outdoor conditions & forecast,
+Outputs:
+     Set HEAT/COOL mode,
+     Set zone calls (ON/OFF),
+     Set dewpoint for radiant cooling,
+     Recommendations to maximize energy efficiency
+</pre>
 
+## Use case
+This was specifically built to control the radiant cooling zones in a house where dewpoint temperature is not consistant from room to room and where humidity control and ventilation was lacking.
+
+A single dewpoint controller was inadequate.  This system allows placing a sensor next to each emmitter and embedded alongside the piping behind the walls for dewpoint data where its needed most.
+
+## Maximize energy efficiency
+The system also determines if outdoor conditions suggest windows should be opened instead of a zone call, preventing wasted energy usage and encouraging natural ventilation. It would be simple to extend this to automate the windows where applicable.
+
+In heating mode, the system will attempt to optimize energy efficiency by recommending changes to flow temperature / outdoor reset settings.  It does this by measuring the fraction of time a zone is calling for heat.  Very short calls for heat imply the flow temperature can be reduced to get better heatpump efficiency (COP).  This needs to be balanced against the energy use of the zone circulators - in mild weather, it could be more efficient to run the pumps less.
+
+## DX2W Air-to-water Hydronics Module
+This control system is currently in use with a DX2W Air-to-water Hydronics Module from ThermAtlantic.
+
+The modbus service and dewpoint-->voltage output is specifically designed for this equipment.
+
+Missing features:
+- The system assumes the heatpump can run more efficiently (lower flow temperature while heating) if there is no zoning. For this reason, multiple zone controls have not been implemented.
+- Priority DHW diversion has not been implemented.
+- the DX2W heatpump controller maintains buffer temperature with outdoor reset, so this type of control was ommitted
+
+## System Architecture Diagram
 ![system diagram showing software and device component relations](burlo.png)
 
 ## Sensors
