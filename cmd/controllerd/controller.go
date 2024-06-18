@@ -75,6 +75,10 @@ func selectDX2WMode(inputs CtrlInput, current CtrlOutput) (dx2wmode, dx2wstate) 
 	coldOut := inputs.Outdoor.T24hMean < 16 && inputs.Outdoor.T24hHigh < 20
 	hotOut := inputs.Outdoor.T24hMean > 20 && inputs.Outdoor.T24hLow > 16
 
+	coolSetpoint := inputs.Indoor.Temperature - inputs.Indoor.CoolSetpointErr
+	heatSetpoint := inputs.Indoor.Temperature - inputs.Indoor.HeatSetpointErr
+	midpoint := (coolSetpoint + heatSetpoint) / 2
+
 	// set initial mode when auto
 	// this only runs once after the controller is started
 	currentMode := current.DX2W.Mode
@@ -89,8 +93,8 @@ func selectDX2WMode(inputs CtrlInput, current CtrlOutput) (dx2wmode, dx2wstate) 
 	switch {
 	case coldOut:
 		// maintain heat mode if its cold out
-		// switch to heat mode if its cold out and rooms are below the heat setpoint
-		if currentMode == DX2W_HEAT || belowSetpoint(inputs.Indoor.HeatSetpointErr) {
+		// switch to heat mode if its cold out and rooms are near the heat setpoint
+		if currentMode == DX2W_HEAT || inputs.Indoor.Temperature < midpoint {
 			return DX2W_HEAT, DX2W_ON
 		}
 		// turn off when in cool mode and its cold out
@@ -98,8 +102,8 @@ func selectDX2WMode(inputs CtrlInput, current CtrlOutput) (dx2wmode, dx2wstate) 
 
 	case hotOut:
 		// maintain cool mode if its hot out
-		// switch to cool mode if its hot out and rooms are above the cool setpoint
-		if currentMode == DX2W_COOL || aboveSetpoint(inputs.Indoor.CoolSetpointErr) {
+		// switch to cool mode if its hot out and rooms are near the cool setpoint
+		if currentMode == DX2W_COOL || inputs.Indoor.Temperature > midpoint {
 			return DX2W_COOL, DX2W_ON
 		}
 		// turn off when in heat mode and its hot out
@@ -119,8 +123,12 @@ func selectWindowMode(inputs CtrlInput, current CtrlOutput) wmode {
 	}
 	switch current.DX2W.Mode {
 	case DX2W_HEAT:
-		// no need to worry about dewpoint in heating mode
 		if inputs.Outdoor.Temperature < (16+20)/2 {
+			return CLOSE
+		}
+		// edge case: it can get hot and humid out before the system switches
+		// over to COOL mode, should keep windows closed then too
+		if inputs.Outdoor.Temperature > 24 && inputs.Outdoor.Dewpoint > 16 {
 			return CLOSE
 		}
 		return OPEN
