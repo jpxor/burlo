@@ -1,15 +1,225 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WebSocket Example</title>
+    <title>Dashboard</title>
     <style>
-        
+        /* CSS Reset */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html,
+        body {
+            height: 100%;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif sans-serif;
+        }
+
+        img,
+        picture,
+        video,
+        canvas,
+        svg {
+            display: block;
+            max-width: 100%;
+        }
+
+        input,
+        button,
+        textarea,
+        select {
+            font: inherit;
+        }
+
+        p,
+        h1,
+        h2,
+        h3,
+        h4,
+        h5,
+        h6 {
+            overflow-wrap: break-word;
+        }
+
+        a {
+            text-decoration: none;
+            color: inherit;
+        }
+
+        ul,
+        ol {
+            list-style: none;
+        }
+
+        table {
+            border-collapse: collapse;
+            border-spacing: 0;
+        }
+
+        @keyframes rotate {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        @keyframes rotate-inv {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(-360deg);
+            }
+        }
+    </style>
+    <style>
+        body {
+            background-color: #141C2B;
+            color: rgba(255, 255, 255, 0.75);
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        article {
+            display: flex;
+            flex-direction: row;
+            flex-wrap: wrap;
+            gap: 2rem;
+            justify-content: center;
+            align-items: stretch;
+            margin-top: 2rem;
+            min-width: 50%;
+            max-width: 1200px;
+        }
+
+        section {
+            background-color: #1F2937;
+            padding: 2rem;
+            width: 100%;
+            flex: 1;
+            border-radius: 1rem;
+        }
+
+        .full-width {
+            flex: 1 1 100%;
+        }
+
+        .circle {
+            border-radius: 50%;
+            padding: 1rem;
+            width: 100%;
+            height: 100%;
+        }
+
+        #outer-rim {
+            background: linear-gradient(-45deg, #7934e0, #4468e0);
+            transition: background 1s ease;
+            animation: rotate 2s linear infinite;
+            width: 12rem;
+            height: 12rem;
+        }
+
+        #inner-rim {
+            animation: rotate-inv 2s linear infinite;
+            background-color: #101827;
+            display: flex;
+            flex-direction: row;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #setpoint-value {
+            font-size: 5rem;
+            color: white;
+        }
+
+        #CFdegree {
+            font-size: 2rem;
+            margin-top: -2rem;
+            color: white;
+        }
+
+        .setpoint {
+            font-size: 1.2rem;
+            margin-top: -2rem;
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        .setpoint-btn {
+            background-color: #374151;
+            border-radius: 50%;
+            padding: 1rem;
+            width: 5rem;
+            height: 5rem;
+            font-size: 2rem;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .mode-btn {
+            background-color: #374151;
+            border-radius: 0.5rem;
+            padding: 1rem;
+            /* height: 3.5rem; */
+            font-size: 2rem;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .vert-flex {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            justify-content: center;
+            align-items: stretch;
+        }
+        .setpoint-section {
+            display: flex;
+            flex-direction: row;
+            justify-content: center;
+            align-items: stretch;
+            gap: 2rem;
+        }
     </style>
 </head>
+
 <body>
-    <h1>WebSocket Example</h1>
+    <h1>Dashboard</h1>
+    <article>
+        <section class="setpoint-section">
+            <div class="circle" id="outer-rim">
+                <div class="circle" id="inner-rim">
+                    <div id="setpoint-value">20</div>
+                    <div id="CFdegree">°C</div>
+                    <div class="setpoint">setpoint</div>
+                </div>
+            </div>
+            <div class="vert-flex">
+                <div class="setpoint-btn">+</div>
+                <div class="setpoint-btn">-</div>
+            </div>
+        </section>
+        <section class="mode-section">
+            <div class="mode-btn">Heat</div>
+            <div class="mode-btn">Cool</div>
+        </section>
+        <section>S2</section>
+        <section class="full-width">S3</section>
+    </article>
+
+
+
     <script>
         // Create a new WebSocket connection
         const socketUrl = `ws://192.168.50.6:4001/ws`;
@@ -36,4 +246,5 @@
         });
     </script>
 </body>
+
 </html>
