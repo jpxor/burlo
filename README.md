@@ -14,7 +14,7 @@ Outputs:
 ## Use case
 This was specifically built to control the radiant cooling zones in a house where dewpoint temperature is not consistant from room to room and where humidity control and ventilation was lacking.
 
-A single dewpoint controller was inadequate.  This system allows placing a sensor next to each emmitter and embedded alongside the piping behind the walls for dewpoint data where its needed most.
+A single dewpoint controller was inadequate.  This system allows placing a sensor next to each emitter and embedded alongside the piping behind the walls for dewpoint data where its needed most.
 
 ## Maximize energy efficiency
 The system also determines if outdoor conditions suggest windows should be opened instead of a zone call, preventing wasted energy usage and encouraging natural ventilation. It would be simple to extend this to automate the windows where applicable.
@@ -37,7 +37,7 @@ Missing features:
 ## Sensors
 
 - zigbee temperature and humidity sensors with a display are used in place of thermostats. They wirelessly transmit the room conditions data to the mqtt server (via zigbee2mqtt service) for processing,
-- zigbee temperature and humidity sensors WITHOUT a display are used as humidistats and are placed next to hydronic emmiters.  These are used to measure the dewpoint and ensure no condensation while radiant cooling,
+- zigbee temperature and humidity sensors WITHOUT a display are used as humidistats and are placed next to hydronic emiters.  These are used to measure the dewpoint and ensure no condensation while radiant cooling,
 - any sensor type can be used so long as it can write its data to mqtt.
 
 ## Virtual Thermostats
@@ -77,9 +77,7 @@ Missing features:
 - the phidgets service is a simple httpserver written in python (to use Phidgets python API client) which accepts http post requests to control the devices,
 - the httpserver also allows querying current state of the phidget devices.
 
-This system is built on the Phidgets SBC which comes with its own web server. This isn't really used, but can be access here:
-    http://phidgetsbc.local/cgi-bin/system-logs.sh
-    Access(admin:root)
+This system is built on the Phidgets SBC which comes with its own web server. This isn't really used.
 
 ## Modbus service
 
@@ -100,7 +98,7 @@ This system is built on the Phidgets SBC which comes with its own web server. Th
 - webserver to serve dashboard UI,
 - allows user input to configure and control the system, posts to controller and thermostat endpoints).
 
-## Logger (not implemented)
+## Log service (not implemented)
 
 - simple httpserver to query logged events
 - maintains history of X days
