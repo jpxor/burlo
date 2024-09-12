@@ -11,7 +11,7 @@ import (
 )
 
 func httpserver(ctx context.Context, cfg config.ServiceConf) {
-	_, port := splitAddr(cfg.ServiceHTTPAddresses.Controller)
+	_, port := splitAddr(cfg.ServiceHTTPAddresses.Dashboard)
 
 	mux := http.NewServeMux()
 	server := http.Server{
