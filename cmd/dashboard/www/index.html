@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebSocket Example</title>
+    <style>
+        
+    </style>
+</head>
+<body>
+    <h1>WebSocket Example</h1>
+    <script>
+        // Create a new WebSocket connection
+        const socketUrl = `ws://192.168.50.6:4005/ws`;
+        const socket = new WebSocket(socketUrl);
+
+        // Connection opened
+        socket.addEventListener('open', function (event) {
+            console.log('WebSocket is open now.');
+        });
+
+        // Listen for messages
+        socket.addEventListener('message', function (event) {
+            console.log('Message from server ', event.data);
+        });
+
+        // Connection closed
+        socket.addEventListener('close', function (event) {
+            console.log('WebSocket is closed now.');
+        });
+
+        // Handle errors
+        socket.addEventListener('error', function (event) {
+            console.error('WebSocket error observed:', event);
+        });
+    </script>
+</body>
+</html>
