@@ -4,6 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="/wscmdr.js"></script>
     <title>Dashboard</title>
     <style>
         /* CSS Reset */
@@ -17,6 +18,7 @@
         body {
             height: 100%;
             font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif sans-serif;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
 
         img,
@@ -144,7 +146,7 @@
             color: white;
         }
 
-        #CFdegree {
+        #setpointUnit {
             font-size: 2rem;
             margin-top: -2rem;
             color: white;
@@ -167,16 +169,7 @@
             justify-content: center;
             align-items: center;
         }
-        .mode-btn {
-            background-color: #374151;
-            border-radius: 0.5rem;
-            padding: 1rem;
-            /* height: 3.5rem; */
-            font-size: 2rem;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
+
         .vert-flex {
             display: flex;
             flex-direction: column;
@@ -184,6 +177,7 @@
             justify-content: center;
             align-items: stretch;
         }
+
         .setpoint-section {
             display: flex;
             flex-direction: row;
@@ -191,18 +185,52 @@
             align-items: stretch;
             gap: 2rem;
         }
+
+        .thermostat-section {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: stretch;
+            gap: 2rem;
+        }
+
+        .roomstat {
+            background-color: #374151;
+            border-radius: 1rem;
+            padding: 1rem;
+            display: flex;
+            gap: 0.5rem;
+            flex-direction: column;
+        }
+        .roomstat>div {
+            font-size: 2rem;
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+        }
+        .roomstat img {
+            height: 25px;
+            width: 25px;
+        }
+        h2 {
+            font-size: 1.5rem;
+            font-weight: 300;
+        }
     </style>
 </head>
 
 <body>
     <h1>Dashboard</h1>
     <article>
+
         <section class="setpoint-section">
-            <div class="circle" id="outer-rim">
-                <div class="circle" id="inner-rim">
-                    <div id="setpoint-value">20</div>
-                    <div id="CFdegree">°C</div>
-                    <div class="setpoint">setpoint</div>
+            <div class="vert-flex">
+                <div class="circle" id="outer-rim">
+                    <div class="circle" id="inner-rim">
+                        <div id="setpoint-value">20</div>
+                        <div id="setpointUnit" class="units">°C</div>
+                        <div class="setpoint">setpoint</div>
+                    </div>
                 </div>
             </div>
             <div class="vert-flex">
@@ -210,11 +238,50 @@
                 <div class="setpoint-btn">-</div>
             </div>
         </section>
-        <section class="mode-section">
-            <div class="mode-btn">Heat</div>
-            <div class="mode-btn">Cool</div>
+
+        <section class="thermostat-section">
+            <div class="roomstat">
+                <h2>Living Room</h2>
+                <div>
+                    <div style="display: flex; align-items: center;">
+                        <img src="/icon-tstat.png">
+                        <span id="room1-temp">20</span><span class="units">°C</span>
+                    </div>
+                    <div style="display: flex; align-items: center;">
+                        <img src="/icon-relh.png">
+                        <span id="room1-relh">40</span><span>%</span>
+                    </div>
+                </div>
+            </div>
+            <div class="roomstat">
+                <h2>Office</h2>
+                <div>
+                    <div style="display: flex; align-items: center;">
+                        <img src="/icon-tstat.png">
+                        <span id="room1-temp">20</span><span class="units">°C</span>
+                    </div>
+                    <div style="display: flex; align-items: center;">
+                        <img src="/icon-relh.png">
+                        <span id="room1-relh">40</span><span>%</span>
+                    </div>
+                </div>
+            </div>
+            <div class="roomstat">
+                <h2>Yoga Room</h2>
+                <div>
+                    <div style="display: flex; align-items: center;">
+                        <img src="/icon-tstat.png">
+                        <span id="room1-temp">20</span><span class="units">°C</span>
+                    </div>
+                    <div style="display: flex; align-items: center;">
+                        <img src="/icon-relh.png">
+                        <span id="room1-relh">40</span><span>%</span>
+                    </div>
+                </div>
+            </div>
         </section>
-        <section>S2</section>
+
+
         <section class="full-width">S3</section>
     </article>
 
@@ -222,28 +289,7 @@
 
     <script>
         // Create a new WebSocket connection
-        const socketUrl = `ws://192.168.50.6:4001/ws`;
-        const socket = new WebSocket(socketUrl);
-
-        // Connection opened
-        socket.addEventListener('open', function (event) {
-            console.log('WebSocket is open now.');
-        });
-
-        // Listen for messages
-        socket.addEventListener('message', function (event) {
-            console.log('Message from server ', event.data);
-        });
-
-        // Connection closed
-        socket.addEventListener('close', function (event) {
-            console.log('WebSocket is closed now.');
-        });
-
-        // Handle errors
-        socket.addEventListener('error', function (event) {
-            console.error('WebSocket error observed:', event);
-        });
+        const updater = new PageUpdater('ws://192.168.50.6:4001/ws');
     </script>
 </body>
 
