@@ -5,6 +5,7 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"net/url"
 	"os"
 	"strings"
 	"time"
@@ -27,6 +28,7 @@ func httpserver(ctx context.Context, cfg config.ServiceConf) {
 
 	mux.HandleFunc("GET /ws", AcceptWebsocket())
 	mux.HandleFunc("GET /dashboard", ServeDashboard())
+	mux.HandleFunc("GET /{file}", ServeFile())
 	mux.HandleFunc("/", RedirectTo("/dashboard"))
 
 	for {
@@ -47,6 +49,22 @@ func ServeDashboard() http.HandlerFunc {
 	}
 	return func(w http.ResponseWriter, r *http.Request) {
 		http.ServeFile(w, r, path)
+	}
+}
+
+func ServeFile() http.HandlerFunc {
+	var path = "./www"
+	_, err := os.Stat(path)
+	if err != nil {
+		path = "./cmd/dashboard/www"
+	}
+	return func(w http.ResponseWriter, r *http.Request) {
+		file := r.PathValue("file")
+		urlpath, err := url.JoinPath(path, file)
+		if err != nil {
+			http.Error(w, "unexpected error", http.StatusInternalServerError)
+		}
+		http.ServeFile(w, r, urlpath)
 	}
 }
 
