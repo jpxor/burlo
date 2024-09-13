@@ -63,11 +63,13 @@ func RenderDashboard() http.HandlerFunc {
 		Setpoint    SetpointData
 		Thermostats []controller.Thermostat
 		Unit        string
+		HostAddr    string
 	}
 	data := PageData{
-		Title:   "Dashboard",
-		Heading: "Dashboard",
-		Unit:    "°C",
+		HostAddr: "192.168.50.6:4001", // TODO get from config
+		Title:    "Dashboard",
+		Heading:  "Dashboard",
+		Unit:     "°C",
 		Setpoint: SetpointData{
 			HeatingSetpoint: 20,
 			CoolingSetpoint: 24,
