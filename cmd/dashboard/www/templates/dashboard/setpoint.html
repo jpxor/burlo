@@ -1,0 +1,17 @@
+{{ define "setpoint" }}
+<section class="setpoint-section">
+    <div class="vert-flex">
+        <div class="circle" id="outer-rim">
+            <div class="circle" id="inner-rim">
+                <div id="setpoint-value">{{ .Setpoint.HeatingSetpoint }}</div>
+                <div id="setpointUnit" class="units">{{ .Unit }}</div>
+                <div class="setpoint">setpoint</div>
+            </div>
+        </div>
+    </div>
+    <div class="vert-flex">
+        <div class="setpoint-btn">+</div>
+        <div class="setpoint-btn">-</div>
+    </div>
+</section>
+{{ end }}

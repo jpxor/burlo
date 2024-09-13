@@ -2,11 +2,14 @@ package main
 
 import (
 	"burlo/config"
+	"burlo/pkg/models/controller"
 	"context"
 	"fmt"
+	"html/template"
 	"net/http"
 	"net/url"
 	"os"
+	"path/filepath"
 	"strings"
 	"time"
 )
@@ -27,7 +30,7 @@ func httpserver(ctx context.Context, cfg config.ServiceConf) {
 	}()
 
 	mux.HandleFunc("GET /ws", AcceptWebsocket())
-	mux.HandleFunc("GET /dashboard", ServeDashboard())
+	mux.HandleFunc("GET /dashboard", RenderDashboard())
 	mux.HandleFunc("GET /{file}", ServeFile())
 	mux.HandleFunc("/", RedirectTo("/dashboard"))
 
@@ -41,14 +44,56 @@ func httpserver(ctx context.Context, cfg config.ServiceConf) {
 	}
 }
 
-func ServeDashboard() http.HandlerFunc {
-	var path = "./www/index.html"
-	_, err := os.Stat(path)
+func RenderDashboard() http.HandlerFunc {
+	var wwwpath = "./www"
+	_, err := os.Stat(wwwpath)
 	if err != nil {
-		path = "./cmd/dashboard/www/index.html"
+		wwwpath = "./cmd/dashboard/www"
+	}
+	tmpl, err := template.ParseFiles(
+		filepath.Join(wwwpath, "templates/dashboard/main.html"),
+		filepath.Join(wwwpath, "templates/dashboard/setpoint.html"),
+		filepath.Join(wwwpath, "templates/dashboard/roomstats.html"))
+	if err != nil {
+		panic(err)
+	}
+	type PageData struct {
+		Title       string
+		Heading     string
+		Setpoint    SetpointData
+		Thermostats []controller.Thermostat
+		Unit        string
+	}
+	data := PageData{
+		Title:   "Dashboard",
+		Heading: "Dashboard",
+		Unit:    "°C",
+		Setpoint: SetpointData{
+			HeatingSetpoint: 20,
+			CoolingSetpoint: 24,
+			Mode:            "Heat",
+		},
+		Thermostats: []controller.Thermostat{
+			{Name: "Living Room", Temperature: 20, Humidity: 40},
+			{Name: "Office", Temperature: 20, Humidity: 40},
+			{Name: "Yoga Room", Temperature: 20, Humidity: 40},
+		},
 	}
 	return func(w http.ResponseWriter, r *http.Request) {
-		http.ServeFile(w, r, path)
+		// reload the templates on each request ONLY in dev
+		tmpl, err = template.ParseFiles(
+			filepath.Join(wwwpath, "templates/dashboard/main.html"),
+			filepath.Join(wwwpath, "templates/dashboard/setpoint.html"),
+			filepath.Join(wwwpath, "templates/dashboard/roomstats.html"))
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		// update the data
+		err = tmpl.Execute(w, data)
+		if err != nil {
+			fmt.Println(err)
+		}
 	}
 }
 

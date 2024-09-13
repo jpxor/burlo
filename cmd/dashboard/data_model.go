@@ -11,6 +11,7 @@ import (
 type DashboardData struct {
 	Thermostats map[string]controller.Thermostat
 	Weather     Weather
+	Setpoint    SetpointData
 }
 
 type Weather struct {
@@ -20,6 +21,12 @@ type Weather struct {
 	Temperature    float32
 	ConditionsCode int32
 	AirQualityIdx  int32
+}
+
+type SetpointData struct {
+	HeatingSetpoint float32
+	CoolingSetpoint float32
+	Mode            string
 }
 
 func (d *DashboardData) updateThermostat(tstat controller.Thermostat) {

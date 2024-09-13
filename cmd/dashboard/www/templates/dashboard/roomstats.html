@@ -1,0 +1,19 @@
+{{ define "roomstats" }}
+<section class="thermostat-section">
+    {{ range .Thermostats }}
+    <div class="roomstat">
+        <h2>{{ .Name }}</h2>
+        <div>
+            <div style="display: flex; align-items: center;">
+                <img src="/icon-tstat.png">
+                <span>{{ .Temperature }}</span><span class="units">{{ $.Unit }}</span>
+            </div>
+            <div style="display: flex; align-items: center;">
+                <img src="/icon-relh.png">
+                <span>{{ .Humidity }}</span><span>%</span>
+            </div>
+        </div>
+    </div>
+    {{ end }}
+</section>
+{{ end }}
