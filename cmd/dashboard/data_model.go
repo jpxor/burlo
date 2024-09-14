@@ -62,10 +62,10 @@ func (d *DashboardData) adjustSetpoint(adj float32) {
 	switch d.Setpoint.Mode {
 	case Heat:
 		d.Setpoint.HeatingSetpoint += Temperature(adj)
-		pushSetpointToDashboards(d.Setpoint.HeatingSetpoint.asFloat(d.Unit))
+		pushSetpointToDashboards(d.Setpoint.HeatingSetpoint)
 	case Cool:
 		d.Setpoint.CoolingSetpoint += Temperature(adj)
-		pushSetpointToDashboards(d.Setpoint.CoolingSetpoint.asFloat(d.Unit))
+		pushSetpointToDashboards(d.Setpoint.CoolingSetpoint)
 	default:
 		panic(fmt.Sprintf("mode not implemented: %s", d.Setpoint.Mode))
 	}

@@ -13,6 +13,8 @@ import (
 	"path/filepath"
 	"strings"
 	"time"
+
+	"github.com/gorilla/websocket"
 )
 
 func httpserver(ctx context.Context, cfg config.ServiceConf) {
@@ -31,9 +33,9 @@ func httpserver(ctx context.Context, cfg config.ServiceConf) {
 	}()
 
 	mux.HandleFunc("POST /api/v1/setpoint", PostedSetpoint())
-
-	mux.HandleFunc("GET /ws", AcceptWebsocket())
 	mux.HandleFunc("GET /dashboard", RenderDashboard())
+	mux.HandleFunc("GET /ws", AcceptWebsocket())
+
 	mux.HandleFunc("GET /{file}", ServeFile())
 	mux.HandleFunc("/", RedirectTo("/dashboard"))
 
@@ -83,27 +85,19 @@ func RenderDashboard() http.HandlerFunc {
 		Title       string
 		Heading     string
 		Setpoint    SetpointData
-		Thermostats []controller.Thermostat
+		Thermostats map[string]controller.Thermostat
 		Unit        string
 		HostAddr    string
 	}
-	data := PageData{
-		HostAddr: "192.168.50.6:4001", // TODO get from config
-		Title:    "Dashboard",
-		Heading:  "Dashboard",
-		Unit:     "°C",
-		Setpoint: SetpointData{
-			HeatingSetpoint: 20,
-			CoolingSetpoint: 24,
-			Mode:            "Heat",
-		},
-		Thermostats: []controller.Thermostat{
-			{Name: "Living Room", Temperature: 20, Humidity: 40},
-			{Name: "Office", Temperature: 20, Humidity: 40},
-			{Name: "Yoga Room", Temperature: 20, Humidity: 40},
-		},
-	}
 	return func(w http.ResponseWriter, r *http.Request) {
+		data := PageData{
+			HostAddr:    "192.168.50.6:4001", // TODO get from config
+			Title:       "Dashboard",
+			Heading:     "Dashboard",
+			Unit:        "°C",
+			Setpoint:    dashboard.Setpoint,
+			Thermostats: dashboard.Thermostats,
+		}
 		// reload the templates on each request ONLY in dev
 		tmpl, err = template.ParseFiles(
 			filepath.Join(wwwpath, "templates/dashboard/main.html"),
@@ -140,6 +134,29 @@ func ServeFile() http.HandlerFunc {
 func RedirectTo(url string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, url, http.StatusFound)
+	}
+}
+
+func AcceptWebsocket() http.HandlerFunc {
+	upgrader := websocket.Upgrader{
+		ReadBufferSize:  1024,
+		WriteBufferSize: 1024,
+	}
+	return func(w http.ResponseWriter, r *http.Request) {
+		conn, err := upgrader.Upgrade(w, r, nil)
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
+		ws.newConnection(conn)
+		for {
+			messageType, p, err := conn.ReadMessage()
+			if err != nil {
+				fmt.Println(err)
+				return
+			}
+			fmt.Println(messageType, string(p))
+		}
 	}
 }
 
