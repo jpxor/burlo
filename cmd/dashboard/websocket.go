@@ -17,6 +17,19 @@ func pushWeatherToDashboards(weather Weather) {
 	ws.write(weather)
 }
 
+func pushSetpointToDashboards(value float32) {
+	var command = struct {
+		Command string `json:"command"`
+		Id      string `json:"id"`
+		Html    string `json:"html"`
+	}{
+		Command: "setInnerHTML",
+		Id:      "setpoint-value",
+		Html:    fmt.Sprintf("%.0f", value),
+	}
+	ws.write(command)
+}
+
 var ws = WebSocketConnections{
 	connections: make(map[*websocket.Conn]bool),
 }

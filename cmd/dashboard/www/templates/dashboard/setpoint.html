@@ -1,7 +1,121 @@
 {{ define "setpoint" }}
 <section class="setpoint-section">
+    <style>
+        .circle {
+            border-radius: 50%;
+            padding: 1rem;
+            width: 100%;
+            height: 100%;
+        }
+
+        #outer-rim {
+            transition: all 1s ease;
+            animation: rotate 2s linear infinite;
+            width: 12rem;
+            height: 12rem;
+        }
+
+        #inner-rim {
+            animation: rotate-inv 2s linear infinite;
+            background-color: #101827;
+            display: flex;
+            flex-direction: row;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #setpoint-value {
+            font-size: 5rem;
+            color: white;
+        }
+
+        #setpointUnit {
+            font-size: 2rem;
+            margin-top: -2rem;
+            color: white;
+        }
+
+        .setpoint {
+            font-size: 1.2rem;
+            margin-top: -2rem;
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        .vert-flex {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: stretch;
+            gap: 1rem;
+        }
+
+        .setpoint-section {
+            display: flex;
+            flex-direction: row;
+            justify-content: center;
+            align-items: stretch;
+            gap: 2rem;
+        }
+
+        .setpoint-btn {
+            background-color: #374151;
+            border: 2px solid #00000000;
+            color: rgba(255, 255, 255, 0.5);
+            border-radius: 50%;
+            padding: 1rem;
+            width: 5rem;
+            height: 5rem;
+            font-size: 2rem;
+            font-weight: bold;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            user-select: none;
+            transition: all 0.3s ease;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .setpoint-btn:hover {
+            background-color: #404d63;
+        }
+
+        .setpoint-btn:active {
+            border: 2px solid #000000cc;
+            transform: scale(0.95);
+        }
+
+        @keyframes rotate {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        @keyframes rotate-inv {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(-360deg);
+            }
+        }
+
+        .cooling-colors {
+            background: linear-gradient(-45deg, #7934e0, #4468e0);
+        }
+
+        .heating-colors {
+            background: linear-gradient(-45deg, #af2828, #a8612e);
+        }
+    </style>
     <div class="vert-flex">
-        <div class="circle" id="outer-rim">
+        <div class="circle heating-colors" id="outer-rim">
             <div class="circle" id="inner-rim">
                 <div id="setpoint-value">{{ .Setpoint.HeatingSetpoint }}</div>
                 <div id="setpointUnit" class="units">{{ .Unit }}</div>
@@ -10,8 +124,17 @@
         </div>
     </div>
     <div class="vert-flex">
-        <div class="setpoint-btn">+</div>
-        <div class="setpoint-btn">-</div>
+        <button class="setpoint-btn" onclick="adjustSetpoint(1)">+</button>
+        <button class="setpoint-btn" onclick="adjustSetpoint(-1)">-</button>
     </div>
+    <script>
+        function adjustSetpoint(value) {
+            fetch('/api/v1/setpoint', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ adjustment: value }),
+            }).catch(error => { console.error('adjustSetpoint error:', error); });
+        }
+    </script>
 </section>
 {{ end }}

@@ -10,6 +10,12 @@ import (
 
 var dashboard = DashboardData{
 	Thermostats: make(map[string]controller.Thermostat),
+	Setpoint: SetpointData{
+		Mode:            Heat,
+		HeatingSetpoint: 20,
+		CoolingSetpoint: 24,
+	},
+	Unit: C,
 }
 
 func onThermostatUpdate(payload []byte) {

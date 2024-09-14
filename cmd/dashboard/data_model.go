@@ -6,27 +6,69 @@ import (
 	"burlo/pkg/weathergcca"
 	"fmt"
 	"slices"
+	"sync"
 )
+
+type Mode string
+
+var Heat Mode = "heat"
+var Cool Mode = "cool"
+
+type Unit string
+
+var C Unit = "C"
+var F Unit = "F"
+
+type Temperature float32
+
+func (t Temperature) asFloat(unit Unit) float32 {
+	switch unit {
+	case C:
+		return float32(t)
+	case F:
+		return float32(t)*(9.0/5.0) + 32
+	}
+	panic(fmt.Sprintf("Temperature unit not implemented: '%s'", unit))
+}
 
 type DashboardData struct {
 	Thermostats map[string]controller.Thermostat
 	Weather     Weather
 	Setpoint    SetpointData
+	Unit        Unit
+	Mutex       sync.Mutex
 }
 
 type Weather struct {
-	T24hHigh       float32
-	T24hLow        float32
-	T24hMean       float32
-	Temperature    float32
+	T24hHigh       Temperature
+	T24hLow        Temperature
+	T24hMean       Temperature
+	Temperature    Temperature
 	ConditionsCode int32
 	AirQualityIdx  int32
 }
 
 type SetpointData struct {
-	HeatingSetpoint float32
-	CoolingSetpoint float32
-	Mode            string
+	PrimaryThermostat string // name
+	HeatingSetpoint   Temperature
+	CoolingSetpoint   Temperature
+	Mode              Mode
+}
+
+func (d *DashboardData) adjustSetpoint(adj float32) {
+	d.Mutex.Lock()
+	defer d.Mutex.Unlock()
+
+	switch d.Setpoint.Mode {
+	case Heat:
+		d.Setpoint.HeatingSetpoint += Temperature(adj)
+		pushSetpointToDashboards(d.Setpoint.HeatingSetpoint.asFloat(d.Unit))
+	case Cool:
+		d.Setpoint.CoolingSetpoint += Temperature(adj)
+		pushSetpointToDashboards(d.Setpoint.CoolingSetpoint.asFloat(d.Unit))
+	default:
+		panic(fmt.Sprintf("mode not implemented: %s", d.Setpoint.Mode))
+	}
 }
 
 func (d *DashboardData) updateThermostat(tstat controller.Thermostat) {
@@ -39,15 +81,19 @@ func (d *DashboardData) updateTemperatureForcast(data weather.Forecast) {
 		fmt.Println("bad data from Temperature Forcast update")
 		return
 	}
-	d.Weather.T24hHigh = slices.Max(data.Temperature)
-	d.Weather.T24hLow = slices.Min(data.Temperature)
-	d.Weather.T24hMean = sliceMean(data.Temperature)
-	d.Weather.Temperature = data.Temperature[0]
+	d.Weather.T24hHigh = Celcius(slices.Max(data.Temperature))
+	d.Weather.T24hLow = Celcius(slices.Min(data.Temperature))
+	d.Weather.T24hMean = Celcius(sliceMean(data.Temperature))
+	d.Weather.Temperature = Celcius(data.Temperature[0])
 	pushWeatherToDashboards(d.Weather)
 }
 
+func Celcius(v float32) Temperature {
+	return Temperature(v)
+}
+
 func (d *DashboardData) updateCurrentWeather(data weather.Current) {
-	d.Weather.Temperature = data.Temperature
+	d.Weather.Temperature = Celcius(data.Temperature)
 	d.Weather.ConditionsCode = data.WeatherCode
 	pushWeatherToDashboards(d.Weather)
 }

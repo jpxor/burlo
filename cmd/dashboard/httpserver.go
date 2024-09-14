@@ -4,6 +4,7 @@ import (
 	"burlo/config"
 	"burlo/pkg/models/controller"
 	"context"
+	"encoding/json"
 	"fmt"
 	"html/template"
 	"net/http"
@@ -29,6 +30,8 @@ func httpserver(ctx context.Context, cfg config.ServiceConf) {
 		server.Shutdown(ctx)
 	}()
 
+	mux.HandleFunc("POST /api/v1/setpoint", PostedSetpoint())
+
 	mux.HandleFunc("GET /ws", AcceptWebsocket())
 	mux.HandleFunc("GET /dashboard", RenderDashboard())
 	mux.HandleFunc("GET /{file}", ServeFile())
@@ -41,6 +44,25 @@ func httpserver(ctx context.Context, cfg config.ServiceConf) {
 			break
 		}
 		fmt.Println(err)
+	}
+}
+
+func PostedSetpoint() http.HandlerFunc {
+	var request struct {
+		Adjustment float32 `json:"adjustment"`
+	}
+	return func(w http.ResponseWriter, r *http.Request) {
+		err := json.NewDecoder(r.Body).Decode(&request)
+		if err != nil {
+			http.Error(w, "Invalid request body", http.StatusBadRequest)
+			return
+		}
+		if request.Adjustment > 1 || request.Adjustment < -1 {
+			http.Error(w, "invalid adjustment", http.StatusBadRequest)
+			return
+		}
+		dashboard.adjustSetpoint(request.Adjustment)
+		w.WriteHeader(http.StatusOK)
 	}
 }
 
