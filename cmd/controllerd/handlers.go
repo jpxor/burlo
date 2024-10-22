@@ -36,15 +36,15 @@ func onThermostatUpdate(payload []byte) {
 	}
 
 	// remove thermostats and humidistats whose last update is
-	// greater than 24hr old. Stale data can cause the controller
+	// greater than 6hr old. Stale data can cause the controller
 	// to perform the wrong action.
 	for id, tstat := range thermostats {
-		if time.Since(tstat.Time) > 24*time.Hour {
+		if time.Since(tstat.Time) > 6*time.Hour {
 			delete(thermostats, id)
 		}
 	}
 	for id, hstat := range humidistats {
-		if time.Since(hstat.Time) > 24*time.Hour {
+		if time.Since(hstat.Time) > 6*time.Hour {
 			delete(humidistats, id)
 		}
 	}
