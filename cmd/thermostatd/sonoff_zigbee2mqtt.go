@@ -41,10 +41,13 @@ func monitor_sonoff_zigbee2mqtt(ctx context.Context, cfg config.ServiceConf) {
 				topicPrefix = "zigbee2mqtt/humidistat/"
 				isHumidistat = true
 			}
+			topic = strings.TrimPrefix(topic, topicPrefix)
 
-			// expected format: "name/id"
-			name := strings.TrimPrefix(topic, topicPrefix)
-			id, _, _ := strings.Cut(name, "/")
+			// expected format: "id/name"
+			id, name, ok := strings.Cut(topic, "/")
+			if !ok {
+				name = id
+			}
 
 			var sensor SonoffSensor
 			err := json.Unmarshal(payload, &sensor)

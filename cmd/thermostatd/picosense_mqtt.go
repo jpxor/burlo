@@ -31,8 +31,7 @@ func monitor_picosense_mqtt(ctx context.Context, cfg config.ServiceConf) {
 			// expected format: "id/name"
 			id, name, ok := strings.Cut(topic, "/")
 			if !ok {
-				fmt.Printf("failed to parse picosense mqtt id and name: %s\r\n", topic)
-				return
+				name = id
 			}
 
 			var sensor PicosenseSensor
