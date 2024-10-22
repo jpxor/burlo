@@ -45,6 +45,7 @@ func main() {
 	})
 
 	go monitor_sonoff_zigbee2mqtt(ctx, cfg)
+	go monitor_picosense_mqtt(ctx, cfg)
 	go http_server(ctx, cfg)
 
 	// waits for signal
