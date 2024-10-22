@@ -169,3 +169,5 @@ zigbee2mqtt/zigbee2mqtt-data/coordinator_backup.json
 
 commit.txt
 .vscode/settings.json
+sensors/temperature/rpi-pico-w/wifi_config.json
+sensors/temperature/rpi-pico-w/mqtt_config.json
