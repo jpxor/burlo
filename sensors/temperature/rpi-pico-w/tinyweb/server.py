@@ -3,7 +3,6 @@ Tiny Web - pretty simple and powerful web server for tiny platforms like ESP8266
 MIT license
 (C) Konstantin Belyalov 2017-2018
 """
-import logging
 import asyncio
 import ujson as json
 import gc
@@ -11,9 +10,6 @@ import uos as os
 import sys
 import uerrno as errno
 import usocket as socket
-
-
-log = logging.getLogger('WEB')
 
 type_gen = type((lambda: (yield))())
 
@@ -482,16 +478,16 @@ class webserver:
                 try:
                     await resp.error(500)
                 except Exception as e:
-                    log.exception(f"Failed to send 500 error after OSError. Original error: {e}")
+                    print(f"Failed to send 500 error after OSError. Original error: {e}")
         except HTTPException as e:
             try:
                 await resp.error(e.code)
             except Exception as e:
-                log.exception(f"Failed to send error after HTTPException. Original error: {e}")
+                print(f"Failed to send error after HTTPException. Original error: {e}")
         except Exception as e:
             # Unhandled expection in user's method
-            log.error(req.path.decode())
-            log.exception(f"Unhandled exception in user's method. Original error: {e}")
+            print(req.path.decode())
+            print(f"Unhandled exception in user's method. Original error: {e}")
             try:
                 await resp.error(500)
                 # Send exception info if desired
