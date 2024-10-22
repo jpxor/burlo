@@ -29,6 +29,12 @@ func onThermostatUpdate(payload []byte) {
 	inputMutex.Lock()
 	defer inputMutex.Unlock()
 
+	if tstat.Battery < 20 {
+		notify.Publish("sensor low battery",
+			fmt.Sprintf("thermostat with low battery: %s/%s", tstat.ID, tstat.Name),
+			[]string{"battery"})
+	}
+
 	// remove thermostats and humidistats whose last update is
 	// greater than 24hr old. Stale data can cause the controller
 	// to perform the wrong action.
