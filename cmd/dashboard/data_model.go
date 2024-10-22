@@ -21,6 +21,10 @@ var F Unit = "F"
 
 type Temperature float32
 
+func Celcius(v float32) Temperature {
+	return Temperature(v)
+}
+
 func (t Temperature) asFloat(unit Unit) float32 {
 	switch unit {
 	case C:
@@ -31,12 +35,12 @@ func (t Temperature) asFloat(unit Unit) float32 {
 	panic(fmt.Sprintf("Temperature unit not implemented: '%s'", unit))
 }
 
-type DashboardData struct {
+type Dashboard struct {
 	Thermostats map[string]controller.Thermostat
 	Weather     Weather
 	Setpoint    SetpointData
 	Unit        Unit
-	Mutex       sync.Mutex
+	Mutex       sync.RWMutex
 }
 
 type Weather struct {
@@ -55,55 +59,106 @@ type SetpointData struct {
 	Mode              Mode
 }
 
-func (d *DashboardData) adjustSetpoint(adj float32) {
-	d.Mutex.Lock()
-	defer d.Mutex.Unlock()
-
-	switch d.Setpoint.Mode {
-	case Heat:
-		d.Setpoint.HeatingSetpoint += Temperature(adj)
-		pushSetpointToDashboards(d.Setpoint.HeatingSetpoint)
-	case Cool:
-		d.Setpoint.CoolingSetpoint += Temperature(adj)
-		pushSetpointToDashboards(d.Setpoint.CoolingSetpoint)
-	default:
-		panic(fmt.Sprintf("mode not implemented: %s", d.Setpoint.Mode))
+func NewDashboard() Dashboard {
+	return Dashboard{
+		Thermostats: make(map[string]controller.Thermostat),
+		Setpoint: SetpointData{
+			Mode:            Heat,
+			HeatingSetpoint: 20,
+			CoolingSetpoint: 24,
+		},
+		Unit: C,
 	}
 }
 
-func (d *DashboardData) updateThermostat(tstat controller.Thermostat) {
+///////////////////////////////////////////////////////////
+//
+//   mqtt listener client calls the following funcs to update
+//   the dashboard when changes are published
+//
+///////////////////////////////////////////////////////////
+
+func (d *Dashboard) setPrimaryThermostat(name string) {
+	d.Mutex.Lock()
+	defer d.Mutex.Unlock()
+	if _, ok := d.Thermostats[name]; ok {
+		d.Setpoint.PrimaryThermostat = name
+	} else {
+		fmt.Println("WARN setPrimaryThermostat: unknown name:", name)
+	}
+}
+
+func (d *Dashboard) setHeatingSetpoint(val_celcius float32) {
+	d.Mutex.Lock()
+	defer d.Mutex.Unlock()
+	if val_celcius < 10 && val_celcius > 40 {
+		fmt.Println("WARN setHeatingSetpoint: invalid setpoint:", val_celcius, "degC")
+		return
+	}
+	d.Setpoint.HeatingSetpoint = Celcius(val_celcius)
+	pushSetpointToDashboards(d.Setpoint)
+}
+
+func (d *Dashboard) setCoolingSetpoint(val_celcius float32) {
+	d.Mutex.Lock()
+	defer d.Mutex.Unlock()
+	if val_celcius < 10 && val_celcius > 40 {
+		fmt.Println("WARN setCoolingSetpoint: invalid setpoint:", val_celcius, "degC")
+		return
+	}
+	d.Setpoint.CoolingSetpoint = Celcius(val_celcius)
+	pushSetpointToDashboards(d.Setpoint)
+}
+
+func (d *Dashboard) setSetpointMode(modestr string) {
+	d.Mutex.Lock()
+	defer d.Mutex.Unlock()
+	mode := Mode(modestr)
+	if mode != Heat && mode != Cool {
+		fmt.Println("WARN setSetpointMode: unknown mode:", modestr)
+		return
+	}
+	d.Setpoint.Mode = mode
+	pushSetpointToDashboards(d.Setpoint)
+}
+
+func (d *Dashboard) setThermostat(tstat controller.Thermostat) {
+	d.Mutex.Lock()
 	d.Thermostats[tstat.ID] = tstat
+	d.Mutex.Unlock()
 	pushThermostatToDashboards(tstat)
 }
 
-func (d *DashboardData) updateTemperatureForcast(data weather.Forecast) {
+func (d *Dashboard) updateTemperatureForcast(data weather.Forecast) {
 	if len(data.Temperature) == 0 {
-		fmt.Println("bad data from Temperature Forcast update")
+		fmt.Println("ERROR bad data from Temperature Forcast update")
 		return
 	}
+	d.Mutex.Lock()
 	d.Weather.T24hHigh = Celcius(slices.Max(data.Temperature))
 	d.Weather.T24hLow = Celcius(slices.Min(data.Temperature))
 	d.Weather.T24hMean = Celcius(sliceMean(data.Temperature))
 	d.Weather.Temperature = Celcius(data.Temperature[0])
+	d.Mutex.Unlock()
 	pushWeatherToDashboards(d.Weather)
 }
 
-func Celcius(v float32) Temperature {
-	return Temperature(v)
-}
-
-func (d *DashboardData) updateCurrentWeather(data weather.Current) {
+func (d *Dashboard) updateCurrentWeather(data weather.Current) {
+	d.Mutex.Lock()
 	d.Weather.Temperature = Celcius(data.Temperature)
 	d.Weather.ConditionsCode = data.WeatherCode
+	d.Mutex.Unlock()
 	pushWeatherToDashboards(d.Weather)
 }
 
-func (d *DashboardData) updateAQHI(data weathergcca.AqhiForecast) {
+func (d *Dashboard) updateAQHI(data weathergcca.AqhiForecast) {
 	if len(data.AQHI) == 0 {
-		fmt.Println("bad data from AQHI update")
+		fmt.Println("ERROR bad data from AQHI update")
 		return
 	}
+	d.Mutex.Lock()
 	d.Weather.AirQualityIdx = int32(data.AQHI[0])
+	d.Mutex.Unlock()
 	pushWeatherToDashboards(d.Weather)
 }
 

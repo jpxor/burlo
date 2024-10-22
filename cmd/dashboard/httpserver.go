@@ -3,6 +3,7 @@ package main
 import (
 	"burlo/config"
 	"burlo/pkg/models/controller"
+	"burlo/pkg/mqtt"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -17,7 +18,12 @@ import (
 	"github.com/gorilla/websocket"
 )
 
-func httpserver(ctx context.Context, cfg config.ServiceConf) {
+type DashboardServer struct {
+	dashboard *Dashboard
+	mqttc     *mqtt.Client
+}
+
+func (d *Dashboard) httpserver(ctx context.Context, cfg config.ServiceConf) {
 	_, port := splitAddr(cfg.ServiceHTTPAddresses.Dashboard)
 
 	mux := http.NewServeMux()
@@ -32,8 +38,19 @@ func httpserver(ctx context.Context, cfg config.ServiceConf) {
 		server.Shutdown(ctx)
 	}()
 
-	mux.HandleFunc("POST /api/v1/setpoint", PostedSetpoint())
-	mux.HandleFunc("GET /dashboard", RenderDashboard())
+	ds := DashboardServer{
+		dashboard: d,
+		mqttc: mqtt.NewClient(mqtt.Opts{
+			Context:  ctx,
+			Address:  cfg.Mqtt.Address,
+			User:     cfg.Mqtt.User,
+			Pass:     []byte(cfg.Mqtt.Pass),
+			ClientID: "dashboard-publisher",
+		}),
+	}
+
+	mux.HandleFunc("POST /api/v1/setpoint", ds.PostedSetpoint())
+	mux.HandleFunc("GET /dashboard", ds.RenderDashboard())
 	mux.HandleFunc("GET /ws", AcceptWebsocket())
 
 	mux.HandleFunc("GET /{file}", ServeFile())
@@ -49,7 +66,7 @@ func httpserver(ctx context.Context, cfg config.ServiceConf) {
 	}
 }
 
-func PostedSetpoint() http.HandlerFunc {
+func (s *DashboardServer) PostedSetpoint() http.HandlerFunc {
 	var request struct {
 		Adjustment float32 `json:"adjustment"`
 	}
@@ -63,12 +80,12 @@ func PostedSetpoint() http.HandlerFunc {
 			http.Error(w, "invalid adjustment", http.StatusBadRequest)
 			return
 		}
-		dashboard.adjustSetpoint(request.Adjustment)
+		s.adjustSetpoint(request.Adjustment)
 		w.WriteHeader(http.StatusOK)
 	}
 }
 
-func RenderDashboard() http.HandlerFunc {
+func (s *DashboardServer) RenderDashboard() http.HandlerFunc {
 	var wwwpath = "./www"
 	_, err := os.Stat(wwwpath)
 	if err != nil {
@@ -95,8 +112,8 @@ func RenderDashboard() http.HandlerFunc {
 			Title:       "Dashboard",
 			Heading:     "Dashboard",
 			Unit:        "°C",
-			Setpoint:    dashboard.Setpoint,
-			Thermostats: dashboard.Thermostats,
+			Setpoint:    s.dashboard.Setpoint,
+			Thermostats: s.dashboard.Thermostats,
 		}
 		// reload the templates on each request ONLY in dev
 		tmpl, err = template.ParseFiles(
