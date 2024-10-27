@@ -1,6 +1,7 @@
 import dht
 import machine
 import asyncio
+import time
 
 from microwifi import MicroWifi
 from micromqttconf import MicroMqttConf
@@ -25,6 +26,7 @@ async def sensor_dht22_task(mqttconf):
     client.connect()
     prevTemp = 0
     prevHumidity = 0
+    lastUpdate = 0
     while True:
         await asyncio.sleep(2)
         led.on()
@@ -32,12 +34,14 @@ async def sensor_dht22_task(mqttconf):
             sensor.measure()
             temperature = sensor.temperature()
             humidity = sensor.humidity()
-            if abs(temperature-prevTemp) > 0.02 or abs(humidity-prevHumidity) > 0.02:
+            timeSinceLastUpdateSeconds = time.time() - lastUpdate
+            if abs(temperature-prevTemp) > 0.02 or abs(humidity-prevHumidity) > 0.02 or timeSinceLastUpdateSeconds > 900:
                 publish_data(client, mqttconf.topic, temperature, humidity)
                 prevTemp = temperature
                 prevHumidity = humidity
+                lastUpdate = time.time()
         except Exception as e:
-            print("Error reading sensor:", e)
+            print("Error:", e)
         await asyncio.sleep(0.2)
         led.off()
         await asyncio.sleep(12.8)
