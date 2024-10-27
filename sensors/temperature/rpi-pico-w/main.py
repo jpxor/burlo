@@ -23,6 +23,8 @@ async def sensor_dht22_task(mqttconf):
     print("sensor_dht22_task started.")
     client = mqttconf.make_client(id_prefix="pico-sensor-dht-")
     client.connect()
+    prevTemp = 0
+    prevHumidity = 0
     while True:
         await asyncio.sleep(2)
         led.on()
@@ -30,7 +32,10 @@ async def sensor_dht22_task(mqttconf):
             sensor.measure()
             temperature = sensor.temperature()
             humidity = sensor.humidity()
-            publish_data(client, mqttconf.topic, temperature, humidity)
+            if abs(temperature-prevTemp) > 0.02 or abs(humidity-prevHumidity) > 0.02:
+                publish_data(client, mqttconf.topic, temperature, humidity)
+                prevTemp = temperature
+                prevHumidity = humidity
         except Exception as e:
             print("Error reading sensor:", e)
         await asyncio.sleep(0.2)
