@@ -16,7 +16,7 @@ sensor = dht.DHT22(machine.Pin(28))
 # Publish data to MQTT server
 def publish_data(client, topic, temperature, humidity):
     payload = f"{{\"temperature\": {temperature}, \"humidity\": {humidity}}}"
-    client.publish(topic, payload, retain=True)
+    client.publish(topic, payload, retain=False)
     print(payload)
 
 
