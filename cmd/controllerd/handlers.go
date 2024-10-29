@@ -57,18 +57,19 @@ func onThermostatUpdate(payload []byte) {
 	}
 
 	// find max and mean values
-	var maxTemp float32 = 0.0
+	var meanTemp float32 = 0.0
 	var maxDewpoint float32 = 0
 	var meanHeatSetpointErr float32 = 0.0
 	var meanCoolSetpointErr float32 = 0.0
 
 	for _, tstat := range thermostats {
-		maxTemp = max(maxTemp, tstat.Temperature)
 		maxDewpoint = max(maxDewpoint, tstat.Dewpoint)
+		meanTemp += tstat.Temperature
 		meanHeatSetpointErr += tstat.Temperature - tstat.HeatSetpoint
 		meanCoolSetpointErr += tstat.Temperature - tstat.CoolSetpoint
 	}
 	if len(thermostats) > 0 {
+		meanTemp /= float32(len(thermostats))
 		meanHeatSetpointErr /= float32(len(thermostats))
 		meanCoolSetpointErr /= float32(len(thermostats))
 	}
@@ -78,7 +79,7 @@ func onThermostatUpdate(payload []byte) {
 	}
 
 	// update inputs and trigger controller routine
-	inputs.Indoor.Temperature = maxTemp
+	inputs.Indoor.Temperature = meanTemp
 	inputs.Indoor.Dewpoint = maxDewpoint
 	inputs.Indoor.HeatSetpointErr = meanHeatSetpointErr
 	inputs.Indoor.CoolSetpointErr = meanCoolSetpointErr
